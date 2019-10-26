@@ -71,7 +71,7 @@ public:
    * @return true if a static transform was found, false otherwise.
    */
   template <class T>
-  bool checkExistsStaticTransform(const std::string& frame_id, T stamp, const std::string& topic);
+  bool checkExistsStaticTransform(const std::string& frame_id, T timestamp, const std::string& topic);
 
   /**
    * Updates <code>RobotState state</code> with the latest tf transform using the timestamp of the message passed in
@@ -92,7 +92,7 @@ public:
   //  void centerCamCallback(const sensor_msgs::ImageConstPtr& image);
   void centerCamCallback(const sensor_msgs::CompressedImageConstPtr& image);
 
-  void backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg);
+  void backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg);
 
   cv_bridge::CvImage img_bridge_;
 

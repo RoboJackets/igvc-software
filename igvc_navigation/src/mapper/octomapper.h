@@ -113,14 +113,14 @@ class Octomapper
 public:
   using PCL_point_cloud = pcl::PointCloud<pcl::PointXYZ>;
 
-  explicit Octomapper(const ros::NodeHandle& pNh);
-  void createOctree(pc_map_pair& pair) const;
+  explicit Octomapper(ros::NodeHandle pNh);
+  void create_octree(pc_map_pair& pair) const;
 
   /**
    * Updates the map to obtain the most updated version from the octree
    * @param pc_map_pair
    */
-  void getUpdatedMap(struct pc_map_pair& pc_map_pair) const;
+  void get_updated_map(struct pc_map_pair& pc_map_pair) const;
 
   /**
    * Inserts a lidar scan into the given pc_map_pair. This means that the points themselves are marked as occupied,
@@ -178,7 +178,8 @@ public:
                     ProbabilityModel model) const;
 
 private:
-  void createMap(pc_map_pair& pair) const;
+  void create_map(pc_map_pair& pair) const;
+  void insert_free(const octomap::Pointcloud& scan, octomap::point3d origin, pc_map_pair& pair, bool lazy_eval) const;
   std::pair<int, int> toMapCoordinates(double x, double y) const;
 
   ros::NodeHandle pNh;

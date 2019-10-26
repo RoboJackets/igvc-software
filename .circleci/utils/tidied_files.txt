@@ -1,6 +1,0 @@
-src/mapper
-external
-
-First line is include regex (space separated)
-Second line is ignore regex (space separated)
-Other lines are ignored

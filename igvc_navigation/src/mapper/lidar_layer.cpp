@@ -158,8 +158,9 @@ LidarLayer::getCloudAndTransform(const sensor_msgs::PointCloud2ConstPtr &pc)
   }
 
   sensor_msgs::PointCloud2 transformed_cloud;
+  constexpr double timeout = 0.1;
   geometry_msgs::TransformStamped transform =
-      tf_->lookupTransform(map_frame, pc_frame, cloud_stamp, ros::Duration(0.1));
+      tf_->lookupTransform(map_frame, pc_frame, cloud_stamp, ros::Duration(timeout));
   tf2::doTransform(*pc, transformed_cloud, transform);
 
   pcl::PointCloud<pcl::PointXYZ> pcl_cloud;
@@ -176,7 +177,8 @@ void LidarLayer::insertScan(const LidarLayer::PointCloud &pointcloud,
   grid_map::Position lidar_pos{ lidar_x, lidar_y };
 
   std::unordered_set<grid_map::Index> free_cells{};
-  free_cells.reserve(50 * pointcloud.size());
+  constexpr double free_cells_coeff_estimate = 50;
+  free_cells.reserve(free_cells_coeff_estimate * pointcloud.size());
   last_occupied_cells_.clear();
   last_occupied_cells_.reserve(pointcloud.size());
 
@@ -216,7 +218,8 @@ void LidarLayer::insertFreeSpace(const PointCloud &pointcloud, const geometry_ms
   grid_map::Position lidar_pos{ lidar_x, lidar_y };
 
   std::unordered_set<grid_map::Index> free_cells{};
-  free_cells.reserve(50 * pointcloud.size());
+  constexpr double free_cells_coeff_estimate = 50;
+  free_cells.reserve(free_cells_coeff_estimate * pointcloud.size());
 
   for (size_t i = 0; i < pointcloud.size(); i += 2)
   {

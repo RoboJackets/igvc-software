@@ -49,33 +49,56 @@ if [[ $# -eq 1 && "$1" == "-fix" ]]; then
     shift
 fi
 
-# Check if we want to just run this on one file, or on default files
-ignore_strings=""
-search_paths=""
-if [[ $# -gt 0 ]]; then
-  search_paths=$*
-else
-  search_paths=$(awk 'NR==1' $tidied_files_path)
-  ignore_strings=$(awk 'NR==2' $tidied_files_path)
-fi
-ignore_strings="${ignore_strings// /|}"
-search_paths="${search_paths// /|}"
-
-regex='((?!.*('$ignore_strings')))('$search_paths')'
-
 # screw circle ci
 num_cores=$(nproc)
-if [[ num_cores -eq 32 ]]; then
+if [[ num_cores -eq 36 ]]; then
   num_cores=2
 fi
 
-# Run run-clang-tidy
-echo "${bold}Running run-clang-tidy.py...${rs}"
-./.circleci/utils/run-clang-tidy.py -clang-tidy-binary clang-tidy-6.0 -quiet -j $num_cores $fix_errors -p ../../build/ $regex
-if [[ $? -eq 0 ]]; then
-  echo "${success}No errors!${rs}"
-  exit 0
-else
-  echo "${error}Errors found! Pass -fix to have clang-tidy try to fix them for you${rs}"
-  exit 1
-fi
+# ===================
+# | Find diff files |
+# ===================
+
+# Find the merge base compared to master.
+base=$(git merge-base refs/remotes/origin/master HEAD)
+# Create an empty array that will contain all the filepaths of files modified.
+modified_filepaths=()
+
+# To properly handle file names with spaces, we have to do some bash magic.
+# We set the Internal Field Separator to nothing and read line by line.
+while IFS='' read -r line
+do
+  # For each line of the git output, we call `realpath` to get the absolute path of the file.
+  absolute_filepath=$(realpath "$line")
+
+  # Append the absolute filepath.
+  if echo "$absolute_filepath" | grep -q -E '(\.cpp)|(\.h)'; then
+    echo "$absolute_filepath"
+    modified_filepaths+=("$absolute_filepath")
+  fi
+
+# `git diff-tree` outputs all the files that differ between the different commits.
+# By specifying `--diff-filter=d`, it doesn't report deleted files.
+done < <(git diff-tree --no-commit-id --diff-filter=d --name-only -r "$base" HEAD)
+
+# =========================
+# | Run with GNU parallel |
+# =========================
+
+# -m specifies that `parallel` should distribute the arguments evenly across the executing jobs.
+# -p Tells clang-tidy where to find the `compile_commands.json`.
+# `{}` specifies where `parallel` adds the command-line arguments.
+# `:::` separates the command `parallel` should execute from the arguments it should pass to the commands.
+# `| tee` specifies that we would like the output of clang-tidy to go to `stdout` and also to capture it in
+# `$build_dir/clang-tidy-output` for later processing.
+build_dir="../../build/"
+parallel -m clang-tidy-8 -p $build_dir -fix -fix-errors {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
+
+echo "STATUS CODE: $?"
+
+# ===============================
+# | Convert result to JUnit XML |
+# ===============================
+
+cat "$build_dir/clang-tidy-output" | ./.circleci/utils/clang-tidy-to-junit.py "$(pwd)" >"$build_dir/junit.xml"
+

@@ -4,10 +4,11 @@ Checks:          '-*,
                   llvm-namespace-comment,
                   modernize-*,
                   readability-*,
+                  bugprone-*
                   -clang-diagnostic-unused-command-line-argument,
                   '
 WarningsAsErrors: '*'
-HeaderFilterRegex: 'src/igvc-software/igvc_(navigation)\.h'
+HeaderFilterRegex: 'src/igvc-software/igvc_(navigation)/.*\.h'
 AnalyzeTemporaryDtors: false
 CheckOptions:
     - key:             llvm-namespace-comment.ShortNamespaceLines
