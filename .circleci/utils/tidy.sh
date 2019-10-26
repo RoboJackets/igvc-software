@@ -33,18 +33,18 @@ else
 fi
 
 # Check for clang-tidy
-if [ ! "$(command -v clang-tidy)" ]; then
-  echo "${error}Couldn't find clang-tidy${rs}"
-  echo "Run sudo apt install clang-tidy clang-tools"
+if [ ! "$(command -v clang-tidy-8)" ]; then
+  echo "${error}Couldn't find clang-tidy-8${rs}"
+  echo "Run sudo apt install clang-tidy-8 clang-tools-8"
   exit 1
 else
-  echo "${success}Found clang-tidy!${rs}"
+  echo "${success}Found clang-tidy-8!${rs}"
 fi
 
 # Check if we want to add '-fix-errors' flag to clang-tidy
 fix_errors=""
 if [[ $# -eq 1 && "$1" == "-fix" ]]; then
-    fix_errors="-fix"
+    fix_errors="-fix -fix-errors"
     echo "-fix flag is passed, will pass to clang-tidy!"
     shift
 fi
@@ -98,7 +98,7 @@ modified_filepaths=($(echo "${modified_filepaths[@]}" | tr ' ' '\n' | sort -u | 
 # `| tee` specifies that we would like the output of clang-tidy to go to `stdout` and also to capture it in
 # `$build_dir/clang-tidy-output` for later processing.
 build_dir="../../build/"
-parallel -m clang-tidy-8 -p $build_dir {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
+parallel -m clang-tidy-8 -p $build_dir ${fix_errors} {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
 
 # ===============================
 # | Convert result to JUnit XML |
