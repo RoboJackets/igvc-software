@@ -455,10 +455,10 @@ void LineLayer::initCostTranslationTable()
 
   cost_translation_table_.resize(std::numeric_limits<uchar>::max() + 1);
 
-  cost_translation_table_[costmap_2d::FREE_SPACE] = free_space_msg_cost;      // NO obstacle
-  cost_translation_table_[costmap_2d::INSCRIBED_INFLATED_OBSTACLE] = inflated_msg_cost;   // INSCRIBED obstacle
-  cost_translation_table_[costmap_2d::LETHAL_OBSTACLE] = lethal_msg_cost;  // LETHAL obstacle
-  cost_translation_table_[costmap_2d::NO_INFORMATION] = unknown_msg_cost;   // UNKNOWN
+  cost_translation_table_[costmap_2d::FREE_SPACE] = free_space_msg_cost;                 // NO obstacle
+  cost_translation_table_[costmap_2d::INSCRIBED_INFLATED_OBSTACLE] = inflated_msg_cost;  // INSCRIBED obstacle
+  cost_translation_table_[costmap_2d::LETHAL_OBSTACLE] = lethal_msg_cost;                // LETHAL obstacle
+  cost_translation_table_[costmap_2d::NO_INFORMATION] = unknown_msg_cost;                // UNKNOWN
 
   // regular cost values scale the range 1 to 252 (inclusive) to fit
   // into 1 to 98 (inclusive).
@@ -488,7 +488,7 @@ void LineLayer::publishCostmap()
   msg->info.width = costmap_2d_.getSizeInCellsX();
   msg->info.height = costmap_2d_.getSizeInCellsY();
 
-  grid_map::Position position = map_.getPosition() - 0.5 * map_.getLength().matrix(); // NOLINT
+  grid_map::Position position = map_.getPosition() - 0.5 * map_.getLength().matrix();  // NOLINT
   msg->info.origin.position.x = position.x();
   msg->info.origin.position.y = position.y();
   msg->info.origin.position.z = 0.0;
