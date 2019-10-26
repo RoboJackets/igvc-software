@@ -219,7 +219,7 @@ void LidarLayer::insertFreeSpace(const PointCloud &pointcloud, const geometry_ms
 
   std::unordered_set<grid_map::Index> free_cells{};
   constexpr double free_cells_coeff_estimate = 50;
-  free_cells.reserve(free_cells_coeff_estimate * pointcloud.size());
+  free_cells.reserve(free_cells_coeff_estimate * 10 * pointcloud.size());
 
   for (size_t i = 0; i < pointcloud.size(); i += 2)
   {
