@@ -34,32 +34,10 @@ public:
   void onInitialize() override;
   void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) override;
 
-  struct ProjectionResult
-  {
-    PointCloud line;
-    PointCloud nonline;
-  };
-
   struct IndexDistPair
   {
     grid_map::Index index;
     double distance;
-  };
-
-  struct index_dist_pair_hash
-  {
-    std::size_t operator()(const IndexDistPair& pair) const
-    {
-      return std::hash<grid_map::Index>()(pair.index);
-    }
-  };
-
-  struct index_dist_pair_equal
-  {
-    bool operator()(const IndexDistPair& lhs, const IndexDistPair& rhs) const
-    {
-      return std::equal_to<grid_map::Index>()(lhs.index, rhs.index);
-    }
   };
 
 private:

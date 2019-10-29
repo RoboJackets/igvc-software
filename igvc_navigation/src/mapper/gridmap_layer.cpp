@@ -7,7 +7,7 @@ GridmapLayer::GridmapLayer(const std::vector<std::string>& layers) : map_{ layer
   resetDirty();
 }
 
-GridmapLayer::GridmapLayer() : map_{}
+GridmapLayer::GridmapLayer()
 {
   resetDirty();
 }
