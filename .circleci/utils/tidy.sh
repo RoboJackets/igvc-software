@@ -87,6 +87,11 @@ done < <(git diff-tree --no-commit-id --diff-filter=d --name-only -r "$base" HEA
 # =====================
 modified_filepaths=($(echo "${modified_filepaths[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
+if [ ${#modified_filepaths[@]} -eq 0 ]; then
+  echo "No changed cpp files!"
+  exit 0
+fi
+
 # =========================
 # | Run with GNU parallel |
 # =========================
