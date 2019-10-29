@@ -24,8 +24,14 @@ except:
 
 def drive_motors(left: float, right: float):
     if kit:
-        kit.motor1.throttle = left
-        kit.motor3.throttle = right
+        left_zero = abs(left) < 0.1
+        right_zero = abs(right) < 0.1
+        if left_zero and right_zero:
+            kit.motor1.throttle = None
+            kit.motor3.throttle = None
+        else:
+            kit.motor1.throttle = left
+            kit.motor3.throttle = -right
 
 
 def main():
