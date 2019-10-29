@@ -4,7 +4,12 @@ except Exception as exception:
     print(exception)
 
 import time
+import os
+
+os.environ['SDL_VIDEODRIVER'] = 'dummy'
 import pygame
+pygame.init()
+pygame.display.set_mode((1,1))
 
 left_lr_coeff = -1
 left_ud_coeff = -1
@@ -30,6 +35,8 @@ def main():
     if pygame.joystick.get_count() == 0:
         print("Waiting for joystick to get connected")
         while pygame.joystick.get_count() == 0:
+            pygame.joystick.quit()
+            pygame.joystick.init()
             time.sleep(0.5)
             pygame.event.pump()
 
@@ -39,8 +46,6 @@ def main():
     num_axes = joystick.get_numaxes()
 
     print()
-
-    counter = 0
 
     while True:
         pygame.event.pump()
@@ -54,20 +59,7 @@ def main():
         print(f"\rl: ({left_ud:10.6f}, {left_lr:10.6f})\t\tr: ({right_ud:10.6f}, {right_lr:10.6f})", end="")
 
         drive_motors(left_ud, right_ud)
-        counter += 1
         time.sleep(0.001)
-
-        if counter == 1000:
-            counter = 0
-            pygame.joystick.quit()
-            pygame.joystick.init()
-            while pygame.joystick.get_count() <= 0:
-                print("Waiting for joystick to reconnect...")
-                time.sleep(1)
-                pygame.event.pump()
-            time.sleep(0.1)
-            joystick = pygame.joystick.Joystick(0)
-            joystick.init()
 
 
 if __name__ == '__main__':
