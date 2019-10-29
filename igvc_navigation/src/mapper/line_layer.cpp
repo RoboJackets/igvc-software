@@ -73,7 +73,7 @@ void LineLayer::initPubSub()
 
     synchronizers_.emplace_back(std::make_unique<RawSegmentedSynchronizer>(
         *camera_subscribers_.back().raw_image_sub, *camera_subscribers_.back().raw_info_sub,
-        *camera_subscribers_.back().segmented_image_sub, *camera_subscribers_.back().segmented_info_sub, 10));
+        *camera_subscribers_.back().segmented_image_sub, *camera_subscribers_.back().segmented_info_sub, 1));
     synchronizers_.back()->registerCallback(boost::bind(&LineLayer::imageSyncedCallback, this, _1, _2, _3, _4, i));
   }
 }
@@ -168,16 +168,14 @@ void LineLayer::calculateCachedRays(const sensor_msgs::CameraInfo &info, size_t 
 
 geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::string &frame, const ros::Time &stamp) const
 {
-  if (tf_->canTransform("odom", frame, stamp, ros::Duration{ 1 }))
-  {
-    return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
-  }
-  else
+  if (!tf_->canTransform("odom", frame, stamp, ros::Duration{ 1 }))
   {
     ROS_WARN_STREAM_THROTTLE(1.0, "Failed to find transform from frame 'odom' to frame 'base_footprint' within "
                                   "timeout. Using latest transform...");
     return tf_->lookupTransform("odom", frame, ros::Time{ 0 }, ros::Duration{ 1 });
   }
+
+  return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
 }
 
 cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const
@@ -204,6 +202,8 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
   grid_map::Index camera_index;  // Center of line_buffer_ and freespace_buffer_
   map_.getIndex({ translate_vector.x, translate_vector.y }, camera_index);
 
+  constexpr uchar true_val = 255U;
+
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = segmented_mat.ptr<uchar>(i);
@@ -216,19 +216,19 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
       double scale = -translation[2] / eigen_ray[2];
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
 
-      bool is_line = row_ptr[j] == 255u;
+      bool is_line = row_ptr[j] == true_val;
       grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
       if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
         if (is_line)
         {
-          line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = 255u;
+          line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
         }
         else
         {
-          freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = 255u;
+          freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
         }
@@ -356,12 +356,13 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
 
   const int rows = line_buffer_.rows;
   const int cols = line_buffer_.cols;
+  constexpr uchar true_val = 255U;
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = line_buffer_.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
-      if (row_ptr[j] == 255u)
+      if (row_ptr[j] == true_val)
       {
         const int map_x = camera_index[0] - center_x + 1 + i;
         const int map_y = camera_index[1] - center_y + 1 + j;
@@ -383,7 +384,7 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
     const auto *row_ptr = freespace_buffer_.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
-      if (row_ptr[j] == 255u)
+      if (row_ptr[j] == true_val)
       {
         const int map_x = camera_index[0] - center_x + 1 + i;
         const int map_y = camera_index[1] - center_y + 1 + j;
@@ -422,12 +423,14 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
   grid_map::Position camera_pos;
   map_.getPosition(camera_index, camera_pos);
 
+  constexpr uchar line_val = 255U;
+
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = mat.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
-      if (row_ptr[j] == 255u)
+      if (row_ptr[j] == line_val)
       {
         auto dx = static_cast<float>(config_.map.resolution * (i - center_x + 1));
         auto dy = static_cast<float>(config_.map.resolution * (j - center_y + 1));
@@ -445,17 +448,24 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
 
 void LineLayer::initCostTranslationTable()
 {
-  cost_translation_table_.resize(256);
-  cost_translation_table_[0] = 0;      // NO obstacle
-  cost_translation_table_[253] = 99;   // INSCRIBED obstacle
-  cost_translation_table_[254] = 100;  // LETHAL obstacle
-  cost_translation_table_[255] = -1;   // UNKNOWN
+  constexpr int8_t free_space_msg_cost = 0;
+  constexpr int8_t inflated_msg_cost = 99;
+  constexpr int8_t lethal_msg_cost = 100;
+  constexpr int8_t unknown_msg_cost = -1;
+
+  cost_translation_table_.resize(std::numeric_limits<uchar>::max() + 1);
+
+  cost_translation_table_[costmap_2d::FREE_SPACE] = free_space_msg_cost;                 // NO obstacle
+  cost_translation_table_[costmap_2d::INSCRIBED_INFLATED_OBSTACLE] = inflated_msg_cost;  // INSCRIBED obstacle
+  cost_translation_table_[costmap_2d::LETHAL_OBSTACLE] = lethal_msg_cost;                // LETHAL obstacle
+  cost_translation_table_[costmap_2d::NO_INFORMATION] = unknown_msg_cost;                // UNKNOWN
 
   // regular cost values scale the range 1 to 252 (inclusive) to fit
   // into 1 to 98 (inclusive).
-  for (int i = 1; i < 253; i++)
+  for (int i = 1; i <= costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1; i++)
   {
-    cost_translation_table_[i] = char(1 + (97 * (i - 1)) / 251);
+    // NOLINTNEXTLINE
+    cost_translation_table_[i] = static_cast<uint8_t>(1 + (97 * (i - 1)) / 251);
   }
 }
 
@@ -478,7 +488,7 @@ void LineLayer::publishCostmap()
   msg->info.width = costmap_2d_.getSizeInCellsX();
   msg->info.height = costmap_2d_.getSizeInCellsY();
 
-  grid_map::Position position = map_.getPosition() - 0.5 * map_.getLength().matrix();
+  grid_map::Position position = map_.getPosition() - 0.5 * map_.getLength().matrix();  // NOLINT
   msg->info.origin.position.x = position.x();
   msg->info.origin.position.y = position.y();
   msg->info.origin.position.z = 0.0;
