@@ -16,8 +16,12 @@ left_ud_coeff = -1
 right_lr_coeff = -1
 right_ud_coeff = -1
 
+interval = 0.02                         # Time between updates in seconds, smaller responds faster but uses more processor time
+controllerLostLoops = 20                # Number of loops without any joystick events before announcing the joystick as out of range
+
 try:
     kit = MotorKit()
+    kit._pca.frequency = 256
 except:
     kit = None
 
@@ -53,8 +57,59 @@ def main():
 
     print()
 
+    loops_without_event = 0
+    controller_lost = False
+
     while True:
-        pygame.event.pump()
+        had_event = False
+        events = pygame.event.get()
+
+        for event in events:
+            if event.type == pygame.JOYBUTTONDOWN:
+                # A button on the joystick just got pushed down
+                had_event = True
+            elif event.type == pygame.JOYAXISMOTION:
+                # A joystick has been moved
+                had_event = True
+
+        if had_event:
+            # Reset the controller lost counter
+            loops_without_event = 0
+            controller_lost = False
+        elif controller_lost:
+            try:
+                # Controller has been lost
+                loops_without_event += 1
+                if (loops_without_event % (controllerLostLoops / 10)) == 0:
+                    del joystick
+                    pygame.joystick.quit()
+                    pygame.joystick.init()
+                    if pygame.joystick.get_count() < 1:
+                        # Controller has been disconnected, poll for reconnection
+                        print('Controller disconnected!')
+                        while pygame.joystick.get_count() < 1:
+                            time.sleep(interval * (controllerLostLoops / 10))
+                            pygame.joystick.quit()
+                            pygame.joystick.init()
+                    # Grab the joystick again
+                    joystick = pygame.joystick.Joystick(0)
+                    joystick.init()
+                    continue
+                # Skip to the next loop after the interval
+                time.sleep(interval)
+                continue
+            except:
+                pass
+        else:
+            # No events this loop, check if it has been too long since we saw an event
+            loops_without_event += 1
+            if loops_without_event > controllerLostLoops:
+                # It has been too long, disable control!
+                print('Controller lost!')
+                controller_lost = True
+                # Skip to the next loop after the interval
+                time.sleep(interval)
+                continue
 
         left_lr = left_lr_coeff * joystick.get_axis(0)
         left_ud = left_ud_coeff * joystick.get_axis(1)
