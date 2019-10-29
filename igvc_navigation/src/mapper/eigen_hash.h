@@ -17,7 +17,7 @@ struct hash<Eigen::Matrix<Scalar, Rows, Cols>>
     for (size_t i = 0; i < matrix.size(); ++i)
     {
       Scalar elem = *(matrix.data() + i);
-      seed ^= std::hash<Scalar>()(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= std::hash<Scalar>()(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);  // NOLINT
     }
     return seed;
   }
@@ -33,7 +33,7 @@ struct hash<Eigen::Array<Scalar, Rows, Cols>>
     for (Eigen::Index i = 0; i < matrix.size(); ++i)
     {
       Scalar elem = *(matrix.data() + i);
-      seed ^= std::hash<Scalar>()(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= std::hash<Scalar>()(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);  // NOLINT
     }
     return seed;
   }

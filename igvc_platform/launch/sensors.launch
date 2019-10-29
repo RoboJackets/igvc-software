@@ -5,7 +5,7 @@
     -->
 <launch>
     <!-- TF -->
-    <include file="$(find igvc_navigation)/launch/robot_state_publisher.launch" />
+    <include file="$(find igvc_description)/launch/robot_state_publisher.launch" />
 
     <!-- MOTOR CONTROLLER -->
     <include file="$(find igvc_platform)/launch/motor_controller.launch" />
