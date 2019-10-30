@@ -4,7 +4,6 @@
 #include <Eigen/StdVector>
 #include <Eigen/Geometry>
 
-
 geometry_msgs::PoseWithCovariance prev_odom;
 bool odom_initialized = false;
 
@@ -15,9 +14,6 @@ void OdomCallback(geometry_msgs::PoseWithCovariance msg)
         prev_odom = msg;
         odom_initialized = true;
     }
-
-
-
 }
 
 int main(int argc, char **argv)
