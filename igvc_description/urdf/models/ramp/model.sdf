@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <model name='ramp'>
+    <static>true</static>
+    <link name='link'>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>model://ramp/meshes/ramp.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <max_contacts>10</max_contacts>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>50</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>model://ramp/meshes/ramp.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+    </link>
+  </model>
+</sdf>
