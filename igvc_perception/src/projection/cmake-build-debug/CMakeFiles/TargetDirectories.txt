@@ -1,0 +1,7 @@
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/install/strip.dir
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/projection.dir
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/list_install_components.dir
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/install/local.dir
+/home/andrew/Desktop/catkin_ws/src/igvc-software/igvc_perception/src/projection/cmake-build-debug/CMakeFiles/install.dir

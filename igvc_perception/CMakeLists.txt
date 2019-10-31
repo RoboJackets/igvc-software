@@ -25,8 +25,11 @@ find_package(catkin REQUIRED COMPONENTS
     parameter_assertions
     )
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+find_package(SUITESPARSE)
+find_package(G2O)
+find_package(Eigen3 3.3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED filters visualization features)
 
@@ -116,6 +119,7 @@ include_directories(
     include
     ${catkin_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
+    ${CSPARSE_INCLUDE_DIR}
 )
 
 ## Declare a cpp library

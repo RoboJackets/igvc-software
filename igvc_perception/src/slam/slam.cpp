@@ -1,4 +1,6 @@
 #include <ros/ros.h>
+#include <ros/subscriber.h>
+#include <ros/publisher.h>
 #include <geometry_msgs/PoseWithCovariance.h>
 #include <Eigen/Core>
 #include <Eigen/StdVector>
@@ -21,7 +23,6 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "slam");
     ros::NodeHandle pnh {"~"};
     ros::Subscriber odom_sub = pnh.subscribe("/wheel_odom", 1, OdomCallback);
-    
     ros::spin();
 }
 
