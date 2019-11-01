@@ -1,82 +1,41 @@
 <?xml version="1.0"?>
 
 <launch>
-  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
-  <arg name="world_name" default="$(find igvc_description)/urdf/worlds/qualification.world"/>
-  <arg name="cmd_timeout" default="0.5"/>
-  <arg name="track" default="0"/>
-  <!-- accelerate lidar with GPU -->
-  <arg name="gpu" default="false"/>
+    <arg name="track" default="0"/>
+    <arg name="cmd_timeout" default="0.5"/>
+    <arg name="gpu" default="false"/>
 
-  <!-- Vehicle pose -->
-  <arg name="x" value="-30"/>
-  <arg name="z" value="0.1525"/>
-  <arg name="roll" value="0.0"/>
-  <arg name="pitch" value="0.0"/>
-  <arg name="yaw" value="0"/>
+    <!-- Vehicle pose -->
+    <arg name="x" value="-30"/>
+    <arg name="z" value="0.1525"/>
+    <arg name="roll" value="0.0"/>
+    <arg name="pitch" value="0.0"/>
+    <arg name="yaw" value="0"/>
 
-  <param name="/use_sim_time" value="true"/>
+    <!-- maps track value to different starting locations -->
+    <arg name="y" value="27" if="$(eval track == 0)"/>
+    <arg name="y" value="21.5" if="$(eval track == 1)"/>
+    <arg name="y" value="17" if="$(eval track == 2)"/>
+    <arg name="y" value="13.5" if="$(eval track == 3)"/>
+    <arg name="y" value="9" if="$(eval track == 4)"/>
+    <arg name="y" value="3.5" if="$(eval track == 5)"/>
+    <arg name="y" value="-1" if="$(eval track == 6)"/>
+    <arg name="y" value="-4.5" if="$(eval track == 7)"/>
+    <arg name="y" value="-9" if="$(eval track == 8)"/>
+    <arg name="y" value="-14.5" if="$(eval track == 9)"/>
+    <arg name="y" value="-19" if="$(eval track == 10)"/>
 
-  <!-- WARNING: this waypoint instance will always use ground truth -->
-  <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
-      <param name="file" value="$(find igvc_gazebo)/config/waypoints_qual_$(arg track).csv" />
-      <param name="localization_topic" value="/ground_truth" />
-      <param name="gps_topic" value="/fix" />
-  </node>
+    <include file="$(find igvc_gazebo)/launch/simulation.launch">
+        <arg name="world_name" value="$(find igvc_description)/urdf/worlds/qualification.world"/>
+        <arg name="waypoints" value="$(find igvc_gazebo)/config/waypoints_qual_$(arg track).csv" />
 
-  <!-- Create the world. -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
-    <arg name="paused" value="false"/>
-    <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
-    <arg name="debug" value="false"/>
-  </include>
-
-  <include file="$(find igvc_description)/launch/spawn_jaymii.launch">
-      <arg name="x" value="$(arg x)"/>
-
-      <!-- maps track value to different starting locations -->
-      <arg name="y" value="27" if="$(eval track == 0)"/>
-      <arg name="y" value="21.5" if="$(eval track == 1)"/>
-      <arg name="y" value="17" if="$(eval track == 2)"/>
-      <arg name="y" value="13.5" if="$(eval track == 3)"/>
-      <arg name="y" value="9" if="$(eval track == 4)"/>
-      <arg name="y" value="3.5" if="$(eval track == 5)"/>
-      <arg name="y" value="-1" if="$(eval track == 6)"/>
-      <arg name="y" value="-4.5" if="$(eval track == 7)"/>
-      <arg name="y" value="-9" if="$(eval track == 8)"/>
-      <arg name="y" value="-14.5" if="$(eval track == 9)"/>
-      <arg name="y" value="-19" if="$(eval track == 10)"/>
-
-      <arg name="z" value="$(arg z)"/>
-      <arg name="roll" value="$(arg roll)"/>
-      <arg name="pitch" value="$(arg pitch)"/>
-      <arg name="yaw" value="$(arg yaw)"/>
-
-      <!-- accelerate lidar with GPU -->
-      <arg name="gpu" value="$(arg gpu)"/>
-  </include>
-  <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
-<!--  <include file="$(find igvc_perception)/launch/projection.launch" />-->
-
-  <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
-
-  <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen">
-    <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>
-    <param name="ground_truth_pub_topic" value="/ground_truth"/>
-  </node>
-
-  <node pkg="igvc_utils" type="quaternion_to_rpy" name="ground_truth_to_rpy" respawn="true" output="screen">
-      <param name="topics/quaternion" value="/ground_truth"/>
-      <param name="topics/rpy" value="/ground_truth_rpy"/>
-      <param name="message_type" value="odometry"/>
-  </node>
-
-  <!-- Publish segmented camera images -->
-  <include file="$(find igvc_gazebo)/launch/sim_detector.launch" />
-
-  <include file="$(find igvc_utils)/launch/imu_to_rpy.launch" />
-
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+        <arg name="roll" value="$(arg roll)"/>
+        <arg name="pitch" value="$(arg pitch)"/>
+        <arg name="yaw" value="$(arg yaw)"/>
+        <arg name="gpu" value="$(arg gpu)"/>
+        <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
+    </include>
 </launch>

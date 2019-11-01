@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="track" default="0"/>
+    <arg name="cmd_timeout" default="0.5"/>
+    <arg name="gpu" default="false"/>
+
+    <!-- Vehicle pose -->
+    <arg name="x" value="0"/>
+    <arg name="y" value="22.9"/>
+    <arg name="z" value="0.1525"/>
+    <arg name="roll" value="0.0"/>
+    <arg name="pitch" value="0.0"/>
+
+    <!-- maps track value to different starting orientations -->
+    <arg name="yaw" value="0" if="$(eval track == 0)"/>
+    <arg name="yaw" value="3.14" if="$(eval track == 1)"/>
+
+    <include file="$(find igvc_gazebo)/launch/simulation.launch">
+        <arg name="world_name" value="$(find igvc_description)/urdf/worlds/autonav.world"/>
+        <arg name="waypoints" value="$(find igvc_gazebo)/config/waypoints_autonav_$(arg track).csv" />
+
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+        <arg name="roll" value="$(arg roll)"/>
+        <arg name="pitch" value="$(arg pitch)"/>
+        <arg name="yaw" value="$(arg yaw)"/>
+        <arg name="gpu" value="$(arg gpu)"/>
+        <arg name="cmd_timeout" value="$(arg cmd_timeout)"/>
+    </include>
+</launch>

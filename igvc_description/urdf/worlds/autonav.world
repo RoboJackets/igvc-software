@@ -1,0 +1,560 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+       <ambient>1.0 1.0 1.0 1.0</ambient>
+       <shadows>true</shadows>
+    </scene>
+
+    <gui>
+      <camera name="user_camera">
+        <pose>0 42.9 25 0 0.8 -1.57</pose>
+      </camera>
+    </gui>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model:///urdf/models/sun</uri>
+    </include>
+    <!-- A ground plane -->
+    <include>
+      <uri>model:///urdf/models/autonav</uri>
+    </include> -->
+    <!-- ramps -->
+    <include>
+      <uri>model:///urdf/models/ramp</uri>
+      <name>ramp_0</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>16.361 3.674 0 0 -0 -0.670</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/ramp</uri>
+      <name>ramp_1</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.608 3.804 0 0 -0 0.955</pose>
+    </include>
+    <!-- barrels -->
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_0</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>0 19.6 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_1</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>0 26 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_2</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>13.787 23.878 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_3</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>19.181 22.189 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_4</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>18.388 19.827 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_5</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>16.033 15.308 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_6</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>16.514 14.981 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_7</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>16.988 14.623 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_8</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>17.482 14.271 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_9</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>17.963 13.917 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_10</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>17.932 11.339 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_11</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>17.489 11.714 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_12</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>17.053 12.108 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_13</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>16.587 12.475 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_14</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>14.138 11.459 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_15</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>14.620 11.077 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_16</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-6.646 -12.089 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_17</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-6.015 -13.752 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_18</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>18.128 0.756 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_19</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>20.533 -0.955 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_20</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>15.699 -6.357 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_21</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>11.253 -9.721 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_22</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>15.437 -16.289 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_23</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>15.988 -16.610 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_24</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>18.360 -20.697 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_25</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>17.072 -23.944 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_26</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>12.114 -17.789 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_27</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>10.155 -18.839 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_28</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>9.652 -19.311 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_29</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>9.181 -19.775 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_30</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>9.742 -11.323 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_31</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>5.393 -12.401 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_32</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.557 -11.338 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_33</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.567 -10.527 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_34</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.523 -9.782 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_35</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.458 -9.008 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_36</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.246 -8.299 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_37</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>1.901 -7.644 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_38</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>0.346 -9.950 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_39</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>0.195 -9.101 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_40</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-0.195 -8.180 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_41</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-0.592 -7.453 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_42</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-0.151 -6.725 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_43</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>0.327 -6.152 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_44</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>0.822 -5.608 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_45</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-1.450 -11.406 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_46</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-1.947 -10.326 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_47</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-2.508 -9.378 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_48</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-2.958 -8.311 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_49</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-5.127 -8.553 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_50</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-5.232 -7.852 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_51</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-6.728 -15.316 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_52</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-10.898 -15.301 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_53</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-10.073 -16.053 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_54</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-9.219 -17.113 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_55</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-8.555 -18.197 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_56</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-9.015 -19.338 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_57</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-9.546 -20.302 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_58</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-9.569 -21.431 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_59</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-13.875 -22.319 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_60</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.001 -21.750 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_61</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-15.407 -23.926 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_62</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.160 -23.218 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_63</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.069 -20.910 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_64</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.222 -19.921 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_65</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.763 -19.123 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_66</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-19.446 -18.306 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_67</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.311 -15.951 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_68</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.262 -16.501 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_69</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-13.932 -16.579 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_70</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-14.197 -15.599 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_71</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-11.110 -11.974 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_72</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-11.848 -11.966 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_73</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-13.557 -10.210 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_74</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-14.905 13.208 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_75</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-15.701 12.643 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_76</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.487 12.075 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_77</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.260 12.433 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_78</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.738 13.150 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_79</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.675 14.280 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_80</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.220 14.819 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_81</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.774 15.348 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_82</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.371 15.709 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_83</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-19.155 15.313 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_84</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-19.832 14.947 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_85</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.418 17.637 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_86</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-19.178 17.690 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_87</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.666 21.003 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_88</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.109 21.543 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_89</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-14.324 24.075 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_90</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-15.872 9.495 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_91</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-13.266 8.423 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_92</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-15.389 6.831 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_93</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-20.761 -0.194 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_94</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-18.601 -1.647 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_95</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-19.876 -3.735 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_96</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.743 -4.719 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_97</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-17.299 -5.169 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_98</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.793 -5.601 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_99</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-16.253 -6.087 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_100</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-15.706 -6.467 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_101</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-15.036 -6.713 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>model:///urdf/models/barrel</uri>
+      <name>barrel_102</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>-14.330 -6.974 0 0 -0 0</pose>
+    </include>
+    <physics type="ode">
+      <max_step_size>0.0005</max_step_size>
+      <real_time_update_rate>2000</real_time_update_rate>
+    </physics>
+  </world>
+</sdf>
