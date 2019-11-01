@@ -148,6 +148,17 @@ So we need two JAUS components. The services that are required of each component
 
 All of which are standard services defined in JAUS.
 
+There are 2 main parts to the scoring:
+1. IOP Interfaces Task
+    - Basically we get points for implementing the required services, and get penalized if there's some error
+2. Performance Tasks
+    - The judges use the interfaces to, at the end, drive around a few waypoints, after making sure that the system is
+    safe.
+
+The time for the performance task waypoint run is used to break ties.
+
+Now, back to the services:
+
 Thankfully, `fkie/iop_core` has as few implementations of these services that are already done:
 - `fkie_iop_transport`
 - `fkie_iop_events`
