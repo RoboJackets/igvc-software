@@ -185,11 +185,57 @@ Yeah. The list of thing(s) that we would need to do would be:
   - and then it's like unit test writing time, to check that all the specs mentioned in the IGVC competition manual are
   fulfilled
 
+## Tasks for other subteams
+The other important tasks that need to be done:
+
+> The teams will implement a wireless 802.11 b/g or **hardwired Ethernet data link**
+
+We didn't include a router in our budget, so hardwired Ethernet data link it is
+
+> For the Wired Network, the judges will provide a **Gigabit Ethernet switch** that a team may plug their subsystem
+> into using a standard RJ-45 Ethernet connector 
+
+> The team shall provide one **Connector Type A connector as specified in the Payloads IOP**.
+> This connector shall be provided at a location that is easily accessible to the judges.
+> At some point in the future of this competition, this connector may be used to add a judges’ or team payload to the
+> platform. For the purposes of this IOP Challenge, the team **does not need to provide Gigabit Ethernet** at this
+> connector – **Fast Ethernet** (**Translator's note**: Fast Ethernet means that we can
+> "_carry traffic at the nominal rate of 100 Mbit/s_") is acceptable.
+> The team **shall NOT connect power to this connector** at this time – **only the data lines shall be populated**
+
+Regarding the "Connector Type A connector" (lmao weird wording), I have no idea what this is. But then also from
+a previous section:
+
+> #### 1.5.2 Payloads Requirements
+> There are currently no payloads requirements 
+
+![](https://i.kym-cdn.com/entries/icons/original/000/018/489/nick-young-confused-face-300x256-nqlyaa.jpg)
+
+Googling "Connector Type A" yields only USB Type A Connector, while "Payloads IOP" yields to
+[this document](https://apps.dtic.mil/dtic/tr/fulltext/u2/a558824.pdf), which contains
+
+> #### 5.1.2 Connectors
+> This section defines requirements associated with the **physical/electrical connectors** employed to integrate
+> subsystems and payload(s) to the UGV platform. This is defined in the **UGV IOP Payloads Profile**
+
+Hmm... so some like another document. Except... this document like doesn't exist on the public web. From wikipedia:
+
+> The National Advanced Mobility Consortium (NAMC) makes the IOPs available at the
+> https://namcgroups.org website for registered users.  
+
+So, let's try registering... except, I'm hit with like a
+"We'll review your registration application" after I hit submit.
+
+So..... for now I think it's a safe bet to say that this "Connector Type A connector" refers to just normal RJ45, since
+it seems like thats what the payloads have on them.
+
 ## My thoughts on IOP
 Finally, thoughts on whether we should do IOP
 - Initially I thought we would need to craft our own UDP packets and like build this up from OSI Layer 5 all the way
   up to Layer 7, and then somehow integrate that with ROS
 - And then I realized that `fkie/iop_core` + JTS handles all of this for us
 - So... the amount of work we need to do is like just making sure that this works
+- Also waiting on NAMC to see if they let me register so I can actually read the fucking section on
+  "Connector Type A connector". 100 bucks it's just RJ45, but oh well I have no hopes for this.
 
 So, IMO IOP is worth doing.
