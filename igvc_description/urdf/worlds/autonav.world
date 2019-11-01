@@ -7,9 +7,15 @@
           <speed>12</speed>
         </clouds>
       </sky>
-    <ambient>1.0 1.0 1.0 1.0</ambient>
-    <shadows>true</shadows>
+       <ambient>1.0 1.0 1.0 1.0</ambient>
+       <shadows>true</shadows>
     </scene>
+
+    <gui>
+      <camera name="user_camera">
+        <pose>0 42.9 25 0 0.8 -1.57</pose>
+      </camera>
+    </gui>
 
     <!-- A global light source -->
     <include>
