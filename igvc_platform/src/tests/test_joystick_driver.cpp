@@ -87,7 +87,7 @@ bool MockMotorSubscriber::waitForPublisher(const ros::Duration& timeout) const
   while (sub_.getNumPublishers() == 0)
   {
     const double sleep_duration = 0.1;
-    ros::WallDuration{sleep_duration}.sleep();
+    ros::WallDuration{ sleep_duration }.sleep();
     if (!timeout.isZero() && ros::Time::now() >= end)
     {
       return false;
@@ -122,7 +122,7 @@ bool MockMotorSubscriber::spinUntilMessages(const ros::Duration& timeout, int nu
   while (static_cast<int>(message_buffer_.size()) < num_messages)
   {
     const double sleep_duration = 0.1;
-    callback_queue_.callAvailable(ros::WallDuration{ sleep_duration});
+    callback_queue_.callAvailable(ros::WallDuration{ sleep_duration });
     if (!timeout.isZero() && ros::Time::now() >= end)
     {
       return false;
