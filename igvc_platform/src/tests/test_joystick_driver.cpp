@@ -32,8 +32,8 @@ public:
 
   void init(const std::string& topic, int queue_size = 1);
 
-  [[nodiscard]] bool waitForPublisher(const ros::Duration& timeout = ros::Duration{ 0 }) const;
-  bool spinUntilMessages(const ros::Duration& timeout = ros::Duration{ 0 }, int num_messages = 1);
+  [[nodiscard]] bool waitForPublisher(const ros::Duration& timeout = ros::Duration{ 5 }) const;
+  bool spinUntilMessages(const ros::Duration& timeout = ros::Duration{ 5 }, int num_messages = 1);
   [[nodiscard]] bool hasMessage() const;
   [[nodiscard]] const MessageType& front() const;
   [[nodiscard]] const std::vector<MessageType>& messages() const;
@@ -139,6 +139,22 @@ public:
   }
 
 protected:
+  [[nodiscard]] bool waitForSubscriber() const
+  {
+    const double timeout = 5.0;
+    const double sleep_time = 1.0;
+    ros::Time end = ros::Time::now() + ros::Duration(timeout);
+    while (mock_joy_pub.getNumSubscribers() == 0)
+    {
+      ros::Duration(sleep_time).sleep();
+      if (ros::Time::now() > end)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
   ros::NodeHandle handle;
   ros::Publisher mock_joy_pub;
 };
@@ -156,6 +172,8 @@ TEST_F(TestJoystickDriver, FullForward)
 {
   MockMotorSubscriber mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(waitForSubscriber());
+
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(full_speed, full_speed));
 
@@ -172,6 +190,7 @@ TEST_F(TestJoystickDriver, FullReverse)
 {
   MockMotorSubscriber mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(waitForSubscriber());
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(-full_speed, -full_speed));
 
@@ -188,6 +207,7 @@ TEST_F(TestJoystickDriver, SpinRight)
 {
   MockMotorSubscriber mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(waitForSubscriber());
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(full_speed, -full_speed));
 
@@ -204,6 +224,7 @@ TEST_F(TestJoystickDriver, SpinLeft)
 {
   MockMotorSubscriber mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(waitForSubscriber());
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(-full_speed, full_speed));
 
@@ -220,6 +241,7 @@ TEST_F(TestJoystickDriver, HalfSpeedForward)
 {
   MockMotorSubscriber mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(waitForSubscriber());
   const float half_speed = 0.5;
   mock_joy_pub.publish(createJoyMsg(half_speed, half_speed));
 
