@@ -19,4 +19,11 @@
       </description>
     </class>
   </library>
+  <library path="lib/libunrolling_layer">
+    <class type="unrolling_layer::UnrollingLayer" base_class_type="costmap_2d::Layer">
+      <description>
+        Layer that undos a rolling window map
+      </description>
+    </class>
+  </library>
 </class_libraries>

@@ -36,6 +36,8 @@ private:
   ros::Subscriber occupied_sub_;
   ros::Subscriber free_sub_;
   ros::Publisher gridmap_pub_;
+  ros::Publisher costmap_pub_;
+  std::vector<int8_t> cost_translation_table_;
 
   std::unordered_set<grid_map::Index> last_occupied_cells_{};
 
@@ -63,8 +65,14 @@ private:
 
   void updateProbabilityLayer();
   void transferToCostmap();
+  void updateRollingWindow();
+  void updateStaticWindow();
 
   void debugPublishMap();
+  void publishCostmap();
+  void initCostTranslationTable();
+
+  void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
 
   inline void markScanMiss(const grid_map::Index& index)
   {
