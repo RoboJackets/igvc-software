@@ -133,6 +133,18 @@ void LidarLayer::transferToCostmap()
   }
 }
 
+void LidarLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
+                              double *max_x, double *max_y)
+{
+  GridmapLayer::updateBounds(robot_x, robot_y, robot_yaw, min_x, min_y, max_x, max_y);
+
+  if (rolling_window_)
+  {
+    costmap_2d_.updateOrigin(robot_x - costmap_2d_.getSizeInMetersX() / 2,
+                             robot_y - costmap_2d_.getSizeInMetersY() / 2);
+  }
+}
+
 void LidarLayer::updateRollingWindow()
 {
   // Rolling window, so we need to move everything
@@ -143,7 +155,7 @@ void LidarLayer::updateRollingWindow()
   const double resolution = costmap_2d_.getResolution();
   grid_map::Position costmap_br_corner{ costmap_2d_.getOriginX(), costmap_2d_.getOriginY() };
   grid_map::Position costmap_tl_corner =
-      costmap_br_corner + grid_map::Position{ cells_x * resolution, cells_y * resolution };
+      costmap_br_corner + grid_map::Position{ costmap_2d_.getSizeInMetersX(), costmap_2d_.getSizeInMetersY() };
   grid_map::Index start_index;
   map_.getIndex(costmap_tl_corner, start_index);
 
