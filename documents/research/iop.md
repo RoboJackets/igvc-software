@@ -1,5 +1,11 @@
 # IOP Research
 
+tl;dr: There's a repo `fkie/iop_core` that implements all the JAUS services we need to implement
+for the IOP challenge, so all we need to do (software-wise) is create a "Conformance Verification
+Tool" (CVT) to make sure that `fkie/iop_core` implements all the specs outlined in the rules.
+Because most of the work has been done for us, I think that it is worthwhile for us to do IOP this
+year.
+
 **Author: Oswin So**
 
 ## Table of Contents
