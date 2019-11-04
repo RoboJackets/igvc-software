@@ -2,20 +2,19 @@
 
 **Author: Oswin So**
 
-tl;dr: Some German dudes did 99% of the hard work so it's worth doing because there's almost nothing to do.
-
 ## Table of Contents
 1. [Overview of IOP](#overview-of-iop)
 2. [Tooling](#tooling)
 3. [fkie/iop_core](#fkieiop_core)
+4. [Tasks for other subteams](#tasks-for-other-subteams)
+5. [My thoughts on IOP](#my-thoughts-on-iop)
 
 ## Overview of IOP
 **IOP**, which stands for **I**nter**o**perability **P**rofiles, is a challenge for the IGVC competition.
 Essentially, the challenge is in conforming to the **J**oint **A**rchitecture for **U**nmanned **S**ystems (JAUS),
-which is an architecture for Unmanned Ground Systems started by the DOD (!!!!) in 1998 (!!!!).
+which is an architecture for Unmanned Ground Systems started by the DOD in 1998.
 
-JAUS defines a bunch of things that need to happen which is very similar to ROS. Except, unlike ROS, the JAUS tools
-all suck. 
+JAUS defines a bunch of things that need to happen which is very similar to ROS.
 
 The main concepts (IMO) in JAUS:
 - JAUS is separated into **Subsystems**, **Nodes**, and **Components**
@@ -27,25 +26,21 @@ The main concepts (IMO) in JAUS:
         - **Client**: Uses one or more **services**
 - There's a DSL (**J**AUS **S**ervice **I**nterface **D**efinition **L**anguage) for defining the layout of each **message**.
   So like ROS messages.
-  
-So, as you can see, it's basically like ROS. Except, of course, that the tooling sucks.
 
 ## Tooling
-AFAIK there's two main tools for **JAUS**:
+AFAIK there are two main tools for **JAUS**:
 1. [OpenJAUS](http://openjaus.com/)
-    - They've got no prices, so spooky
-    - They've got the word "Open" in their name, but they're not open source. Bamboozle = Banboozle
+    - They've got no prices
     - [Manipal](http://www.igvc.org/design/2019/6.pdf) claims that this is better than JAUS Toolset
 2. [JAUS Toolset (JTS)](http://jaustoolset.org/)
     - It's actually open source.
-    - Contracted by like the military
     - [Some German dudes](https://github.com/fkie/) made this [really nice framework that easily allows ROS nodes to
     communicate with IOP services](https://github.com/fkie/iop_core)
     - It generates boilerplate code for a component / service given the JSIDL (C++, C#, Java)
 
 I don't know about OpenJAUS. Given that their website looks more modern, and they're paid, it seems like their product is
-pretty good. JAUS Toolset, on the other hand, seems like some horrible piece of software written in Java. Look at their
-GUI, who thinks drawing state machines to describe your entire system is fun and nice?
+pretty good. JAUS Toolset, on the other hand, seems less modern and more clunky, and requires users to define services
+and components by drawing a state machine.
 
 ![](http://jaustoolset.org/wp-content/uploads/2012/12/standards-990x397.png)
 
@@ -56,7 +51,7 @@ GUI, who thinks drawing state machines to describe your entire system is fun and
 > This repository lets your ROS software communicate with IOP services 
 
 I've tried it out, and it looks like quite a lot of work was put in to this project. You can read
-their README (which is pretty good ngl) for an overview of how the framework works, but essentially:
+their README (which is pretty good) for an overview of how the framework works, but essentially:
 
 - The default JSIDL is modified from the default ones (still not sure what the difference is)
 - JTS is used to generate boilerplate C++ from the JSIDLs
@@ -102,8 +97,6 @@ their README (which is pretty good ngl) for an overview of how the framework wor
 - You run a `JTSNodeManager` that handles all the communications between the components
   and the outside world (hmm `roscore`?)
     - fkie has their [own version](https://github.com/fkie/iop_node_manager)
-- ????
-- Stuff works
 
 ## IOP challenge requirements for IGVC
 Coming back to the IOP challenge for IGVC:
@@ -121,7 +114,7 @@ Also **CVT**
 > - If you are **under contract with the Government** and that contract contains the proper clauses and scope for access to the CVT, you can request a copy through the relevant contracting office
 > - If you are a **sub-contractor to a company that meets the requirements for #2 above**, the primary contractor can get written permission to provide the CVT to you 
 
-So, either you're military, or you're government. Fun.
+So, since we're not military or government, we probably won't have access to a CVT.
 
 > A team will provide **two JAUS Components** - a **Navigation and Reporting JAUS Component** that contains all
 > the services defined by the Navigation and Reporting capability, and **platform management JAUS Component**
@@ -157,9 +150,9 @@ There are 2 main parts to the scoring:
 
 The time for the performance task waypoint run is used to break ties.
 
-Now, back to the services:
+Now, back to the services.
 
-Thankfully, `fkie/iop_core` has as few implementations of these services that are already done:
+Thankfully, `fkie/iop_core` has implementations of some services:
 - `fkie_iop_transport`
 - `fkie_iop_events`
 - `fkie_iop_accesscontrol`
@@ -172,17 +165,15 @@ Thankfully, `fkie/iop_core` has as few implementations of these services that ar
 - `fkie_iop_local_pose_sensor`
 - `fkie_iop_primitive_driver`
 
-So, long list of services that we need to implement:
-- ¿؟⁇?
+Which overlaps with all the services that we need, so we shouldn't need to write any extra services.
 
-Yeah. The list of thing(s) that we would need to do would be:
-- Implement our own version of the secret tool that can only be given to military or government (CVT), because
-  Sometimes it happens that way, hyung 
-  - Thankfully some Indian dude part of Manipal asked about this last year on an issue for the `fkie/iop-core` repo,
-  and the German dudes actually gave [a really good response](https://github.com/fkie/iop_core/issues/2).
+So, the list of thing(s) that we would need to do would be:
+- Implement our own version of the CVT
+  - Thankfully some Indians part of Manipal asked about this last year on an issue for `fkie/iop-core` repo,
+  and the German dudes gave [a really good response](https://github.com/fkie/iop_core/issues/2).
   - Basically, we can use [wireshark](https://www.wireshark.org/) and some
   [LUA plugin that some other repo trying to do ROS+JAUS integration did](https://github.com/udmamrl/ROSJAUS/blob/master/Wireshark-dissector/Wireshark_JAUS_dissector.lua)
-  - and then it's like unit test writing time, to check that all the specs mentioned in the IGVC competition manual are
+  - Then it'like unit test writing time, to check that all the specs mentioned in the IGVC competition manual are
   fulfilled
 
 ## Tasks for other subteams
@@ -209,8 +200,6 @@ a previous section:
 > #### 1.5.2 Payloads Requirements
 > There are currently no payloads requirements 
 
-![](https://i.kym-cdn.com/entries/icons/original/000/018/489/nick-young-confused-face-300x256-nqlyaa.jpg)
-
 Googling "Connector Type A" yields only USB Type A Connector, while "Payloads IOP" yields to
 [this document](https://apps.dtic.mil/dtic/tr/fulltext/u2/a558824.pdf), which contains
 
@@ -218,24 +207,15 @@ Googling "Connector Type A" yields only USB Type A Connector, while "Payloads IO
 > This section defines requirements associated with the **physical/electrical connectors** employed to integrate
 > subsystems and payload(s) to the UGV platform. This is defined in the **UGV IOP Payloads Profile**
 
-Hmm... so some like another document. Except... this document like doesn't exist on the public web. From wikipedia:
+From Wikipedia:
 
 > The National Advanced Mobility Consortium (NAMC) makes the IOPs available at the
 > https://namcgroups.org website for registered users.  
-
-So, let's try registering... except, I'm hit with like a
-"We'll review your registration application" after I hit submit.
 
 So..... for now I think it's a safe bet to say that this "Connector Type A connector" refers to just normal RJ45, since
 it seems like thats what the payloads have on them.
 
 ## My thoughts on IOP
-Finally, thoughts on whether we should do IOP
-- Initially I thought we would need to craft our own UDP packets and like build this up from OSI Layer 5 all the way
-  up to Layer 7, and then somehow integrate that with ROS
-- And then I realized that `fkie/iop_core` + JTS handles all of this for us
-- So... the amount of work we need to do is like just making sure that this works
-- Also waiting on NAMC to see if they let me register so I can actually read the fucking section on
-  "Connector Type A connector". 100 bucks it's just RJ45, but oh well I have no hopes for this.
-
-So, IMO IOP is worth doing.
+Since all the hard work has been done for us with `fkie/iop_core`, and we only need to write a CVT to verify that
+everything works properly, I think that **it is worth doing this year**, though it probably **won't be that high of a
+priority**.
