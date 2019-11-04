@@ -34,7 +34,6 @@ void UnrollingLayer::initTranslator()
 void UnrollingLayer::initPubSub()
 {
   map_update_sub_ = nh_.subscribe(config_.topic, 1, &UnrollingLayer::incomingUpdate, this);
-  costmap_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/mapper/fuck", 1);
 }
 
 void UnrollingLayer::incomingUpdate(const nav_msgs::OccupancyGridConstPtr& map)
@@ -98,7 +97,6 @@ void UnrollingLayer::incomingUpdate(const nav_msgs::OccupancyGridConstPtr& map)
       costmap_[our_index] = translator[map->data[map_index]];
     }
   }
-  publishCostmap();
 }
 
 void UnrollingLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
@@ -141,66 +139,6 @@ void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
       it++;
     }
   }
-}
-
-void UnrollingLayer::initCostTranslationTable()
-{
-  constexpr int8_t free_space_msg_cost = 0;
-  constexpr int8_t inflated_msg_cost = 99;
-  constexpr int8_t lethal_msg_cost = 100;
-  constexpr int8_t unknown_msg_cost = -1;
-
-  cost_translation_table_.resize(std::numeric_limits<uint8_t>::max() + 1);
-
-  cost_translation_table_[costmap_2d::FREE_SPACE] = free_space_msg_cost;                 // NO obstacle
-  cost_translation_table_[costmap_2d::INSCRIBED_INFLATED_OBSTACLE] = inflated_msg_cost;  // INSCRIBED obstacle
-  cost_translation_table_[costmap_2d::LETHAL_OBSTACLE] = lethal_msg_cost;                // LETHAL obstacle
-  cost_translation_table_[costmap_2d::NO_INFORMATION] = unknown_msg_cost;                // UNKNOWN
-
-  // regular cost values scale the range 1 to 252 (inclusive) to fit
-  // into 1 to 98 (inclusive).
-  for (int i = 1; i <= costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1; i++)
-  {
-    // NOLINTNEXTLINE
-    cost_translation_table_[i] = static_cast<uint8_t>(1 + (97 * (i - 1)) / 251);
-  }
-}
-
-void UnrollingLayer::publishCostmap()
-{
-  if (cost_translation_table_.empty())
-  {
-    initCostTranslationTable();
-  }
-
-  nav_msgs::OccupancyGridPtr msg = boost::make_shared<nav_msgs::OccupancyGrid>();
-
-  boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(getMutex()));
-  double resolution = getResolution();
-
-  msg->header.frame_id = "odom";
-  msg->header.stamp = ros::Time::now();
-  msg->info.resolution = resolution;
-
-  msg->info.width = getSizeInCellsX();
-  msg->info.height = getSizeInCellsY();
-
-  double wx, wy;
-  mapToWorld(0, 0, wx, wy);
-  msg->info.origin.position.x = wx - resolution / 2;
-  msg->info.origin.position.y = wy - resolution / 2;
-  msg->info.origin.position.z = 0.0;
-  msg->info.origin.orientation.w = 1.0;
-
-  msg->data.resize(msg->info.width * msg->info.height);
-
-  unsigned char* data = getCharMap();
-  for (size_t i = 0; i < msg->data.size(); i++)
-  {
-    msg->data[i] = cost_translation_table_[data[i]];
-  }
-
-  costmap_pub_.publish(msg);
 }
 
 }  // namespace unrolling_layer

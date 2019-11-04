@@ -23,15 +23,11 @@ private:
   void initPubSub();
   void initTranslator();
   void incomingUpdate(const nav_msgs::OccupancyGridConstPtr& map);
-  void publishCostmap();
-  void initCostTranslationTable();
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
   ros::Subscriber map_update_sub_;
   std::array<uint8_t, std::numeric_limits<char>::max()> translator;
-  ros::Publisher costmap_pub_;
-  std::vector<int8_t> cost_translation_table_;
 
   UnrollingLayerConfig config_;
 };

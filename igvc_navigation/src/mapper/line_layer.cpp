@@ -24,8 +24,7 @@ LineLayer::LineLayer()
 {
   initGridmap();
   initPubSub();
-  costmap_2d_ = { static_cast<unsigned int>(map_.getSize()[0]), static_cast<unsigned int>(map_.getSize()[1]),
-                  map_.getResolution(), map_.getPosition()[0], map_.getPosition()[1] };
+
   pinhole_models_ = std::vector<image_geometry::PinholeCameraModel>(config_.cameras.size());
   cached_rays_ = std::vector<std::vector<Eigen::Vector3d>>(config_.cameras.size());
 }
@@ -80,19 +79,31 @@ void LineLayer::initPubSub()
 
 void LineLayer::onInitialize()
 {
+  GridmapLayer::onInitialize();
+  matchCostmapDims(*layered_costmap_->getCostmap());
+
+  const double length_x = costmap_2d_.getSizeInMetersX();
+  const double length_y = costmap_2d_.getSizeInMetersY();
+  const double resolution = costmap_2d_.getResolution();
+
+  const bool different_dims =
+      length_x != map_.getSize()[0] || length_y != map_.getSize()[1] || resolution != map_.getResolution();
+
+  if (!rolling_window_ && different_dims)
+  {
+    throw std::runtime_error("Not using a rolling window, but the costmap size is not the backing gridmap size.");
+  }
 }
 
 void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
+  matchCostmapDims(master_grid);
   transferToCostmap();
-  publishCostmap();
   if (config_.map.debug.enabled)
   {
     updateProbabilityLayer();
-  }
-  if (config_.map.debug.enabled)
-  {
     debugPublishMap();
+    publishCostmap();
   }
   resetDirty();
 
@@ -267,6 +278,24 @@ void LineLayer::markHit(const grid_map::Index &index, double distance, const Cam
   (*layer_)(index[0], index[1]) = std::min((*layer_)(index[0], index[1]) + probability, config_.map.max_occupancy);
 }
 
+void LineLayer::matchCostmapDims(const costmap_2d::Costmap2D &master_grid)
+{
+  unsigned int cells_x = master_grid.getSizeInCellsX();
+  unsigned int cells_y = master_grid.getSizeInCellsY();
+  double resolution = master_grid.getResolution();
+  bool different_dims = costmap_2d_.getSizeInCellsX() != cells_x || costmap_2d_.getSizeInCellsY() != cells_y ||
+                        costmap_2d_.getResolution() != resolution;
+
+  double origin_x = master_grid.getOriginX();
+  double origin_y = master_grid.getOriginY();
+
+  if (different_dims)
+  {
+    costmap_2d_.resizeMap(cells_x, cells_y, resolution, origin_x, origin_y);
+  }
+  costmap_2d_.updateOrigin(origin_x, origin_y);
+}
+
 void LineLayer::updateProbabilityLayer()
 {
   auto optional_it = getDirtyIterator();
@@ -282,6 +311,81 @@ void LineLayer::updateProbabilityLayer()
 }
 
 void LineLayer::transferToCostmap()
+{
+  if (rolling_window_)
+  {
+    updateRollingWindow();
+  }
+  else
+  {
+    updateStaticWindow();
+  }
+}
+
+void LineLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
+                             double *max_x, double *max_y)
+{
+  GridmapLayer::updateBounds(robot_x, robot_y, robot_yaw, min_x, min_y, max_x, max_y);
+
+  if (rolling_window_)
+  {
+    costmap_2d_.updateOrigin(robot_x - costmap_2d_.getSizeInMetersX() / 2,
+                             robot_y - costmap_2d_.getSizeInMetersY() / 2);
+  }
+}
+
+void LineLayer::updateRollingWindow()
+{
+  // Rolling window, so we need to move everything
+
+  // Convert from costmap_2d_ coordinate frame to gridmap coordinate frame
+  const size_t cells_x = costmap_2d_.getSizeInCellsX();
+  const size_t cells_y = costmap_2d_.getSizeInCellsY();
+  const double resolution = costmap_2d_.getResolution();
+  grid_map::Position costmap_br_corner{ costmap_2d_.getOriginX(), costmap_2d_.getOriginY() };
+  grid_map::Position costmap_tl_corner =
+      costmap_br_corner + grid_map::Position{ costmap_2d_.getSizeInMetersX(), costmap_2d_.getSizeInMetersY() };
+  grid_map::Index start_index;
+  map_.getIndex(costmap_tl_corner, start_index);
+
+  grid_map::Index submap_buffer_size{ costmap_2d_.getSizeInCellsX(), costmap_2d_.getSizeInCellsY() };
+
+  uchar *char_map = costmap_2d_.getCharMap();
+
+  size_t x_idx = cells_x - 1;
+  size_t y_idx = cells_y - 1;
+
+  // This goes top -> down, left -> right
+  // but costmap_2d_ indicies go down -> up, left -> right
+  for (grid_map::SubmapIterator it{ map_, start_index, submap_buffer_size }; !it.isPastEnd(); ++it)
+  {
+    const auto &log_odds = (*layer_)((*it)[0], (*it)[1]);
+    float probability = probability_utils::fromLogOdds(log_odds);
+
+    const size_t linear_idx = x_idx + y_idx * cells_x;
+
+    if (probability > config_.map.occupied_threshold)
+    {
+      char_map[linear_idx] = costmap_2d::LETHAL_OBSTACLE;
+    }
+    else
+    {
+      char_map[linear_idx] = costmap_2d::FREE_SPACE;
+    }
+
+    if (y_idx == 0)
+    {
+      y_idx = cells_y - 1;
+      x_idx--;
+    }
+    else
+    {
+      y_idx--;
+    }
+  }
+}
+
+void LineLayer::updateStaticWindow()
 {
   size_t num_cells = map_.getSize().prod();
 

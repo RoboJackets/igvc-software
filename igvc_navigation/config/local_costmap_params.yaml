@@ -3,7 +3,7 @@ local_costmap:
     robot_base_frame: base_link
     plugins:
         - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
-#        - {name: line_layer,     type: "line_layer::LineLayer"}
+        - {name: line_layer,     type: "line_layer::LineLayer"}
     publish_frequency: 5.0
     footprint: [[0.4,0.4],[-0.4,0.4],[-0.4,-0.4],[0.4,-0.4]]
     width: 20
@@ -27,7 +27,7 @@ lidar_layer:
         costmap_topic: "/mapper/debug/lidar/costmap"
         debug:
             map_topic: "/mapper/debug/lidar/gridmap"
-            enabled: true
+            enabled: false
     lidar:
         occupied_topic: "/lidar/occupied"
         free_topic: "/lidar/free"

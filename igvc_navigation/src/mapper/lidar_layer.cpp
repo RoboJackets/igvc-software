@@ -103,8 +103,6 @@ void LidarLayer::matchCostmapDims(const costmap_2d::Costmap2D &master_grid)
     costmap_2d_.resizeMap(cells_x, cells_y, resolution, origin_x, origin_y);
   }
   costmap_2d_.updateOrigin(origin_x, origin_y);
-
-  //  ROS_INFO_STREAM("master_grid origin: (" << origin_x << ", " << origin_y << ")");
 }
 
 void LidarLayer::updateProbabilityLayer()
@@ -415,7 +413,8 @@ void LidarLayer::publishCostmap()
   msg->info.width = costmap_2d_.getSizeInCellsX();
   msg->info.height = costmap_2d_.getSizeInCellsY();
 
-  double wx, wy;
+  double wx;
+  double wy;
   costmap_2d_.mapToWorld(0, 0, wx, wy);
   msg->info.origin.position.x = wx - resolution / 2;
   msg->info.origin.position.y = wy - resolution / 2;
