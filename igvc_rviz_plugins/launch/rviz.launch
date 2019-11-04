@@ -1,0 +1,3 @@
+<launch>
+    <node name="jessii_rviz" pkg="rviz" type="rviz" args="-d $(find igvc_rviz_plugins)/configs/jessii_conf.rviz"/>
+</launch>
