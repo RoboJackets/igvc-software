@@ -1,8 +1,7 @@
 #include <ros/ros.h>
 #include <parameter_assertions/assertions.h>
-#include <pcl/point_cloud.h>
-#include <pcl_ros/point_cloud.h>
 #include <math.h>
+#include "GroundSegmenter.h"
 
 ros::Publisher g_ground_pub;
 ros::Publisher g_nonground_pub;
@@ -11,18 +10,13 @@ std::string g_ground_topic;
 std::string g_nonground_topic;
 std::string g_velodyne_topic;
 int g_num_segments;
-
-int getAngleFromPoint(const pcl::PointXYZ &point)
-{
-  return (int)(tan(point.y / point.x) * 180 / M_PI) % 360;
-}
+int g_bin_width;
 
 void velodyneCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 { 
-  for (const auto &point : msg->points) 
-  {
-    std::cout << getAngleFromPoint(point) << std::endl;
-  }
+  GroundSegmenter segmenter = GroundSegmenter(msg->points, g_num_segments, g_bin_width);
+  segmenter.processSegments();
+  segmenter.getLinesFromSegments();
 }
 
 int main(int argc, char **argv)
@@ -36,6 +30,7 @@ int main(int argc, char **argv)
   assertions::getParam(pNh, "nonground_topic", g_nonground_topic);
   assertions::getParam(pNh, "velodyne_topic", g_velodyne_topic);
   assertions::getParam(pNh, "num_segments", g_num_segments);
+  assertions::getParam(pNh, "bin_width", g_bin_width);
 
   g_ground_pub = n.advertise<pcl::PointCloud<pcl::PointXYZ>>(g_ground_topic, 1);
   g_nonground_pub = n.advertise<pcl::PointCloud<pcl::PointXYZ>>(g_nonground_topic, 1);

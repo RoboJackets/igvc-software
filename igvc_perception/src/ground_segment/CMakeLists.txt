@@ -1,4 +1,4 @@
-add_executable(ground_segment main.cpp)
+add_executable(ground_segment GroundSegmenter.cpp main.cpp)
 target_link_libraries(ground_segment ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 install(
