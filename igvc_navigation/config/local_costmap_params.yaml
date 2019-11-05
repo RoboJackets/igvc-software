@@ -10,6 +10,7 @@ local_costmap:
     height: 40
     origin_x: -20
     origin_y: -20
+    update_frequency: 10
     track_unknown_space: false
     unknown_cost_value: 30
     static_map: false

@@ -10,6 +10,7 @@ global_costmap:
     height: 200
     origin_x: -100
     origin_y: -100
+    update_frequency: 10
     track_unknown_space: false
     unknown_cost_value: 30
     rolling_window: false
