@@ -85,14 +85,14 @@ void UnrollingLayer::incomingUpdate(const nav_msgs::OccupancyGridConstPtr& map)
 
   for (size_t y = start_idx_y; y < end_idx_y; y++)
   {
-    size_t our_y = map_idx_y + y;
-    size_t map_index_base = y * length_x;
-    size_t our_index_base = our_y * getSizeInCellsX();
+    const size_t our_y = map_idx_y + y;
+    const size_t map_index_base = y * length_x;
+    const size_t our_index_base = our_y * getSizeInCellsX();
     for (size_t x = start_idx_x; x < end_idx_x; x++)
     {
-      size_t our_x = map_idx_x + x;
-      size_t map_index = map_index_base + x;
-      size_t our_index = our_index_base + our_x;
+      const size_t our_x = map_idx_x + x;
+      const size_t map_index = map_index_base + x;
+      const size_t our_index = our_index_base + our_x;
 
       costmap_[our_index] = translator[map->data[map_index]];
     }
@@ -130,13 +130,11 @@ void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
 
   for (int j = min_j; j < max_j; j++)
   {
-    unsigned int it = j * span + min_i;
+    const unsigned int base = j * span;
     for (int i = min_i; i < max_i; i++)
     {
-      unsigned char old_cost = master_array[it];
-      if (old_cost == costmap_2d::NO_INFORMATION || old_cost < line_array[it])
-        master_array[it] = line_array[it];
-      it++;
+      const unsigned int it = base + i;
+      master_array[it] = line_array[it];
     }
   }
 }
