@@ -21,6 +21,7 @@ add_message_files(
     igvc_path.msg
     trajectory_point.msg
     trajectory.msg
+    motor_control.msg
 )
 
 # Generate added messages and services with any dependencies listed here

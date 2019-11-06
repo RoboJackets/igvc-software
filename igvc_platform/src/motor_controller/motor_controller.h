@@ -45,6 +45,7 @@ private:
   ros::Publisher enc_pub_;
   ros::Publisher enabled_pub_;
   ros::Publisher battery_pub_;
+  ros::Publisher motor_output_pub_;
 
   /**
   get current motor command from the /motors topic
