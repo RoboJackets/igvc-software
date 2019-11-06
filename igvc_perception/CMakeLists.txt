@@ -3,6 +3,7 @@ project(igvc_perception)
 
 include(../igvc.cmake)
 
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -24,12 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
     velodyne_pointcloud
     parameter_assertions
     )
-
-
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-find_package(SUITESPARSE)
-find_package(G2O)
-find_package(Eigen3 3.3 REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED filters visualization features)
 
