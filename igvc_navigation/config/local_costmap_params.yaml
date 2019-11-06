@@ -5,7 +5,7 @@ local_costmap:
         - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
         - {name: line_layer,     type: "line_layer::LineLayer"}
     publish_frequency: 5.0
-    footprint: [[0.4,0.4],[-0.4,0.4],[-0.4,-0.4],[0.4,-0.4]]
+    footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
     width: 200
     height: 200
     origin_x: -100
