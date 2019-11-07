@@ -1,4 +1,5 @@
 # RoboJackets IGVC [![Build Status](https://circleci.com/gh/RoboJackets/igvc-software/tree/master.svg?&style=shield)](https://circleci.com/gh/RoboJackets/igvc-software/tree/master)
+![](https://user-images.githubusercontent.com/4125463/68362261-aea09080-00f4-11ea-9d82-379f88d2d532.jpg)
 
 Welcome to the RoboJackets IGVC software repo!
 This document will give you a brief description of the repo's layout and an overview of the repo.
