@@ -3,9 +3,10 @@ global_costmap:
     robot_base_frame: base_link
     plugins:
         - {name: unrolling_layer,       type: "unrolling_layer::UnrollingLayer"}
+#        - {name: static_layer,       type: "costmap_2d::StaticLayer"}
         - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
-    footprint: [[0.4,0.4],[-0.4,0.4],[-0.4,-0.4],[0.4,-0.4]]
+    footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
     width: 200
     height: 200
     origin_x: -100
@@ -15,6 +16,9 @@ global_costmap:
     unknown_cost_value: 30
     rolling_window: false
     resolution: 0.1
+    static_layer:
+        map_topic: "/move_base_flex/local_costmap/costmap"
+        subscribe_to_updates: true
     inflation_layer:
         inflation_radius: 5.0
 unrolling_layer:

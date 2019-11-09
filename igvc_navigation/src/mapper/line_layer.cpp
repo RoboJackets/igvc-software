@@ -80,19 +80,6 @@ void LineLayer::initPubSub()
 void LineLayer::onInitialize()
 {
   GridmapLayer::onInitialize();
-  matchCostmapDims(*layered_costmap_->getCostmap());
-
-  const double length_x = costmap_2d_.getSizeInMetersX();
-  const double length_y = costmap_2d_.getSizeInMetersY();
-  const double resolution = costmap_2d_.getResolution();
-
-  const bool different_dims =
-      length_x != map_.getSize()[0] || length_y != map_.getSize()[1] || resolution != map_.getResolution();
-
-  if (!rolling_window_ && different_dims)
-  {
-    throw std::runtime_error("Not using a rolling window, but the costmap size is not the backing gridmap size.");
-  }
 }
 
 void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)

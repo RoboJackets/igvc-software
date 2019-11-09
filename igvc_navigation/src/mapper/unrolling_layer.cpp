@@ -8,22 +8,29 @@ namespace unrolling_layer
 {
 UnrollingLayer::UnrollingLayer() : private_nh_{ "~" }, config_{ private_nh_ }
 {
-  initPubSub();
-  initTranslator();
 }
 
 void UnrollingLayer::onInitialize()
 {
-  current_ = true;
   matchSize();
+  initTranslator();
+  initPubSub();
+
+  bool track_unknown = nh_.param("track_unknown_space", false);
+
+  default_value_ = track_unknown ? costmap_2d::NO_INFORMATION : costmap_2d::FREE_SPACE;
+
+  current_ = true;
 }
 
 void UnrollingLayer::initTranslator()
 {
-  constexpr int8_t free_space_msg_cost = 0;
-  constexpr int8_t inflated_msg_cost = 99;
-  constexpr int8_t lethal_msg_cost = 100;
-  constexpr int8_t unknown_msg_cost = -1;
+  constexpr uint8_t free_space_msg_cost = 0;
+  constexpr uint8_t inflated_msg_cost = 99;
+  constexpr uint8_t lethal_msg_cost = 100;
+  constexpr uint8_t unknown_msg_cost = -1;
+
+  translator.fill(costmap_2d::FREE_SPACE);
 
   translator[free_space_msg_cost] = costmap_2d::FREE_SPACE;
   translator[inflated_msg_cost] = costmap_2d::INSCRIBED_INFLATED_OBSTACLE;
@@ -33,22 +40,39 @@ void UnrollingLayer::initTranslator()
 
 void UnrollingLayer::initPubSub()
 {
-  map_update_sub_ = nh_.subscribe(config_.topic, 1, &UnrollingLayer::incomingUpdate, this);
+  if (map_update_sub_.getTopic() != ros::names::resolve(config_.topic))
+  {
+    map_sub_ = nh_.subscribe(config_.topic, 1, &UnrollingLayer::incomingMap, this);
+    map_update_sub_ = nh_.subscribe(config_.topic + "_updates", 1, &UnrollingLayer::incomingUpdate, this);
+  }
 }
 
-void UnrollingLayer::incomingUpdate(const nav_msgs::OccupancyGridConstPtr& map)
+void UnrollingLayer::incomingMap(const nav_msgs::OccupancyGridConstPtr& map)
 {
+  current_metadata_ = map->info;
+}
+
+void UnrollingLayer::incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& map)
+{
+  if (!current_metadata_)
+  {
+    return;
+  }
+
   // We need to translate indices from update to our costmap
-  const uint32_t length_x = map->info.width;
-  const uint32_t length_y = map->info.height;
+  const uint32_t length_x = map->width;
+  const uint32_t length_y = map->height;
 
-  const auto resolution = static_cast<double>(map->info.resolution);
-  const auto origin_x = static_cast<double>(map->info.origin.position.x);
-  const auto origin_y = static_cast<double>(map->info.origin.position.y);
+  const auto resolution = static_cast<double>(current_metadata_->resolution);
+  const auto origin_x = static_cast<double>(current_metadata_->origin.position.x);
+  const auto origin_y = static_cast<double>(current_metadata_->origin.position.y);
 
-  // Calculate where map's origin is on our map
-  const int map_idx_x = (origin_x - getOriginX()) / resolution;
-  const int map_idx_y = (origin_y - getOriginY()) / resolution;
+  const auto update_origin_x = origin_x + (map->x * resolution);
+  const auto update_origin_y = origin_y + (map->y * resolution);
+
+  // Calculate where the update map's origin is on our map
+  const int map_idx_x = (update_origin_x - getOriginX()) / resolution;
+  const int map_idx_y = (update_origin_y - getOriginY()) / resolution;
 
   size_t start_idx_x = 0;
   size_t start_idx_y = 0;
@@ -64,24 +88,29 @@ void UnrollingLayer::incomingUpdate(const nav_msgs::OccupancyGridConstPtr& map)
   }
 
   // Calculate where map's end is on our map
-  const size_t idx_end_x = map_idx_x + length_x;
-  const size_t idx_end_y = map_idx_y + length_y;
+  const size_t our_idx_end_x = map_idx_x + length_x;
+  const size_t our_idx_end_y = map_idx_y + length_y;
 
   const auto last_idx_x = getSizeInCellsX();
   const auto last_idx_y = getSizeInCellsY();
 
-  // If map's end is larger than our largest, then last index to iterate is our largest - their origin in our map
   size_t end_idx_x = length_x;
   size_t end_idx_y = length_y;
 
-  if (idx_end_x > last_idx_x)
+  // If map's end is larger than our largest, then last index to iterate is our largest - their origin in our map
+  if (our_idx_end_x > last_idx_x)
   {
     end_idx_x = last_idx_x - map_idx_x;
   }
-  if (idx_end_y > last_idx_y)
+  if (our_idx_end_y > last_idx_y)
   {
     end_idx_y = last_idx_y - map_idx_y;
   }
+
+  min_map_x_ = std::min(min_map_x_, map_idx_x + start_idx_x);
+  min_map_y_ = std::min(min_map_y_, map_idx_y + start_idx_y);
+  max_map_x_ = std::max(max_map_x_, map_idx_x + end_idx_x);
+  max_map_y_ = std::max(max_map_y_, map_idx_y + end_idx_y);
 
   for (size_t y = start_idx_y; y < end_idx_y; y++)
   {
@@ -110,16 +139,21 @@ void UnrollingLayer::updateBounds(double robot_x, double robot_y, double robot_y
   //  mapToWorld(min_x_, min_y_, wx, wy);
   //  *min_x = std::min(wx, *min_x);
   //  *min_y = std::min(wy, *min_y);
-  mapToWorld(0, 0, min_wx, min_wy);
+  mapToWorld(min_map_x_, min_map_y_, min_wx, min_wy);
   *min_x = std::min(min_wx, *min_x);
   *min_y = std::min(min_wy, *min_y);
 
   //  mapToWorld(max_x_, max_y_, wx, wy);
   //  *max_x = std::max(wx, *max_x);
   //  *max_y = std::max(wy, *max_y);
-  mapToWorld(getSizeInCellsX() - 1, getSizeInCellsY() - 1, max_wx, max_wy);
+  mapToWorld(max_map_x_, max_map_y_, max_wx, max_wy);
   *max_x = std::max(max_wx, *max_x);
   *max_y = std::max(max_wy, *max_y);
+
+  min_map_x_ = std::numeric_limits<size_t>::max();
+  min_map_y_ = std::numeric_limits<size_t>::max();
+  max_map_x_ = 0;
+  max_map_y_ = 0;
 }
 
 void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
