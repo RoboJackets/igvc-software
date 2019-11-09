@@ -18,6 +18,7 @@ public:
   double miss;
   double hit_exponential_coeff;
   double hit;
+  double max_squared_distance;
 
   struct
   {
