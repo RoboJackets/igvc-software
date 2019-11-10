@@ -10,7 +10,7 @@ local_costmap:
     height: 200
     origin_x: -100
     origin_y: -100
-    track_unknown_space: true
+    track_unknown_space: false
     unknown_cost_value: 30
     static_map: false
     rolling_window: false
@@ -53,6 +53,7 @@ line_layer:
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        max_distance: 10
         probabilities:
             miss: 0.7
             hit: 0.7
@@ -68,6 +69,7 @@ line_layer:
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        max_distance: 10
         probabilities:
             miss: 0.7
             hit: 0.7
@@ -83,6 +85,7 @@ line_layer:
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        max_distance: 10
         probabilities:
             miss: 0.7
             hit: 0.7

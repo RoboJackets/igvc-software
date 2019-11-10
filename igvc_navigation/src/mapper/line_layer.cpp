@@ -374,8 +374,12 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         map_.getPosition(map_index, position);
         const auto dx = position[0] - camera_x;
         const auto dy = position[1] - camera_y;
-        double distance = dx * dx + dy * dy;
-        markHit(map_index, distance, config);
+        double squared_distance = dx * dx + dy * dy;
+
+        if (squared_distance < config.max_squared_distance)
+        {
+          markHit(map_index, squared_distance, config);
+        }
       }
     }
   }
@@ -396,9 +400,13 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         map_.getPosition(map_index, position);
         const auto dx = position[0] - camera_x;
         const auto dy = position[1] - camera_y;
-        const double distance = dx * dx + dy * dy;
+        const double squared_distance = dx * dx + dy * dy;
         const double angle = angles::normalize_angle(camera_heading - std::atan2(dy, dx));
-        markEmpty(map_index, distance, angle, config);
+
+        if (squared_distance < config.max_squared_distance)
+        {
+          markEmpty(map_index, squared_distance, angle, config);
+        }
       }
     }
   }
