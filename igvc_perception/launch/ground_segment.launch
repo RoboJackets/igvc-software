@@ -5,7 +5,8 @@
     <param name="ground_topic" type="string" value="/ground" />
     <param name="nonground_topic" type="string" value="/nonground" />
     <param name="velodyne_topic" type="string" value="/velodyne_points" />
-    <param name="num_segments" type="int" value="12" />
-    <param name="bin_width" type="int" value="20" />
+    <param name="num_segments" type="int" value="100" />
+    <param name="bin_width" type="double" value="0.1" />
+    <param name="error_t" type="double" value=".1" />
   </node>
 </launch>
