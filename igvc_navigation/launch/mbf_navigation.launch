@@ -1,6 +1,6 @@
 <launch>
     <!-- Move Base Flex -->
-    <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen">libsimple_layer
+    <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen">
         <param name="tf_timeout" value="1.5"/>
         <param name="planner_frequency" value="2.0"/>
         <param name="planner_max_retries" value="3"/>
