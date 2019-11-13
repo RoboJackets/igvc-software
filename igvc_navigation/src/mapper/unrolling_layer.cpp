@@ -162,7 +162,6 @@ void UnrollingLayer::touch(size_t start_x, size_t start_y, size_t end_x, size_t 
 void UnrollingLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                                   double* max_x, double* max_y)
 {
-  ROS_INFO_STREAM(">>> updateBounds");
   if (max_map_x_ == 0 && max_map_y_ == 0 && min_map_x_ == std::numeric_limits<size_t>::max() &&
       min_map_y_ == std::numeric_limits<size_t>::max())
   {
@@ -192,12 +191,10 @@ void UnrollingLayer::updateBounds(double robot_x, double robot_y, double robot_y
   min_map_y_ = std::numeric_limits<size_t>::max();
   max_map_x_ = 0;
   max_map_y_ = 0;
-  ROS_INFO_STREAM("<< done updateBounds");
 }
 
 void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-  ROS_INFO_STREAM(">>> updateCosts (" << min_i << ", " << min_j << ") -> (" << max_i << ", " << max_j << ")");
   uint8_t* master_array = master_grid.getCharMap();
   uint8_t* line_array = getCharMap();
   unsigned int span = master_grid.getSizeInCellsX();
@@ -211,7 +208,6 @@ void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
       master_array[it] = line_array[it];
     }
   }
-  ROS_INFO_STREAM("<<< done updateCosts");
 }
 
 }  // namespace unrolling_layer
