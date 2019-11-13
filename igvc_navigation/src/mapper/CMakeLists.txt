@@ -38,6 +38,13 @@ add_library(line_layer
 add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(line_layer ${catkin_LIBRARIES})
 
+add_library(unrolling_layer
+        unrolling_layer.cpp unrolling_layer.h
+        unrolling_layer_config.cpp unrolling_layer.h
+        )
+add_dependencies(unrolling_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(unrolling_layer ${catkin_LIBRARIES})
+
 find_package(OpenMP)
 if (OpenMP_FOUND)
     target_link_libraries(mapper ${OpenMP_CXX_LIBRARIES})
