@@ -26,6 +26,22 @@ private:
   void incomingMap(const nav_msgs::OccupancyGridConstPtr& map);
   void incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& map);
 
+  void touch(size_t start_x, size_t start_y, size_t end_x, size_t end_y);
+
+  struct UpdateMapMetadata
+  {
+    int map_idx_x;
+    int map_idx_y;
+    size_t start_idx_x;
+    size_t start_idx_y;
+    size_t end_idx_x;
+    size_t end_idx_y;
+    size_t length_x;
+    size_t length_y;
+  };
+
+  void updateMap(const std::vector<int8_t>& map, const UpdateMapMetadata& metadata);
+
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
   ros::Subscriber map_sub_;
