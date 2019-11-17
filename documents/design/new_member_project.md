@@ -48,7 +48,7 @@ what you don't know will make it easier to do research and ask for help.**
 
 - What parts of the software will you have to change (if any)?
 - Which packages are relevant to the success of the project?
-- You're first step of the project should be reviewing the relevant packages and code
+- Your first step of the project should be reviewing the relevant packages and code
 
 ### Responsibilities
 
@@ -58,14 +58,20 @@ what you don't know will make it easier to do research and ask for help.**
 
 ### Schedule
 
-Week 1 (Date): What do expect to get done each week?
+Subtask 1 (Date): How long will each step of the solution take?
 
-Week 2 (Date): Think about how long each portion of the solution will take
+Subtask 2 (Date): Refer back to the bullets you made in the solution section
 
-Week 3 (Date): This will be used as a rough guide for keeping track of your progress, 
-but it's ok if you fall behind schedule. 
+Subtask 3 (Date): This will be used as a rough guide for keeping track of your progress, 
+but it's ok if you fall behind schedule.
 
-Week 4 (Date): Include an estimate for when your code/result will be ready to review
+Subtask 4 (Date): Remember, with 2 meetings per week, you can expect to have 5 to 6 hours to work
+on your project during meetings. If you want to work outside of meetings, you're free to, but
+keep that in mind when planning out your goals.
+
+*(Your project may have more or less subtasks than this)*
+
+Code Review (Date): Include an estimate for when your code/result will be ready to review
 
 *(School work will change over the semester and software often takes longer than you expect to write,
 so don't worry if you fall behind. Just be sure to update this document with your progress.)*
