@@ -5,8 +5,10 @@
     <param name="ground_topic" type="string" value="/ground" />
     <param name="nonground_topic" type="string" value="/nonground" />
     <param name="velodyne_topic" type="string" value="/velodyne_points" />
-    <param name="num_segments" type="int" value="100" />
-    <param name="bin_width" type="double" value="0.1" />
+    <param name="num_segments" type="int" value="520" />
     <param name="error_t" type="double" value=".1" />
+    <param name="slope_t" type="double" value="10" />
+    <param name="intercept_z_t" type="double" value="100" />
+    <param name="dist_t" type="double" value="50" />
   </node>
 </launch>

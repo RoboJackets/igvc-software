@@ -50,7 +50,7 @@ bool Line::fitPoints(const Prototype new_point)
   intercept(0) = -mean(0, 0);
   intercept(1) = -mean(0, 1);
   intercept(2) = -mean(0, 2);
-  //TODO: figure out how to discount bad line models/look into weird artifact with off-center barrels
+  params.normalize();
   double squared_error = distFromPoint(new_point);
   for (Prototype pt : model_points)
   {
@@ -67,10 +67,12 @@ bool Line::fitPoints(const Prototype new_point)
   return true;
 }
 
-GroundSegmenter::GroundSegmenter(std::vector<velodyne_pointcloud::PointXYZIR, Eigen::aligned_allocator<velodyne_pointcloud::PointXYZIR>> points, int nnum_segments, double bbin_width)
+GroundSegmenter::GroundSegmenter(std::vector<velodyne_pointcloud::PointXYZIR, Eigen::aligned_allocator<velodyne_pointcloud::PointXYZIR>> points, int p_num_segments, double p_slope_t, double p_intercept_z_t, double p_dist_t)
 {
-  num_segments = nnum_segments;
-  bin_width = bbin_width;
+  num_segments = p_num_segments;
+  slope_t = p_slope_t;
+  intercept_z_t = p_intercept_z_t;
+  dist_t = p_dist_t;
   for (const auto &point : points) 
   {
     int segment_id = getAngleFromPoint(point) * num_segments / 360;
@@ -97,7 +99,7 @@ void GroundSegmenter::processSegments()
           prototype_pt = point;
         }
       }
-      Prototype ptype = {getDistanceFromPoint(prototype_pt), prototype_pt};
+      Prototype ptype = {getDistanceFromPoint(prototype_pt), prototype_pt, 0, 0, 0};
       segments[seg.first].prototype_points.emplace_back(ptype);
     }
   }
@@ -112,21 +114,99 @@ void GroundSegmenter::getLinesFromSegments(double error_t)
     Line curr_line = Line(error_t);
     for (Prototype pt : sorted_points) {
       if (!curr_line.fitPoints(pt)) {
+        curr_line.isGround = evaluateIsGround(curr_line);
+        if (curr_line.isGround)
+        {
+          curr_line.blue = 1.0;
+          curr_line.red = 0.0;
+        }
+        else 
+        {
+          curr_line.red = 1.0;
+          curr_line.blue = 0.0;
+        }
+        for (Prototype &pt : curr_line.model_points)
+        {
+          pt.blue = curr_line.blue;
+          pt.green = curr_line.green;
+          pt.red = curr_line.red;
+        }
         seg.second.lines.emplace_back(curr_line);
         curr_line = Line(error_t);
         curr_line.fitPoints(pt);
       }
     }
+    curr_line.isGround = evaluateIsGround(curr_line);
+    if (curr_line.isGround)
+    {
+      curr_line.blue = 1.0;
+      curr_line.red = 0.0;
+    }
+    else 
+    {
+      curr_line.red = 1.0;
+      curr_line.blue = 0.0;
+    }
+    for (Prototype &pt : curr_line.model_points)
+    {
+      pt.blue = curr_line.blue;
+      pt.green = curr_line.green;
+      pt.red = curr_line.red;
+    }
     seg.second.lines.emplace_back(curr_line);
   }
 }
 
-int GroundSegmenter::getAngleFromPoint(velodyne_pointcloud::PointXYZIR point)
+void GroundSegmenter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &ground_points, pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &nonground_points)
+{
+  for (const auto &seg : segments)
+  {
+    Segment segment = seg.second;
+    for (const auto &point : segment.raw_points)
+    {
+      Line mapped_line;
+      double min_dist = -1;
+      for (const auto &line : segment.lines)
+      {
+        for (const auto &pt : line.model_points)
+        {
+          double distance = getDistanceBetweenPoints(point, pt.point);
+          if (min_dist == -1 || distance < min_dist)
+          {
+            min_dist = distance;
+            mapped_line = line;
+          }
+        }
+      }
+      if (mapped_line.isGround) //&& min_dist < dist_t)
+      {
+        ground_points.push_back(point);
+      }
+      else
+      {
+        nonground_points.push_back(point);
+      }
+    }
+  }
+}
+
+int GroundSegmenter::getAngleFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
   return (int)(atan(point.y / point.x) * 180 / M_PI) % 360;
 }
 
-double GroundSegmenter::getDistanceFromPoint(velodyne_pointcloud::PointXYZIR point)
+double GroundSegmenter::getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
   return sqrt(point.x * point.x + point.y * point.y);
+}
+
+double GroundSegmenter::getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1, const velodyne_pointcloud::PointXYZIR point2)
+{
+  return pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2) + pow(point1.z - point2.z, 2);
+}
+
+bool GroundSegmenter::evaluateIsGround(const Line l)
+{
+  double slope = abs(l.end_point.point.z - l.start_point.point.z) / sqrt(pow(l.end_point.point.y - l.start_point.point.y, 2) + pow(l.end_point.point.x - l.start_point.point.x, 2));
+  return slope < slope_t && l.end_point.point.z < intercept_z_t;
 }
