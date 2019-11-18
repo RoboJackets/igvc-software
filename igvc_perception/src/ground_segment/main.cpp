@@ -65,14 +65,14 @@ void debugViz(GroundSegmenter segmenter)
       line_list.color.g = line.green;
       line_list.color.a = 1.0;
       geometry_msgs::Point p1;
-      p1.x = line.intercept(0, 0) - 1 * line.params(0, 0);
-      p1.y = line.intercept(1, 0) - 1 * line.params(1, 0);
-      p1.z = line.intercept(2, 0) - 1 * line.params(2, 0);
+      p1.x = line.start_point.point.x;
+      p1.y = line.start_point.point.y;
+      p1.z = line.start_point.point.z;
       line_list.points.push_back(p1);
       geometry_msgs::Point p2;
-      p2.x = line.intercept(0, 0) + 1 * line.params(0, 0);
-      p2.y = line.intercept(1, 0) + 1 * line.params(1, 0);
-      p2.z = line.intercept(2, 0) + 1 * line.params(2, 0);
+      p2.x = line.end_point.point.x;
+      p2.y = line.end_point.point.y;
+      p2.z = line.end_point.point.z;
       line_list.points.push_back(p2);
       lines.markers.push_back(line_list);
     }

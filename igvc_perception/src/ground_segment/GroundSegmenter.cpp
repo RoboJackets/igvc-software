@@ -192,7 +192,7 @@ void GroundSegmenter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointX
 
 int GroundSegmenter::getAngleFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
-  return (int)(atan(point.y / point.x) * 180 / M_PI) % 360;
+  return (int)(atan2(point.y, point.x) * 180 / M_PI) % 360;
 }
 
 double GroundSegmenter::getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point)
