@@ -1,18 +1,17 @@
 # Project Title
 
-*Issue #Number*
-(What GitHub issue is associated with this project)
+*Issue #552*
 
 **Author:**
-- Insert Name(s) here
+- William Wilson
 
 ## The Problem
 
-What is the problem you are trying to solve? Why is it important to solve this problem?
-What is the end goal of this project? This section should similar to the body of the GitHub
-issue but include more details about it. This will be a qualitative description of the
-project. Use as many details you can to describe the requirements of the project.
-*(This is similar to the Motivation section of the other design documents.)*
+The problem I am trying to solve is the lack of noise in the gazebo simulation. In order to
+have a more realistic simulation and ground truth pose, noise is needed. In the real world,
+sensors output noisy data, which we must work through to get an accurate position of the
+robot. Currently, the simulation does not account for that. In the end, there will be noise
+added to the ground truth pose, and this noise can be set in the gazebo launch files.
 
 ## Proposed Solution
 
