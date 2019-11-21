@@ -1,77 +1,54 @@
-# Project Title
+# “Low performance mode” for simulation
 
-*Issue #Number*
-(What GitHub issue is associated with this project)
+*Issue #572*
 
 **Author:**
-- Insert Name(s) here
+- Jessica Zheng
 
 ## The Problem
 
-What is the problem you are trying to solve? Why is it important to solve this problem?
-What is the end goal of this project? This section should similar to the body of the GitHub
-issue but include more details about it. This will be a qualitative description of the
-project. Use as many details you can to describe the requirements of the project.
-*(This is similar to the Motivation section of the other design documents.)*
+The problem I am trying to solve is the low realtime factor of the simulation by creating a “low performance mode,” which will omit a few factors in order to increase performance. Currently, my laptop runs qualification.launch at 0.02 fps. It’s important to solve this problem because having a higher realtime factor allows us to run gazebo more efficiently, even on an average laptop. While this would neglect a few factors and risk a few inaccuracies, it would overall save time and energy when testing. The second part of this problem is benchmarking the current simulation in order to find out what exactly is causing this lack in performance and if this real-time factor could be increased without yielding some accuracy. Ideally the low-performance simulation would run above a 0.5 realtime factor for a laptop with average specs.
 
 ## Proposed Solution
 
-- How are you going to solve this problem?
-- What are the steps you need to take to complete the project?
-- Break down the problem above into smaller, individual components with specific metrics of success
-- You can think of this section as a quantitative description of the project
-- Each bullet should represent a single action
-    - Use sub-bullets to provide more details and justifications for each step
-- *(Replace these bullet points with your own)*
-
-_It's OK if your approach changes later in the project as you learn more. Treat this like
-a road map that you can come back to to figure out what to work on next. If you aren't sure about the
-technical details, make sure your ideas are clear. It's also OK to come up with a couple solutions
-and decide which to pursue later. There should be some justification with your solution (i.e. how 
-does each step address part of the problem above)._
+- Begin by duplicating the current world file for the low-performance world
+    - This way the current simulation stays the same (slow but accurate) while the world created from duplicating can be altered
+- Create a new launch file too 
+    - So that we don’t have to edit the world parameter everytime we roslaunch to access the low-performance mode
+- Try reducing physics simulation rate in this new world file and note the difference in real time factor
+    - Also see how much accuracy is affected by this change
+- Try reducing rate and detail of sensor plugins and note the difference in real time factor
+- Try disabling collisions on barrels
+- Benchmark the current simulation using PERF (Performance Events for Linux)
 
 ## Questions & Research
+So far, the only things I will need to look up are what variables to change in order to reduce the real time factor. I have a general idea that I will need to alter these values, but I need to research what they mean or if there is a limit to how much I should alter it. 
+For reducing the physics simualation rate, it looks like I will be changing either the real_time_update_rate or max_step_size variable found in the .world file.
 
-Are there things you are unsure about or don't know? What do you need to research to be able to
-complete this project? If you need information from the mechanical or electrical subteams,
-be sure to describe that here. If your solution requires more research to implement, descibe
-what kind of topics you need look at. Link any research papers/articles that you find here.
+I believe that reducing the rate/detail of sensor plugins would mean changing the values in igvc-software/igvc-description/urdf/jessi.urdf. Does this mean that I would also need to duplicate this file also? Do I need to duplicate every file I need for this low-performance mode?
 
-**Of course, if you have _any_ questions or concerns, feel free to bring them up at any time.
-If you ever feel lost or don't know what to do or work on, Oswin or any old software member
-can help you out. You are not expected to know every technical detail about the project. Expressing
-what you don't know will make it easier to do research and ask for help.** 
+For benchmarking the current simulation, I will probably be using PERF: 
+sandsoftwaresound.net/perf/perf-tutorial-hot-spots/ 
 
 ## Overall Scope
 
 ### Affected Packages
 
-- What parts of the software will you have to change (if any)?
-- Which packages are relevant to the success of the project?
-- Your first step of the project should be reviewing the relevant packages and code
-
-### Responsibilities
-
-- If you have more than one person working on this project, what will each person do?
-- My Name: one of actions described in the solution
-- *(Remove this section if you are doing this alone.)*
+- Creating and adding another world file to igvc-software/igvc_description/urdf/worlds/
+- Creating and adding another launch file to igvc-software/igvc_gazebo/launch/
+- Possibly duplicate jessi.urdf with different sensor variables
 
 ### Schedule
 
-Subtask 1 (Date): How long will each step of the solution take?
+Subtask 1 (11/24): Create the .world files and .launch files that will be used for low performance mode and ensure that they run correctly.
 
-Subtask 2 (Date): Refer back to the bullets you made in the solution section
+Subtask 2 (1 week): Alter physics simulation rate in the new .world file and observe change to real time factor.
 
-Subtask 3 (Date): This will be used as a rough guide for keeping track of your progress, 
-but it's ok if you fall behind schedule.
+Subtask 3 (1 week): If needed, reduce the rate and detail of sensor plugins, possibly duplicate jessi.urdf file and edit new .launch file. Observe change to real time factor.
 
-Subtask 4 (Date): Remember, with 2 meetings per week, you can expect to have 5 to 6 hours to work
-on your project during meetings. If you want to work outside of meetings, you're free to, but
-keep that in mind when planning out your goals.
+Subtask 4 (1 week): If needed, disable collisions on barrels and observe change to real time factor.
 
-*(Your project may have more or less subtasks than this)*
+Subtask 5 (1 week): Benchmark the current simulation using PERF
 
 Code Review (Date): Include an estimate for when your code/result will be ready to review
 
-*(School work will change over the semester and software often takes longer than you expect to write,
-so don't worry if you fall behind. Just be sure to update this document with your progress.)*
