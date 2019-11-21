@@ -21,21 +21,16 @@ To calculate the intended waypoint orientation, the program will calculate the o
 points the robot towards the next waypoint. For the final waypoint, the final orientation should
 correspond to one with yaw = 0.
 
-The pose calculation will be something like:
-
-geometry_msgs::PointStamped Waypoint1, Waypoint2;
-double angle = std::atan2(Waypoint2.y - Waypoint1.y, Waypoint2.x - Waypoint1.x);
-geometry_msgs::PoseStamped waypoint_pose;
-geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(angle);
-waypoint_pose.pose.point = Waypoint1;
-waypoint_pose.pose.orientation = quaternion;
-waypoint_pose.header = Waypoint1.header;
-
 Another aspect that can be fixed is to merge the action_server.cpp into waypoint_source.cpp. Since
 the two files are solely dependent on each other, their functionality can be merged into a single
-file. This would mean that waypoint_source.cpp would have a MoveBaseClient object inside of it.
+file. This would mean that waypoint_source.cpp would have a MoveBaseClient object inside of it, and that
+it would handle the client sending both file waypoints and rviz waypoints.
 
-A parameter will also be added which sets if the waypoints come from a file or are defined by the user.
+There will be a parameter called "reading_from_file" that defines if the node will only send waypoints 
+from a file or from rviz. If true, it will only send waypoints from a file and ignore any waypoints sent
+by rviz. If false, it will not read from any file and only send waypoints from rviz.
+
+Waypoints sent from a file will be sent with sendGoalAndWait(), and from rviz it will be sent with sendGoal().
 
 ## Questions & Research
 
