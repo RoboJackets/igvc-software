@@ -13,6 +13,7 @@ End goal will be separating barrels into individual groups and extracting inform
 - Create a subscriber that suscribes to the filtered non-ground data.
 - Use the clustering algorithm inside PCL.
 - (If necessary)Program a clustering algorithm that take in a pointcloud and returns a clustered pointcloud.
+- Both clustering algorithm is based on the same general idea. You pick a point in a pointcloud and get all the point within a certain radius. Repeat the last process recursively with all the points inside the radius are processed. This finish the segmentation of a cluster. After this, you pick another point and repeat this process. 
 - Visualized clustering result.
 - Tune the parameter of the optimal algorithm if necessary.
 - Use the clusters to calculate metrics (ex: position, num of barrels/) 
