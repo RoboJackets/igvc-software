@@ -8,6 +8,7 @@
 #include <tf/transform_datatypes.h>
 
 ros::Publisher g_rpy_pub;
+bool g_readability;
 
 void convertAndPublish(const geometry_msgs::Quaternion& quat, const ros::Time& stamp)
 {
@@ -19,6 +20,13 @@ void convertAndPublish(const geometry_msgs::Quaternion& quat, const ros::Time& s
 
   double r, p, y;
   tf::Matrix3x3(tf_quat).getRPY(r, p, y);
+
+  if (g_readability)
+  {
+    r = std::round(r * 1000.0) / 1000.0;
+    p = std::round(p * 1000.0) / 1000.0;
+    y = std::round(y * 1000.0) / 1000.0;
+  }
 
   msg.vector.x = r;
   msg.vector.y = p;
@@ -54,6 +62,7 @@ int main(int argc, char** argv)
   assertions::getParam(pNh, "topics/quaternion", quaternion_topic);
   assertions::getParam(pNh, "topics/rpy", rpy_topic);
   assertions::param(pNh, "message_type", message_type, imu_quaternion);
+  assertions::param(pNh, "readability", g_readability, true);
 
   g_rpy_pub = nh.advertise<geometry_msgs::Vector3Stamped>(rpy_topic, 1);
 

@@ -1,0 +1,19 @@
+<launch>
+    <!-- Move Base Flex -->
+    <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen">
+        <param name="tf_timeout" value="1.5"/>
+        <param name="planner_frequency" value="2.0"/>
+        <param name="planner_max_retries" value="3"/>
+        <param name="controller_frequency" value="5.0" />
+        <param name="controller_patience" value="1.0" />
+        <param name="robot_frame" value="base_link" />
+        <param name="global_frame" value="odom" />
+        <param name="map_frame" value="odom" />
+        <rosparam file="$(find igvc_navigation)/config/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/teb_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/planners.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/controllers.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/recovery_behaviors.yaml" command="load" />
+    </node>
+</launch>

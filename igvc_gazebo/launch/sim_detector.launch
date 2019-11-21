@@ -8,11 +8,20 @@
       <rosparam param="semantic_topic_prefix">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
       <rosparam param="semantic_topic_suffix">["", "", ""]</rosparam>
 
+      <param name="image_base_topic" value="/raw/image" />
+
       <param name="output_image/width" value="400" />
       <param name="output_image/height" value="400" />
 
+      <param name="lines/lower/h" value="120" />
+      <param name="lines/lower/s" value="130" />
+      <param name="lines/lower/v" value="100" />
+      <param name="lines/upper/h" value="180" />
+      <param name="lines/upper/s" value="255" />
+      <param name="lines/upper/v" value="255" />
+
       <!-- names of output segmentation topics. Published in the namespace of the corresponding camera -->
-      <param name="line_topic" value="/semantic_segmentation" />
+      <param name="line_topic" value="/segmented/image" />
       <param name="barrel_topic" value="/detected_barrels" />
   </node>
 

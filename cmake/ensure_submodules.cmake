@@ -29,9 +29,9 @@ if(NOT EXISTS ${GIT_REPO_DIR}/external)
 endif()
 
 foreach(EXTERNAL_PACKAGE ${EXTERNAL_PACKAGES})
-    if(NOT EXISTS ${GIT_REPO_DIR}/external/${EXTERNAL_PACKAGE})
+    if(NOT EXISTS ${GIT_REPO_DIR}/external/${EXTERNAL_PACKAGE}/.git)
         set(EXTERNAL_PACKAGES_FOUND False)
-        message(WARNING "Couldn't find external package external/${EXTERNAL_PACKAGE}...")
+        message(WARNING "Couldn't find .git folder in external package external/${EXTERNAL_PACKAGE}/.git ...")
     endif()
 endforeach()
 

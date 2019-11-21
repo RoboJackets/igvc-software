@@ -16,10 +16,34 @@ add_executable(mapper mapper_node.cpp)
 add_dependencies(mapper ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mapper ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES} mapper_lib)
 
-# New interface with costmap2d as a "thin wrapper"
-add_library(wrapper_layer wrapper_layer.h wrapper_layer.cpp)
-add_dependencies(wrapper_layer ${catkin_EXPORTED_TARGETS})
-target_link_libraries(wrapper_layer ${catkin_LIBRARIES} mapper_lib)
+# Final part of refactor:
+add_library(lidar_layer
+    lidar_layer.cpp lidar_layer.h
+    lidar_layer_config.cpp lidar_layer_config.h
+    map_config.cpp map_config.h
+    lidar_config.cpp lidar_config.h eigen_hash.h
+    gridmap_layer.cpp gridmap_layer.h
+    )
+add_dependencies(lidar_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(lidar_layer ${catkin_LIBRARIES})
+
+add_library(line_layer
+    line_layer.cpp line_layer.h
+    line_layer_config.cpp line_layer_config.h
+    map_config.cpp map_config.h
+    camera_config.cpp camera_config.h
+    projection_config.cpp projection_config.h
+    gridmap_layer.cpp gridmap_layer.h
+    )
+add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(line_layer ${catkin_LIBRARIES})
+
+add_library(unrolling_layer
+        unrolling_layer.cpp unrolling_layer.h
+        unrolling_layer_config.cpp unrolling_layer.h
+        )
+add_dependencies(unrolling_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(unrolling_layer ${catkin_LIBRARIES})
 
 find_package(OpenMP)
 if (OpenMP_FOUND)
@@ -27,7 +51,7 @@ if (OpenMP_FOUND)
 endif ()
 
 install(
-    TARGETS mapper
+    TARGETS mapper lidar_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
