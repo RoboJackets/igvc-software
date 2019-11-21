@@ -7,11 +7,11 @@
 
 ## The Problem
 
-The problem I am trying to solve is the lack of noise in the gazebo simulation. In order to
-have a more realistic simulation and ground truth pose, noise is needed. In the real world,
+The problem I am trying to solve is adding noise to ground_truth produced by the gazebo simulation. In order to
+have a more realistic simulation and ground truth pose, adjustable noise is needed. In the real world,
 sensors output noisy data, which we must work through to get an accurate position of the
-robot. Currently, the simulation does not account for that. In the end, there will be noise
-added to the ground truth pose, and this noise can be set in the gazebo launch files.
+robot. Currently, the simulation accounts for some level of noise, but we want more of a stress test.
+In the end, there will be noise added to the ground truth pose, and this noise can be set in the gazebo launch files.
 
 ## Proposed Solution
 
