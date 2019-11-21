@@ -13,9 +13,9 @@ In last year's IGVC competition, Jessie turned 180 degrees before starting trave
 ## Proposed Solution
 
 - The problem could potentially be solved by creating a cone behind the robot and make the robot think that that is a part of the line defining the course. Thus the robot would not travel backwards.
-- Create a new topic publishing a map with artificially created points and then feed that into the navigation 
-    - Create a map with artificially inserted points and publish the map to a topic (maybe something like /cam/fakeback)
-    - Create a subscriber in the navigation stack for the topic and interegrate the mapping into path planning cost map
+- Create a new layer in the 2D cost map and artificially insert points to act as a cone-shaped obstacle behind the robot
+    - Create a new layer and artificially create point behind the robot
+    - Incorporate the new layer into the cost map
 
 ## Questions & Research
 
@@ -25,14 +25,15 @@ In last year's IGVC competition, Jessie turned 180 degrees before starting trave
 
 ### Affected Packages
 
-- igvc_perception
 - igvc_navigation
+    - src/mapper/fakecone.cpp [new]
+    - src/mapper/mapper.cpp [modify]
 
 
 ### Schedule
 
-Subtask 1 (11/24/2019): Finish creating the map and publish it
+Subtask 1 (11/24/2019): Finish creating the layer
 
-Subtask 2 (11/28/2019): Modify the navigation stack to incorporate new map data
+Subtask 2 (11/28/2019): Modify mapper.cpp to insert the new layer
 
-Code Review (12/2/2019): Most likely I would have everything figured out by then and ready for review
+Code Review (12/2/2019): Most likely I would have everything figured out by then and ready for review. Hopefully it could be sooner.
