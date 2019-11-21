@@ -7,7 +7,7 @@
 
 ## The Problem
 
-The problem I am trying to solve is the low realtime factor of the simulation by creating a “low performance mode,” which will omit a few factors in order to increase performance. Currently, my laptop runs qualification.launch at 0.02 fps. It’s important to solve this problem because having a higher realtime factor allows us to run gazebo more efficiently, even on an average laptop. While this would neglect a few factors and risk a few inaccuracies, it would overall save time and energy when testing. The second part of this problem is benchmarking the current simulation in order to find out what exactly is causing this lack in performance and if this real-time factor could be increased without yielding some accuracy. Ideally the low-performance simulation would run above a 0.5 realtime factor for a laptop with average specs.
+The problem I am trying to solve is the low realtime factor of the simulation by creating a “low performance mode,” which will omit a few factors in order to increase performance. Currently, my laptop runs qualification.launch at 0.02 real time factor. It’s important to solve this problem because having a higher realtime factor allows us to run gazebo more efficiently, even on an average laptop. While this would neglect a few factors and risk a few inaccuracies, it would overall save time and energy when testing. The second part of this problem is benchmarking the current simulation in order to find out what exactly is causing this lack in performance and if this real-time factor could be increased without yielding some accuracy. Ideally the low-performance simulation would run above a 0.5 realtime factor for a laptop with average specs.
 
 ## Proposed Solution
 
