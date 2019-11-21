@@ -36,19 +36,18 @@ sandsoftwaresound.net/perf/perf-tutorial-hot-spots/
 
 - Creating and adding another world file to igvc-software/igvc_description/urdf/worlds/
 - Creating and adding another launch file to igvc-software/igvc_gazebo/launch/
-- Possibly duplicate jessi.urdf with different sensor variables
+- Possibly duplicate jessi.urdf with different variable values
 
 ### Schedule
 
 Subtask 1 (11/24): Create the .world files and .launch files that will be used for low performance mode and ensure that they run correctly.
 
-Subtask 2 (1 week): Alter physics simulation rate in the new .world file and observe change to real time factor.
+Subtask 2 (1 meeting): Alter physics simulation rate in the new .world file and observe change to real time factor.
 
-Subtask 3 (1 week): If needed, reduce the rate and detail of sensor plugins, possibly duplicate jessi.urdf file and edit new .launch file. Observe change to real time factor.
+Subtask 3 (1 meeting): If needed, reduce the rate and detail of sensor plugins, possibly duplicate jessi.urdf file and edit new .launch file. Observe change to real time factor.
 
-Subtask 4 (1 week): If needed, disable collisions on barrels and observe change to real time factor.
+Subtask 4 (1 meeting): If needed, disable collisions on barrels and observe change to real time factor.
 
 Subtask 5 (1 week): Benchmark the current simulation using PERF
 
-Code Review (Date): Include an estimate for when your code/result will be ready to review
-
+Code Review: 
