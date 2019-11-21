@@ -1,16 +1,15 @@
 #ifndef SRC_POINTCLOUD_FILTER_H
 #define SRC_POINTCLOUD_FILTER_H
 
-#include <ros/ros.h>
-#include <tf/transform_listener.h>
-
 #include <pointcloud_filter/back_filter/back_filter.h>
+#include <pointcloud_filter/fast_segment_filter/fast_segment_filter.h>
 #include <pointcloud_filter/ground_filter/ground_filter.h>
 #include <pointcloud_filter/pointcloud_filter_config.h>
 #include <pointcloud_filter/radius_filter/radius_filter.h>
 #include <pointcloud_filter/raycast_filter/raycast_filter.h>
 #include <pointcloud_filter/tf_transform_filter/tf_transform_filter.h>
-#include <pointcloud_filter/fast_segment_filter/fast_segment_filter.h>
+#include <ros/ros.h>
+#include <tf/transform_listener.h>
 
 namespace pointcloud_filter
 {

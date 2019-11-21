@@ -1,17 +1,17 @@
 #ifndef GROUNDSEGMENTER_H
 #define GROUNDSEGMENTER_H
 
-#include <pcl/point_cloud.h>
-#include <velodyne_pointcloud/point_types.h>
-#include <pcl_ros/point_cloud.h>
 #include <gsl/gsl_fit.h>
-#include <Eigen/Dense>
 #include <math.h>
+#include <pcl/point_cloud.h>
+#include <pcl_ros/point_cloud.h>
+#include <pointcloud_filter/fast_segment_filter/fast_segment_filter_config.h>
+#include <pointcloud_filter/filter.h>
+#include <velodyne_pointcloud/point_types.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#include <pointcloud_filter/filter.h>
-#include <pointcloud_filter/fast_segment_filter/fast_segment_filter_config.h>
+#include <Eigen/Dense>
 
 typedef Eigen::Matrix<double, Eigen::Dynamic, 3> MatrixXd;
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VectorXd;
@@ -26,7 +26,10 @@ struct Prototype
   double red_;
   double green_;
 
-  bool operator<(const Prototype &p) const {return distance_ < p.distance_;}
+  bool operator<(const Prototype &p) const
+  {
+    return distance_ < p.distance_;
+  }
 };
 
 struct Line
@@ -42,8 +45,13 @@ struct Line
   double red_;
   double green_;
 
-  Line() {}
-  Line(double threshold) {error_t_ = threshold;}
+  Line()
+  {
+  }
+  Line(double threshold)
+  {
+    error_t_ = threshold;
+  }
   double distFromPoint(const Prototype p);
   bool fitPoints(const Prototype new_point);
 };
@@ -55,15 +63,15 @@ struct Segment
   std::vector<Line> lines_;
 };
 
-class FastSegmentFilter 
+class FastSegmentFilter
 {
 public:
-  FastSegmentFilter(const ros::NodeHandle& nh);
-  
+  FastSegmentFilter(const ros::NodeHandle &nh);
+
   std::map<int, Segment> segments_;
   pcl::PointCloud<velodyne_pointcloud::PointXYZIR> ground_points_;
-  pcl::PointCloud<velodyne_pointcloud::PointXYZIR> nonground_points_;  
-  
+  pcl::PointCloud<velodyne_pointcloud::PointXYZIR> nonground_points_;
+
   ros::Publisher ground_pub_;
   ros::Publisher nonground_pub_;
   ros::Publisher marker_pub_;
@@ -73,20 +81,20 @@ public:
 
   ros::NodeHandle private_nh_;
 
-
-  void filter(pointcloud_filter::Bundle& bundle);
+  void filter(pointcloud_filter::Bundle &bundle);
   void processSegments();
   void getLinesFromSegments();
-  void classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &ground_points, pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &nonground_points);
+  void classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &ground_points,
+                      pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &nonground_points);
   void debugViz();
 
 private:
-
   FastSegmentFilterConfig config_{};
 
   int getAngleFromPoint(const velodyne_pointcloud::PointXYZIR point);
   double getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point);
-  double getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1, const velodyne_pointcloud::PointXYZIR point2);
+  double getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1,
+                                  const velodyne_pointcloud::PointXYZIR point2);
   bool evaluateIsGround(Line &l);
 };
 }  // namespace pointcloud_filter
