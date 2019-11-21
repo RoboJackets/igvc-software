@@ -53,8 +53,7 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
 
     // publish odom message
     g_ground_truth_pub.publish(result);
-    ROS_INFO_STREAM("setting result_pose to " << result.pose.pose.position.x << ", "
-                                              << result.pose.pose.position.y);
+
     // publish transform for tf if there has not been a update from the localization node in the last second
     // since it also publishes the same transform
     if (std::abs(msg->header.stamp.toSec() - g_last_estimate.toSec()) > 1.0)
