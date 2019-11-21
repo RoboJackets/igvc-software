@@ -18,6 +18,15 @@ pointcloud_filter:
         angular_resolution: 0.02
         start_angle: -2.0
         end_angle: 2.0
+    fast_segment_filter:
+        ground_topic: "/ground"
+        nonground_topic: "/nonground"
+        num_segments: 270
+        error_t: .015
+        slope_t: .4
+        intercept_z_t: 100
+        dist_t: .1
+        debug_viz: false
     frames:
         base_footprint: "base_footprint"
     timeout_duration: 0.5

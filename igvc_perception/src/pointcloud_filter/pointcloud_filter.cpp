@@ -21,6 +21,7 @@ PointcloudFilter::PointcloudFilter(const ros::NodeHandle& nh, const ros::NodeHan
   , tf_transform_filter_{ &buffer_ }
   , ground_filter_{ private_nh_ }
   , raycast_filter_{ private_nh_ }
+  , fast_segment_filter_ {private_nh_ }
 {
   setupPubSub();
 }
@@ -41,6 +42,8 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
   radius_filter_.filter(bundle);
 
   back_filter_.filter(bundle);
+  
+  fast_segment_filter_.filter(bundle);
 
   std::string base_frame = config_.base_frame;
   std::string lidar_frame = raw_pointcloud->header.frame_id;
