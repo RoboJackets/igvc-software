@@ -15,7 +15,8 @@ added to the ground truth pose, and this noise can be set in the gazebo launch f
 
 ## Proposed Solution
 
-I am going to simulate noise via random Gaussian noises (random normal distribution)
+I am going to simulate noise for the x and y position of the robot via random Gaussian noises
+(random normal distribution) in the ground_truth node.
 
 - Add Gaussian distribution randomizer
 - Use randomizer to add noise to pose.position.x and pose.position.y
