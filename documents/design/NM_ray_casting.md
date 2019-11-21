@@ -10,25 +10,17 @@
 The current raycasting continues until the max range. It should stop at the first obstacle in the map if it is within the raycasting radius (as that would also result in a "miss" because it is within the minimum range).
 Essentially it should extend our Lidar range into the minimum range, and if there is an object in the minimum range then make sure the scan shows that the arc behind that object is blocked. This is important because right now if an object is closer than the LiDAR range, the LiDAR thinks that there is no object and there is open space in that region which influences the path planning.
 
-
-
 ## Proposed Solution
 
 1. Before we start scanning from the endpoint to startpoint we need to make sure that there is no object within the minimum range.
-1. So i'll need to add this code to the LiDAR layer, specifically insertFreeSpace.
-1. Get the robot's current position
-1. Iterate through the Line from the robot's origin to the minRange. If an occupied node exists in this range mark minRange as occupied.
-1. I nothing in this range is occupied, then search from minRange to Endpoint.
-
+2. So I'll need to add this code to the LiDAR layer, specifically insertFreeSpace.
+3. Get the robot's current position
+4. Iterate through the line from the robot's origin to the minRange. If an occupied node exists in this range, mark minRange as occupied.
+5. If nothing in this range is occupied, then search from minRange to endpoint.
 
 
 ## Questions & Research
 - I also need a bag file I can test my changes on to see if my solution works.
-- How do I get
-
-
-
-## Overall Scope
 
 ### Affected Packages
 
@@ -36,7 +28,6 @@ Essentially it should extend our Lidar range into the minimum range, and if ther
     - I'll have to change the LidarLayer::insertFreeSpace method within lidar_layer.cpp
 - Which packages are relevant to the success of the project?
     - the igvc_navigation layer
-
 
 
 ### Schedule
