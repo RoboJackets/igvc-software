@@ -136,6 +136,7 @@ void NavigationClient::sendPointAsGoalAndWait(const geometry_msgs::PointStamped&
 
 void NavigationClient::position_callback(const nav_msgs::OdometryConstPtr& msg) {
     if (igvc::get_distance(msg->pose.pose.position, current_waypoint_odom_.point) < waypoint_radius_){
+        ROS_INFO_STREAM("Entering waypoint radius.");
         // sets the orientation to be the angle the robot enters the radius from
         geometry_msgs::PoseStamped pose;
         pose.header = waypoints_queue_.front().header;
@@ -148,13 +149,14 @@ void NavigationClient::position_callback(const nav_msgs::OdometryConstPtr& msg) 
 
         // move on to next waypoint
         waypoints_queue_.erase(waypoints_queue_.begin());
+
         if(waypoints_queue_.size() > 1){
             sendPointAsGoal(waypoints_queue_.front());
-            ROS_INFO_STREAM("");
+            ROS_INFO_STREAM("Waypoint reached. [" << waypoints_queue_.size() << "] waypoints remaining.");
             // transform the waypoint at the head of the waypoints_ vector from UTM to odom
             tf_listener_.transformPoint("odom", ros::Time(0), waypoints_queue_.front(), "odom", current_waypoint_odom_);
         } else {
-
+            ROS_INFO_STREAM("Waypoint reached. No waypoints remaining.");
         }
     }
 }
