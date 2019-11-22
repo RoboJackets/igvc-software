@@ -139,7 +139,8 @@ public:
   }
 
 protected:
-  [[nodiscard]] bool waitForSubscriber() const {
+  [[nodiscard]] bool waitForSubscriber() const
+  {
     const double timeout = 5.0;
     const double sleep_time = 1.0;
     ros::Time end = ros::Time::now() + ros::Duration(timeout);
