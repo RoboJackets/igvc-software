@@ -15,7 +15,7 @@ End goal will be separating barrels into individual groups and extracting inform
 - (If necessary)Program a clustering algorithm that take in a pointcloud and returns a clustered pointcloud.
 - The way the clustering algorithm works: (http://pointclouds.org/documentation/tutorials/cluster_extraction.php) 
 
-'''
+```
 1. create a Kd-tree representation for the input point cloud dataset P;
 2. set up an empty list of clusters C, and a queue of the points that need to be checked Q;
 3. then for every point pi in P, perform the following steps:
@@ -24,8 +24,8 @@ End goal will be separating barrels into individual groups and extracting inform
 		- search for the set P^i_k of point neighbors of pi in a sphere with radius r < dth;
 		- for every neighbor pki in P^k_i, check if the point has already been processed, and if not add it to Q;
 	when the list of all points in Q has been processed, add Q to the list of clusters C, and reset Q to an empty list
-4. the algorithm terminates when all points \boldsymbol{p}_i \in P have been processed and are now part of the list of point clusters C
-'''
+4. the algorithm terminates when all points P_i in P have been processed and are now part of the list of point clusters C
+```
 
 - Visualized clustering result.
 - Tune the parameter of the optimal algorithm if necessary.
