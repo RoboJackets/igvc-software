@@ -224,3 +224,5 @@ add_subdirectory(src/back_circle)
 
 add_subdirectory(src/action_server)
 add_subdirectory(src/differential_drive)
+
+add_subdirectory(src/navigation_client)
