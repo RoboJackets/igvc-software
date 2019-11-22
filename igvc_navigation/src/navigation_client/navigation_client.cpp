@@ -29,6 +29,8 @@ NavigationClient::NavigationClient() {
 
         // transform the waypoint at the head of the waypoints_ vector from UTM to odom
         tf_listener_.transformPoint("odom", ros::Time(0), waypoints_queue_.front(), "odom", current_waypoint_odom_);
+    } else {
+        ROS_INFO_STREAM("Waiting for waypoints from rviz.");
     }
     ros::spin();
 }
@@ -103,18 +105,21 @@ double NavigationClient::dms_to_dec(std::string dms) {
 }
 
 void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose) {
+    ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y << ") with yaw = " << tf::getYaw(pose.pose.orientation));
     mbf_msgs::MoveBaseGoal goal;
     goal.target_pose = pose;
     client.sendGoal(goal);
 }
 
 void NavigationClient::sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped& pose) {
+    ROS_INFO_STREAM("Sending pose and waiting: (" << pose.pose.position.x << ", " << pose.pose.position.y << ") with yaw = " << tf::getYaw(pose.pose.orientation));
     mbf_msgs::MoveBaseGoal goal;
     goal.target_pose = pose;
     client.sendGoalAndWait(goal);
 }
 
 void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point) {
+    ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ") with yaw = 0");
     mbf_msgs::MoveBaseGoal goal;
 
     goal.target_pose.header = point.header;
@@ -125,6 +130,7 @@ void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point)
 }
 
 void NavigationClient::sendPointAsGoalAndWait(const geometry_msgs::PointStamped& point) {
+    ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ") with yaw = 0");
     mbf_msgs::MoveBaseGoal goal;
 
     goal.target_pose.header = point.header;
