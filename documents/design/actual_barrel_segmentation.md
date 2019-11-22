@@ -14,6 +14,7 @@ End goal will be separating barrels into individual groups and extracting inform
 - Use the clustering algorithm inside PCL.
 - (If necessary)Program a clustering algorithm that take in a pointcloud and returns a clustered pointcloud.
 - The way the clustering algorithm works: (http://pointclouds.org/documentation/tutorials/cluster_extraction.php) 
+
 '''
 1. create a Kd-tree representation for the input point cloud dataset P;
 2. set up an empty list of clusters C, and a queue of the points that need to be checked Q;
@@ -25,6 +26,7 @@ End goal will be separating barrels into individual groups and extracting inform
 	when the list of all points in Q has been processed, add Q to the list of clusters C, and reset Q to an empty list
 4. the algorithm terminates when all points \boldsymbol{p}_i \in P have been processed and are now part of the list of point clusters C
 '''
+
 - Visualized clustering result.
 - Tune the parameter of the optimal algorithm if necessary.
 - Use the clusters to calculate metrics (ex: position, num of barrels/) 
