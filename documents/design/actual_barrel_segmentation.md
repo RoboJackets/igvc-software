@@ -29,7 +29,7 @@ End goal will be separating barrels into individual groups and extracting inform
 
 - Visualized clustering result.
 - Tune the parameter of the optimal algorithm if necessary.
-- Use the clusters to calculate metrics (ex: position, num of barrels/) 
+- Use the clusters to calculate metrics (ex: position, num of barrels) 
 - Publish the metrics to the corresponding topic. 
 
 ## Questions & Research
@@ -58,3 +58,5 @@ Subtask 5 (/): (If necessary) Test the original DBSCAN algorithm under a known d
 Subtask 6 (/): (If necessary) Work on Auto Hyperparameter Tuning. 
 
 Subtask 7 (3-4 weeks into 2019 Spring): Test and tune the algorithm under simulated data. 
+
+Subtask 8 (4-5 weeks into 2019 Spring): Work on calculating and outputting metrics. 
