@@ -77,23 +77,23 @@ extern "C"
   extern const float RequestMessage_speed_r_default;
 
 /* Initializer values for message structs */
-#define ResponseMessage_init_default                                                                              \
-  {                                                                                                               \
-    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, \
-        false, 0, false, 0                                                                                        \
+#define ResponseMessage_init_default                                                                                   \
+  {                                                                                                                    \
+    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0,      \
+        false, 0, false, 0                                                                                             \
   }
-#define RequestMessage_init_default                                                                    \
-  {                                                                                                    \
-    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0 \
+#define RequestMessage_init_default                                                                                    \
+  {                                                                                                                    \
+    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0                 \
   }
-#define ResponseMessage_init_zero                                                                                 \
-  {                                                                                                               \
-    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, \
-        false, 0, false, 0                                                                                        \
+#define ResponseMessage_init_zero                                                                                      \
+  {                                                                                                                    \
+    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0,      \
+        false, 0, false, 0                                                                                             \
   }
-#define RequestMessage_init_zero                                                                       \
-  {                                                                                                    \
-    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0 \
+#define RequestMessage_init_zero                                                                                       \
+  {                                                                                                                    \
+    false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0                 \
   }
 
 /* Field tags (for use in manual encoding/decoding) */

@@ -2,7 +2,7 @@
 BasedOnStyle: Google
 BreakBeforeBraces: Allman
 AccessModifierOffset: -2
-AlignEscapedNewlines: Left
+AlignEscapedNewlines: Right
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortFunctionsOnASingleLine: None

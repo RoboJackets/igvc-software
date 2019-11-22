@@ -105,14 +105,14 @@ extern "C"
  *    printf("Message size is %d\n", stream.bytes_written);
  */
 #ifndef PB_NO_ERRMSG
-#define PB_OSTREAM_SIZING \
-  {                       \
-    0, 0, 0, 0, 0         \
+#define PB_OSTREAM_SIZING                                                                                              \
+  {                                                                                                                    \
+    0, 0, 0, 0, 0                                                                                                      \
   }
 #else
-#define PB_OSTREAM_SIZING \
-  {                       \
-    0, 0, 0, 0            \
+#define PB_OSTREAM_SIZING                                                                                              \
+  {                                                                                                                    \
+    0, 0, 0, 0                                                                                                         \
   }
 #endif
 
