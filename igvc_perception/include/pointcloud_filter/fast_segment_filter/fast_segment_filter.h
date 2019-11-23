@@ -1,7 +1,6 @@
 #ifndef GROUNDSEGMENTER_H
 #define GROUNDSEGMENTER_H
 
-#include <gsl/gsl_fit.h>
 #include <math.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
