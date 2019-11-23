@@ -9,7 +9,7 @@ NavigationClient::NavigationClient() {
     ros::NodeHandle pNh("~");
 
     assertions::getParam(pNh, "reading_from_file", reading_from_file_);
-    assertions::getParam(pNh, "path", path_);
+    assertions::getParam(pNh, "/waypoint_file_path", waypoint_file_path_);
     assertions::getParam(pNh, "waypoint_radius", waypoint_radius_);
 
     rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
@@ -26,9 +26,6 @@ NavigationClient::NavigationClient() {
         odom_sub_ = nh_.subscribe("/odometry/filtered", 1, &NavigationClient::position_callback, this);
         load_waypoints_file();
         sendPointAsGoal(waypoints_queue_.front());
-
-        // transform the waypoint at the head of the waypoints_ vector from UTM to odom
-        tf_listener_.transformPoint("odom", ros::Time(0), waypoints_queue_.front(), "odom", current_waypoint_odom_);
     } else {
         ROS_INFO_STREAM("Waiting for waypoints from rviz.");
     }
@@ -36,20 +33,20 @@ NavigationClient::NavigationClient() {
 }
 
 void NavigationClient::load_waypoints_file() {
-    ROS_INFO_STREAM_ONCE("Loading waypoints from " << path_);
+    ROS_INFO_STREAM_ONCE("Loading waypoints from " << waypoint_file_path_);
 
-    if (path_.empty())
+    if (waypoint_file_path_.empty())
     {
         ROS_ERROR_STREAM("Could not load waypoints. Empty file path.");
         return;
     }
 
     std::ifstream file;
-    file.open(path_.c_str());
+    file.open(waypoint_file_path_.c_str());
 
     if (!file.is_open())
     {
-        ROS_INFO_STREAM("Could not open file: " << path_);
+        ROS_INFO_STREAM("Could not open file: " << waypoint_file_path_);
         return;
     }
 
@@ -65,7 +62,7 @@ void NavigationClient::load_waypoints_file() {
 
             if (tokens.size() != 2)
             {
-                ROS_ERROR_STREAM(path_ << ":" << lineIndex << " - " << tokens.size() << " tokens instead of 2.");
+                ROS_ERROR_STREAM(waypoint_file_path_ << ":" << lineIndex << " - " << tokens.size() << " tokens instead of 2.");
                 return;
             }
 
@@ -75,10 +72,14 @@ void NavigationClient::load_waypoints_file() {
             double lon = (tokens[1].find('?') != std::string::npos) ? dms_to_dec(tokens[1]) : stod(tokens[1]);
 
             // transform latitude and longitude to UTM frame
-            geometry_msgs::PointStamped p;
-            RobotLocalization::NavsatConversions::UTM(lat, lon, &(p.point.x), &(p.point.y));
-            p.header.frame_id = "utm";
-            waypoints_queue_.push_back(p);
+            geometry_msgs::PointStamped waypoint_utm;
+            RobotLocalization::NavsatConversions::UTM(lat, lon, &(waypoint_utm.point.x), &(waypoint_utm.point.y));
+            waypoint_utm.header.frame_id = "utm";
+
+            // transform utm frame to odom frame
+            geometry_msgs::PointStamped waypoint_odom;
+            tf_listener_.transformPoint("odom", ros::Time(0), waypoint_utm, "odom", waypoint_odom);
+            waypoints_queue_.push_back(waypoint_odom);
         }
         lineIndex++;
     }
@@ -141,13 +142,13 @@ void NavigationClient::sendPointAsGoalAndWait(const geometry_msgs::PointStamped&
 }
 
 void NavigationClient::position_callback(const nav_msgs::OdometryConstPtr& msg) {
-    if (igvc::get_distance(msg->pose.pose.position, current_waypoint_odom_.point) < waypoint_radius_){
+    if (igvc::get_distance(msg->pose.pose.position, waypoints_queue_.front().point) < waypoint_radius_){
         ROS_INFO_STREAM("Entering waypoint radius.");
         // sets the orientation to be the angle the robot enters the radius from
         geometry_msgs::PoseStamped pose;
         pose.header = waypoints_queue_.front().header;
         pose.pose.position = waypoints_queue_.front().point;
-        double angle = std::atan2(current_waypoint_odom_.point.y - msg->pose.pose.position.y, current_waypoint_odom_.point.x - msg->pose.pose.position.x);
+        double angle = std::atan2(waypoints_queue_.front().point.y - msg->pose.pose.position.y, waypoints_queue_.front().point.x - msg->pose.pose.position.x);
         pose.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
 
         // sends pose to be next goal
@@ -159,8 +160,6 @@ void NavigationClient::position_callback(const nav_msgs::OdometryConstPtr& msg) 
         if(waypoints_queue_.size() > 1){
             sendPointAsGoal(waypoints_queue_.front());
             ROS_INFO_STREAM("Waypoint reached. [" << waypoints_queue_.size() << "] waypoints remaining.");
-            // transform the waypoint at the head of the waypoints_ vector from UTM to odom
-            tf_listener_.transformPoint("odom", ros::Time(0), waypoints_queue_.front(), "odom", current_waypoint_odom_);
         } else {
             ROS_INFO_STREAM("Waypoint reached. No waypoints remaining.");
         }

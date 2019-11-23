@@ -31,12 +31,9 @@ private:
     // waypoint poses to send
     std::vector<geometry_msgs::PointStamped> waypoints_queue_;
 
-    // waypoint coordinates in odom
-    geometry_msgs::PointStamped current_waypoint_odom_;
-
     // params
     bool reading_from_file_; // true if reading from waypoint file, false if from rviz
-    std::string path_;       // path to waypoint file
+    std::string waypoint_file_path_;       // path to waypoint file
     double waypoint_radius_; // detection radius for waypoint
 
     /**
