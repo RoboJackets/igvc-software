@@ -17,9 +17,10 @@ The solution to this problem would be to change the message type of `/waypoint` 
 to `PoseStamped`, and then make the action server (or itself) send the pose directly instead of a point with 
 an orientation of yaw = 0.
 
-To calculate the intended waypoint orientation, the program will calculate the orientation that
-points the robot towards the next waypoint. For the final waypoint, the final orientation should
-correspond to one with yaw = 0.
+To calculate the intended waypoint orientation, the program will first send the waypoint with yaw =0
+wait until the robot is within a certain radius of the waypoint, defined with the 
+parameter `waypoint_radius`, then send the waypoint again but with an orientation such that the robot just 
+has to go in a straight line from the circle circumference.
 
 Another aspect that can be fixed is to merge the `action_server.cpp` and `waypoint_source.cpp` into a
 new node called `navigation_client.cpp`. Since the two files are solely dependent on each other, 
