@@ -3,6 +3,9 @@
 # some settings
 tidied_files_path=".circleci/utils/tidied_files.txt"
 
+# Ignore pb.c / pb.h generated files
+IGNORE_REGEX="pb\.[ch]"
+
 
 # For pretty printing
 if test -t 1; then
@@ -72,7 +75,7 @@ do
   absolute_filepath=$(realpath "$line")
 
   # Append the absolute filepath.
-  if echo "$absolute_filepath" | grep -q -E '(\.cpp)|(\.h)'; then
+  if echo "$absolute_filepath" | grep -q -E '(\.cpp)|(\.h)' | grep -v -E "${IGNORE_REGEX}" ; then
     echo "$absolute_filepath"
     modified_filepaths+=("$absolute_filepath")
   fi
