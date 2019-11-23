@@ -29,7 +29,6 @@ NavigationClient::NavigationClient() {
     } else {
         ROS_INFO_STREAM("Waiting for waypoints from rviz.");
     }
-    ros::spin();
 }
 
 void NavigationClient::load_waypoints_file() {
@@ -177,4 +176,5 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
 int main(int argc, char** argv){
     ros::init(argc, argv, "navigation_client");
     NavigationClient();
+    ros::spin();
 }
