@@ -13,6 +13,7 @@ NavigationClient::NavigationClient() {
     assertions::getParam(pNh, "waypoint_radius", waypoint_radius_);
 
     rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
+    current_waypoint_pub = nh_.advertise<geometry_msgs::PoseStamped>("/current_waypoint", 1);
 
     // wait for the utm->odom transform to become available
     while (!tf_listener_.waitForTransform("odom", "utm", ros::Time(0), ros::Duration(5.0)))
@@ -108,6 +109,8 @@ void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose) {
     ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y << ") with yaw = " << tf::getYaw(pose.pose.orientation));
     mbf_msgs::MoveBaseGoal goal;
     goal.target_pose = pose;
+
+    current_waypoint_pub.publish(pose);
     client.sendGoal(goal);
 }
 
@@ -115,6 +118,8 @@ void NavigationClient::sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped& p
     ROS_INFO_STREAM("Sending pose and waiting: (" << pose.pose.position.x << ", " << pose.pose.position.y << ") with yaw = " << tf::getYaw(pose.pose.orientation));
     mbf_msgs::MoveBaseGoal goal;
     goal.target_pose = pose;
+
+    current_waypoint_pub.publish(pose);
     client.sendGoalAndWait(goal);
 }
 
@@ -126,6 +131,7 @@ void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point)
     goal.target_pose.pose.position = point.point;
     goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
+    current_waypoint_pub.publish(goal.target_pose);
     client.sendGoal(goal);
 }
 
@@ -137,6 +143,7 @@ void NavigationClient::sendPointAsGoalAndWait(const geometry_msgs::PointStamped&
     goal.target_pose.pose.position = point.point;
     goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
+    current_waypoint_pub.publish(goal.target_pose);
     client.sendGoalAndWait(goal);
 }
 

@@ -20,6 +20,8 @@ class NavigationClient
 public:
     NavigationClient();
     ros::NodeHandle nh_;
+    ros::Publisher waypoints_pub;
+    ros::Publisher current_waypoint_pub;
     ros::Subscriber rviz_sub_;
     ros::Subscriber odom_sub_;
     tf::TransformListener tf_listener_;
