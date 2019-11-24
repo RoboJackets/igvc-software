@@ -1,89 +1,88 @@
 #ifndef SRC_NAVIGATION_CLIENT_H
 #define SRC_NAVIGATION_CLIENT_H
 
-#include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <mbf_msgs/MoveBaseAction.h>
+#include <ros/ros.h>
 #include <tf/transform_listener.h>
 
 #include <fstream>
 #include <string>
 
-#include <nav_msgs/Odometry.h>
-#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Odometry.h>
 
 using MoveBaseClient = actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction>;
 
 class NavigationClient
 {
 public:
-    NavigationClient();
-    ros::NodeHandle nh_;
-    ros::Subscriber rviz_sub_;
-    tf::TransformListener tf_listener_;
+  NavigationClient();
+  ros::NodeHandle nh_;
+  ros::Subscriber rviz_sub_;
+  tf::TransformListener tf_listener_;
 
 private:
-    // action lib client
-    MoveBaseClient client = MoveBaseClient("move_base_flex/move_base", true);
+  // action lib client
+  MoveBaseClient client = MoveBaseClient("move_base_flex/move_base", true);
 
-    // waypoint poses to send
-    std::vector<geometry_msgs::PointStamped> waypoints_list_;
+  // waypoint poses to send
+  std::vector<geometry_msgs::PointStamped> waypoints_list_;
 
-    // params
-    bool reading_from_file_; // true if reading from waypoint file, false if from rviz
-    std::string waypoint_file_path_;       // path to waypoint file
-    double waypoint_radius_; // detection radius for waypoint
+  // params
+  bool reading_from_file_;          // true if reading from waypoint file, false if from rviz
+  std::string waypoint_file_path_;  // path to waypoint file
+  double waypoint_radius_;          // detection radius for waypoint
 
-    /**
-    Loads waypoints from path_, transforms them into the UTM frame, and stores
-    them in waypoints_.
-    */
-    void load_waypoints_file();
+  /**
+  Loads waypoints from path_, transforms them into the UTM frame, and stores
+  them in waypoints_.
+  */
+  void load_waypoints_file();
 
-    /**
-    degrees minutes seconds to decimal degrees conversion function
+  /**
+  degrees minutes seconds to decimal degrees conversion function
 
-    @param[in] dms lat or long in degrees minutes seconds
-    @return input value in decimal degrees
-    */
-    static double dms_to_dec(std::string dms);
+  @param[in] dms lat or long in degrees minutes seconds
+  @return input value in decimal degrees
+  */
+  static double dms_to_dec(std::string dms);
 
-    /**
-    sends the PoseStamped as a goal
+  /**
+  sends the PoseStamped as a goal
 
-    @param[in] PoseStamped to send
-     */
-    void sendPoseAsGoal(const geometry_msgs::PoseStamped&);
+  @param[in] PoseStamped to send
+   */
+  void sendPoseAsGoal(const geometry_msgs::PoseStamped&);
 
-    /**
-    sends the PoseStamped as a goal and waits
+  /**
+  sends the PoseStamped as a goal and waits
 
-    @param[in] PoseStamped to send
-     */
-    void sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped&);
+  @param[in] PoseStamped to send
+   */
+  void sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped&);
 
-    /**
-    sends the PointStamped as a goal, orientation is that of yaw = 0
+  /**
+  sends the PointStamped as a goal, orientation is that of yaw = 0
 
-    @param[in] PointStamped to send
-     */
-    void sendPointAsGoal(const geometry_msgs::PointStamped&);
+  @param[in] PointStamped to send
+   */
+  void sendPointAsGoal(const geometry_msgs::PointStamped&);
 
-    /**
-    sends the PointStamped as a goal and waits, orientation is that of yaw = 0
+  /**
+  sends the PointStamped as a goal and waits, orientation is that of yaw = 0
 
-    @param[in] PointStamped to send
-     */
-    void sendPointAsGoalAndWait(const geometry_msgs::PointStamped&);
+  @param[in] PointStamped to send
+   */
+  void sendPointAsGoalAndWait(const geometry_msgs::PointStamped&);
 
-    /**
-    (ROS Callback) sends waypoints from rviz to the navigation server
+  /**
+  (ROS Callback) sends waypoints from rviz to the navigation server
 
-    @param[in]
-    */
-    void rvizWaypointCallback(const geometry_msgs::PoseStamped&);
+  @param[in]
+  */
+  void rvizWaypointCallback(const geometry_msgs::PoseStamped&);
 };
 
-
-#endif //SRC_NAVIGATION_CLIENT_H
+#endif  // SRC_NAVIGATION_CLIENT_H
