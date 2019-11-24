@@ -1,8 +1,8 @@
 import cv2
-import functools #import message_filters
-import numpy as np #import pdb
+import functools
+import numpy as np
 from PIL import Image
-import sys #from timeit import default_timer as timer
+import sys
 import torch
 from torch.autograd import Variable
 from torchvision import transforms
@@ -14,7 +14,7 @@ from train_eval.models.model import UNet
 import rospy
 import tf as ros_tf
 
-from cv_bridge import CvBridge, CvBridgeError
+from cv_bridge import CvBridge
 from image_geometry import PinholeCameraModel
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import CompressedImage
@@ -75,6 +75,7 @@ class SegmentationModel(object):
                                                      timeout=5)
             except (rospy.ROSException), e:
                 rospy.logerr('Camera info for %s not available.' % camera_name)
+                print(e)
                 exit()
 
             # width and height adjust factors.
@@ -106,9 +107,11 @@ class SegmentationModel(object):
             transform_listener.waitForTransform('/base_footprint',
                                                 cam_frame_name, rospy.Time(0),
                                                 rospy.Duration(5.0))
-            cam_transform_translation, cam_transform_rotation =
+            cam_transform_translation, cam_transform_rotation = \
                 transform_listener.lookupTransform(
-                '/base_footprint', cam_frame_name, rospy.Time(0))
+                                                    '/base_footprint',
+                                                    cam_frame_name,
+                                                    rospy.Time(0))
             self.cam_transform_rotation_matrices[
                 camera_name] = ros_tf.transformations.quaternion_matrix(
                     cam_transform_rotation)[:-1, :-1]
@@ -117,7 +120,7 @@ class SegmentationModel(object):
             print self.cam_transform_translations[camera_name]
             print self.cam_transform_rotation_matrices[camera_name]
 
-            # Create a mapping between image pixels and world coordinates (flat plane assumption).
+            # Create a mapping between image pixels and world coordinates
             self.init_point_cloud_array(camera_name)
 
             # Create image and pointcloud publishers.
@@ -134,19 +137,30 @@ class SegmentationModel(object):
             for camera_name, segmented_image_topic in zip(
                     camera_names, segmented_image_topics):
                 # Use the same callback for every camera.
-                self.subscribers.append(rospy.Subscriber(segmented_image_topic, ImMsg,
-                                        functools.partial(self.segmented_image_cb, camera_name), queue_size=1, buff_size=10**8))
+                self.subscribers.append(
+                   rospy.Subscriber(segmented_image_topic,
+                                    ImMsg,
+                                    functools.partial(
+                                        self.segmented_image_cb,
+                                        camera_name),
+                                    queue_size=1,
+                                    buff_size=10**8))
         else:
             for camera_name in camera_names:
                 # Use the same callback for every camera.
-                self.subscribers.append(rospy.Subscriber('/%s/image_raw/compressed' % camera_name, CompressedImage,
-                                        functools.partial(self.image_cb, camera_name), queue_size=1, buff_size=10**8))
-
+                self.subscribers.append(
+                    rospy.Subscriber('/%s/image_raw/compressed' % camera_name,
+                                     CompressedImage,
+                                     functools.partial(
+                                        self.image_cb,
+                                        camera_name),
+                                     queue_size=1,
+                                     buff_size=10**8))
         rospy.loginfo('Line detector is running.')
 
     def image_cb(self, camera_name, data):
         # Track inference time.
-        #start = timer()
+        # start = timer()
 
         # Resize image and convert to tensor.
         np_arr = np.fromstring(data.data, np.uint8)
@@ -195,12 +209,12 @@ class SegmentationModel(object):
 
         self.cloud_publishers[camera_name].publish(cloud_msg)
 
-        #end = timer()
-        #print end - start
+        # end = timer()
+        # print end - start
 
     def segmented_image_cb(self, camera_name, data):
         # Track inference time.
-        #start = timer()
+        # start = timer()
 
         # Resize image and convert to tensor.
         np_arr = self.bridge.imgmsg_to_cv2(data, "mono8")
@@ -236,10 +250,10 @@ class SegmentationModel(object):
 
         self.cloud_publishers[camera_name].publish(cloud_msg)
 
-        #end = timer()
-        #print end - start
+        # end = timer()
+        # print end - start
 
-    # This function projects image pixels into world coordinates using a flat plane assumption.
+    # Projects image pixels into world coordinates
     def init_point_cloud_array(self, camera_name):
         camera_model = self.camera_models[camera_name]
         cam_transform_translation = self.cam_transform_translations[
