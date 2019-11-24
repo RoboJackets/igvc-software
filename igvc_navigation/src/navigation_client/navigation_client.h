@@ -20,10 +20,7 @@ class NavigationClient
 public:
     NavigationClient();
     ros::NodeHandle nh_;
-    ros::Publisher waypoints_pub;
-    ros::Publisher current_waypoint_pub;
     ros::Subscriber rviz_sub_;
-    ros::Subscriber odom_sub_;
     tf::TransformListener tf_listener_;
 
 private:
@@ -31,7 +28,7 @@ private:
     MoveBaseClient client = MoveBaseClient("move_base_flex/move_base", true);
 
     // waypoint poses to send
-    std::vector<geometry_msgs::PointStamped> waypoints_queue_;
+    std::vector<geometry_msgs::PointStamped> waypoints_list_;
 
     // params
     bool reading_from_file_; // true if reading from waypoint file, false if from rviz
@@ -79,14 +76,6 @@ private:
     @param[in] PointStamped to send
      */
     void sendPointAsGoalAndWait(const geometry_msgs::PointStamped&);
-
-    /**
-    (ROS Callback) Checks if the robot is less than a threshold distance from the
-    current waypoint using the robot's current odometry.
-
-    @param[in] msg most recent odometry message on the "odometry/filtered" topic
-    */
-    void position_callback(const nav_msgs::OdometryConstPtr& msg);
 
     /**
     (ROS Callback) sends waypoints from rviz to the navigation server

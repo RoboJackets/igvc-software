@@ -12,8 +12,13 @@ NavigationClient::NavigationClient() {
     assertions::getParam(pNh, "/waypoint_file_path", waypoint_file_path_);
     assertions::getParam(pNh, "waypoint_radius", waypoint_radius_);
 
+    // wait for the action server to come up
+    while (!client.waitForServer(ros::Duration(5.0)))
+    {
+        ROS_INFO("Waiting for the move_base action server to come up");
+    }
+
     rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
-    current_waypoint_pub = nh_.advertise<geometry_msgs::PoseStamped>("/current_waypoint", 1);
 
     // wait for the utm->odom transform to become available
     while (!tf_listener_.waitForTransform("odom", "utm", ros::Time(0), ros::Duration(5.0)))
@@ -24,11 +29,13 @@ NavigationClient::NavigationClient() {
     ROS_INFO_STREAM("utm->odom transform found!");
 
     if(reading_from_file_){
-        odom_sub_ = nh_.subscribe("/odometry/filtered", 1, &NavigationClient::position_callback, this);
         load_waypoints_file();
-        sendPointAsGoal(waypoints_queue_.front());
+        for(const geometry_msgs::PointStamped& waypoint: waypoints_list_){
+            sendPointAsGoalAndWait(waypoint);
+        }
     } else {
         ROS_INFO_STREAM("Waiting for waypoints from rviz.");
+        ros::spin();
     }
 }
 
@@ -79,12 +86,12 @@ void NavigationClient::load_waypoints_file() {
             // transform utm frame to odom frame
             geometry_msgs::PointStamped waypoint_odom;
             tf_listener_.transformPoint("odom", ros::Time(0), waypoint_utm, "odom", waypoint_odom);
-            waypoints_queue_.push_back(waypoint_odom);
+            waypoints_list_.push_back(waypoint_odom);
         }
         lineIndex++;
     }
 
-    ROS_INFO_STREAM_ONCE(waypoints_queue_.size() << " waypoints loaded.");
+    ROS_INFO_STREAM_ONCE(waypoints_list_.size() << " waypoints loaded.");
 }
 
 double NavigationClient::dms_to_dec(std::string dms) {
@@ -110,7 +117,6 @@ void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose) {
     mbf_msgs::MoveBaseGoal goal;
     goal.target_pose = pose;
 
-    current_waypoint_pub.publish(pose);
     client.sendGoal(goal);
 }
 
@@ -119,7 +125,6 @@ void NavigationClient::sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped& p
     mbf_msgs::MoveBaseGoal goal;
     goal.target_pose = pose;
 
-    current_waypoint_pub.publish(pose);
     client.sendGoalAndWait(goal);
 }
 
@@ -131,7 +136,6 @@ void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point)
     goal.target_pose.pose.position = point.point;
     goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
-    current_waypoint_pub.publish(goal.target_pose);
     client.sendGoal(goal);
 }
 
@@ -143,33 +147,7 @@ void NavigationClient::sendPointAsGoalAndWait(const geometry_msgs::PointStamped&
     goal.target_pose.pose.position = point.point;
     goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
-    current_waypoint_pub.publish(goal.target_pose);
     client.sendGoalAndWait(goal);
-}
-
-void NavigationClient::position_callback(const nav_msgs::OdometryConstPtr& msg) {
-    if (igvc::get_distance(msg->pose.pose.position, waypoints_queue_.front().point) < waypoint_radius_){
-        ROS_INFO_STREAM("Entering waypoint radius.");
-        // sets the orientation to be the angle the robot enters the radius from
-        geometry_msgs::PoseStamped pose;
-        pose.header = waypoints_queue_.front().header;
-        pose.pose.position = waypoints_queue_.front().point;
-        double angle = std::atan2(waypoints_queue_.front().point.y - msg->pose.pose.position.y, waypoints_queue_.front().point.x - msg->pose.pose.position.x);
-        pose.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
-
-        // sends pose to be next goal
-        sendPoseAsGoalAndWait(pose);
-
-        // move on to next waypoint
-        waypoints_queue_.erase(waypoints_queue_.begin());
-
-        if(waypoints_queue_.size() > 1){
-            sendPointAsGoal(waypoints_queue_.front());
-            ROS_INFO_STREAM("Waypoint reached. [" << waypoints_queue_.size() << "] waypoints remaining.");
-        } else {
-            ROS_INFO_STREAM("Waypoint reached. No waypoints remaining.");
-        }
-    }
 }
 
 void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& pose) {
@@ -182,6 +160,5 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "navigation_client");
-    NavigationClient();
-    ros::spin();
+    NavigationClient nav = NavigationClient();
 }
