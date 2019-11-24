@@ -11,7 +11,8 @@ add_library(pointcloud_filter_lib STATIC
     tf_transform_filter/tf_transform_filter.cpp
     raycast_filter/raycast_filter_config.cpp
     raycast_filter/raycast_filter.cpp
-    )
+    actual_barrel_segmentation/actual_barrel_segmentation.cpp
+        )
 add_dependencies(pointcloud_filter_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pointcloud_filter_lib ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
