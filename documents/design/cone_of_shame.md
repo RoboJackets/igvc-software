@@ -23,7 +23,21 @@ In last year's IGVC competition, Jessie turned 180 degrees before starting trave
 
 ## Questions & Research
 
-- I probably just need to go through the input of navigation stack to make sure the specific format I am supposed to be publishing and the format for the name of the topic
+- ROS Service
+    - Similar to subscriber and pubisher but is a one time call
+    - written with a .srv file and a structure with response/request classes will be generated
+    - ServiceClient calls a service with
+        - ros::ServiceClient srvClient = nh.serviceClient<serviceType>("service_name");
+        - srvClient.call(serviceInstantiation); [returns true if service calls with success and serviceInstantion is filled, and false otherwise]
+    - Service contains a callback method used to process the request upon received. It is called with
+        - ros::ServiceServer srvServer = nh.advertiseService(serviceType, <callback>);
+
+- Costmap2d layer
+    - A map that indicates discretized information about the world the robot is in
+    - consist of a flattened array that represent a two-dimensional map
+    - contains useful functions such as:
+        - void GridLayer::updateCosts - update the cost in the master grid map according to the value in this layer
+        - void GridLayer::updateBounds - expand the cost map layer to include new cells that the robot is in
 
 ## Overall Scope
 
