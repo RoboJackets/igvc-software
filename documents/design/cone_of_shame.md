@@ -12,14 +12,19 @@ In last year's IGVC competition, Jessie turned 180 degrees before starting trave
 
 ## Proposed Solution
 
-- The problem could potentially be solved by creating a cone behind the robot and make the robot think that that is a part of the line defining the course. Thus the robot would not travel backwards.
+- The problem could potentially be solved by creating a semi-circle behind the robot with the diameter of the distance between the left and right lines of the course and make the robot think that that is a part of the line defining the course. Thus the robot would not travel backwards.
 - How to measure the location of the cone
-    - Subscribe to **/move_base_flex/local_costmap/costmap** and select the point on the line that is closest to the robot
+    - Obtain the layered_costmap_ from the costmap2d::layer which contains a getPlugin method that will return a vector of **boost::shared_ptr``<Layer``>** with each shared_ptr pointing to a layer
+    - From the vector of layers we can obtain the LineLayer representing the lines the robot is seeing around itself
     - detect in a small radius of that line whether a point belongs to the same line still exist, until reaching the endpoint of the line
     - when both endpoints of the line on the right and left are reached, use a grid-based search algorithm to draw a line between the two points (or a cone)
 - Create a new layer in the 2D cost map and artificially insert points on the line/cone created above to act as an obstacle behind the robot
     - Create a new layer in igvc_navigation/mapper
     - Incorporate the new layer into the cost map
+- Create a ROS service that generate the new cost2d map
+    - call when service when the robot reaches a waypoint and at the start of the course
+    - the service will also contain a remove method that will remove the cone created at the course start after the robot has reached the first way point [or some other specific period of time]
+
 
 ## Questions & Research
 
