@@ -7,14 +7,15 @@
 
 NavigationClient::NavigationClient()
 {
-  ros::NodeHandle pNh("~");
+  ros::NodeHandle private_nh("~");
 
-  assertions::getParam(pNh, "reading_from_file", reading_from_file_);
-  assertions::getParam(pNh, "/waypoint_file_path", waypoint_file_path_);
-  assertions::getParam(pNh, "waypoint_radius", waypoint_radius_);
+  assertions::getParam(private_nh, "reading_from_file", reading_from_file_);
+  assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
+  assertions::getParam(private_nh, "waypoint_radius", waypoint_radius_);
 
+  const double waiting_time = 5.0;
   // wait for the action server to come up
-  while (!client.waitForServer(ros::Duration(5.0)))
+  while (!client.waitForServer(ros::Duration(waiting_time)))
   {
     ROS_INFO("Waiting for the move_base action server to come up");
   }
@@ -22,7 +23,7 @@ NavigationClient::NavigationClient()
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
 
   // wait for the utm->odom transform to become available
-  while (!tf_listener_.waitForTransform("odom", "utm", ros::Time(0), ros::Duration(5.0)))
+  while (!tf_listener_.waitForTransform("odom", "utm", ros::Time(0), ros::Duration(waiting_time)))
   {
     ROS_INFO_STREAM("utm->odom transform not found. waiting...");
   }
@@ -31,7 +32,7 @@ NavigationClient::NavigationClient()
 
   if (reading_from_file_)
   {
-    load_waypoints_file();
+    loadWaypointsFile();
     for (const geometry_msgs::PointStamped& waypoint : waypoints_list_)
     {
       sendPointAsGoalAndWait(waypoint);
@@ -44,7 +45,7 @@ NavigationClient::NavigationClient()
   }
 }
 
-void NavigationClient::load_waypoints_file()
+void NavigationClient::loadWaypointsFile()
 {
   ROS_INFO_STREAM_ONCE("Loading waypoints from " << waypoint_file_path_);
 
@@ -64,7 +65,7 @@ void NavigationClient::load_waypoints_file()
   }
 
   std::string line;
-  auto lineIndex = 1;
+  auto line_index = 1;
   while (!file.eof())
   {
     getline(file, line);
@@ -75,14 +76,14 @@ void NavigationClient::load_waypoints_file()
 
       if (tokens.size() != 2)
       {
-        ROS_ERROR_STREAM(waypoint_file_path_ << ":" << lineIndex << " - " << tokens.size() << " tokens instead of 2.");
+        ROS_ERROR_STREAM(waypoint_file_path_ << ":" << line_index << " - " << tokens.size() << " tokens instead of 2.");
         return;
       }
 
       // convert latitude and longiture to decimal degrees if currently in degrees minutes second. specified by '?'
       // symbol
-      double lat = (tokens[0].find('?') != std::string::npos) ? dms_to_dec(tokens[0]) : stod(tokens[0]);
-      double lon = (tokens[1].find('?') != std::string::npos) ? dms_to_dec(tokens[1]) : stod(tokens[1]);
+      double lat = (tokens[0].find('?') != std::string::npos) ? convertDmsToDec(tokens[0]) : stod(tokens[0]);
+      double lon = (tokens[1].find('?') != std::string::npos) ? convertDmsToDec(tokens[1]) : stod(tokens[1]);
 
       // transform latitude and longitude to UTM frame
       geometry_msgs::PointStamped waypoint_utm;
@@ -94,26 +95,28 @@ void NavigationClient::load_waypoints_file()
       tf_listener_.transformPoint("odom", ros::Time(0), waypoint_utm, "odom", waypoint_odom);
       waypoints_list_.push_back(waypoint_odom);
     }
-    lineIndex++;
+    line_index++;
   }
 
   ROS_INFO_STREAM_ONCE(waypoints_list_.size() << " waypoints loaded.");
 }
 
-double NavigationClient::dms_to_dec(std::string dms)
+double NavigationClient::convertDmsToDec(std::string dms)
 {
-  auto qMarkIter = dms.find('?');
-  auto aposIter = dms.find('\'');
-  auto qouteIter = dms.find('\"');
-  auto degrees = stod(dms.substr(0, qMarkIter));
-  auto minutes = stod(dms.substr(qMarkIter + 1, aposIter));
-  auto seconds = stod(dms.substr(aposIter + 1, qouteIter));
-  auto dirChar = dms[dms.size() - 1];
+  auto q_mark_iter = dms.find('?');
+  auto apos_iter = dms.find('\'');
+  auto quote_iter = dms.find('\"');
+  auto degrees = stod(dms.substr(0, q_mark_iter));
+  auto minutes = stod(dms.substr(q_mark_iter + 1, apos_iter));
+  auto seconds = stod(dms.substr(apos_iter + 1, quote_iter));
+  auto dir_char = dms[dms.size() - 1];
 
-  degrees += minutes / 60.0;
-  degrees += seconds / 3600.0;
+  const double seconds_in_minute = 60.0;
+  const double seconds_in_hour = 3600.0;
+  degrees += minutes / seconds_in_minute;
+  degrees += seconds / seconds_in_hour;
 
-  if (dirChar == 'W' || dirChar == 'S')
+  if (dir_char == 'W' || dir_char == 'S')
     degrees *= -1;
 
   return degrees;

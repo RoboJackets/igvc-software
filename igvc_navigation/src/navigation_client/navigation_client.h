@@ -39,7 +39,7 @@ private:
   Loads waypoints from path_, transforms them into the UTM frame, and stores
   them in waypoints_.
   */
-  void load_waypoints_file();
+  void loadWaypointsFile();
 
   /**
   degrees minutes seconds to decimal degrees conversion function
@@ -47,42 +47,42 @@ private:
   @param[in] dms lat or long in degrees minutes seconds
   @return input value in decimal degrees
   */
-  static double dms_to_dec(std::string dms);
+  static double convertDmsToDec(std::string dms);
 
   /**
   sends the PoseStamped as a goal
 
   @param[in] PoseStamped to send
    */
-  void sendPoseAsGoal(const geometry_msgs::PoseStamped&);
+  void sendPoseAsGoal(const geometry_msgs::PoseStamped& pose);
 
   /**
   sends the PoseStamped as a goal and waits
 
   @param[in] PoseStamped to send
    */
-  void sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped&);
+  void sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped& pose);
 
   /**
   sends the PointStamped as a goal, orientation is that of yaw = 0
 
   @param[in] PointStamped to send
    */
-  void sendPointAsGoal(const geometry_msgs::PointStamped&);
+  void sendPointAsGoal(const geometry_msgs::PointStamped& point);
 
   /**
   sends the PointStamped as a goal and waits, orientation is that of yaw = 0
 
   @param[in] PointStamped to send
    */
-  void sendPointAsGoalAndWait(const geometry_msgs::PointStamped&);
+  void sendPointAsGoalAndWait(const geometry_msgs::PointStamped& point);
 
   /**
   (ROS Callback) sends waypoints from rviz to the navigation server
 
   @param[in]
   */
-  void rvizWaypointCallback(const geometry_msgs::PoseStamped&);
+  void rvizWaypointCallback(const geometry_msgs::PoseStamped& pose);
 };
 
 #endif  // SRC_NAVIGATION_CLIENT_H
