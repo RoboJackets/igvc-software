@@ -55,51 +55,11 @@ void UnrollingLayer::incomingMap(const nav_msgs::OccupancyGridConstPtr& map)
   const uint32_t length_x = map->info.width;
   const uint32_t length_y = map->info.height;
 
-  const auto resolution = static_cast<double>(map->info.resolution);
   const auto origin_x = static_cast<double>(map->info.origin.position.x);
   const auto origin_y = static_cast<double>(map->info.origin.position.y);
 
-  // Calculate where map's origin is on our map
-  const int map_idx_x = static_cast<int>(std::round((origin_x - getOriginX()) / resolution));
-  const int map_idx_y = static_cast<int>(std::round((origin_y - getOriginY()) / resolution));
-
-  size_t start_idx_x = 0;
-  size_t start_idx_y = 0;
-  // If map_idx is negative, then calculate the offset we need to start iterating map at
-  // so that we don't go off the map
-  if (map_idx_x < 0)
-  {
-    start_idx_x = -map_idx_x;
-  }
-  if (map_idx_y < 0)
-  {
-    start_idx_y = -map_idx_y;
-  }
-
-  // Calculate where map's end is on our map
-  const size_t idx_end_x = map_idx_x + length_x;
-  const size_t idx_end_y = map_idx_y + length_y;
-
-  const auto last_idx_x = getSizeInCellsX();
-  const auto last_idx_y = getSizeInCellsY();
-
-  // If map's end is larger than our largest, then last index to iterate is our largest - their origin in our map
-  size_t end_idx_x = length_x;
-  size_t end_idx_y = length_y;
-
-  if (idx_end_x > last_idx_x)
-  {
-    end_idx_x = last_idx_x - map_idx_x;
-  }
-  if (idx_end_y > last_idx_y)
-  {
-    end_idx_y = last_idx_y - map_idx_y;
-  }
-
-  UpdateMapMetadata metadata{
-    map_idx_x, map_idx_y, start_idx_x, start_idx_y, end_idx_x, end_idx_y, length_x, length_y
-  };
-  updateMap(map->data, metadata);
+  auto update_metadata = calculateMapMetadata(length_x, length_y, origin_x, origin_y);
+  updateMap(map->data, update_metadata);
 }
 
 void UnrollingLayer::incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& map)
@@ -120,9 +80,20 @@ void UnrollingLayer::incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr&
   const auto update_origin_x = origin_x + (map->x * resolution);
   const auto update_origin_y = origin_y + (map->y * resolution);
 
+  auto update_metadata = calculateMapMetadata(length_x, length_y, update_origin_x, update_origin_y);
+
+  updateMap(map->data, update_metadata);
+}
+
+UnrollingLayer::UpdateMapMetadata UnrollingLayer::calculateMapMetadata(size_t length_x, size_t length_y,
+                                                                       double origin_x, double origin_y) const
+{
+  // We need to translate indices from update to our costmap
+  const auto resolution = static_cast<double>(current_metadata_->resolution);
+
   // Calculate where the update map's origin is on our map
-  const int map_idx_x = static_cast<int>((update_origin_x - getOriginX()) / resolution);
-  const int map_idx_y = static_cast<int>((update_origin_y - getOriginY()) / resolution);
+  const int map_idx_x = static_cast<int>((origin_x - getOriginX()) / resolution);
+  const int map_idx_y = static_cast<int>((origin_y - getOriginY()) / resolution);
 
   size_t start_idx_x = 0;
   size_t start_idx_y = 0;
@@ -157,10 +128,7 @@ void UnrollingLayer::incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr&
     end_idx_y = last_idx_y - map_idx_y;
   }
 
-  UpdateMapMetadata metadata{
-    map_idx_x, map_idx_y, start_idx_x, start_idx_y, end_idx_x, end_idx_y, length_x, length_y
-  };
-  updateMap(map->data, metadata);
+  return { map_idx_x, map_idx_y, start_idx_x, start_idx_y, end_idx_x, end_idx_y, length_x, length_y };
 }
 
 void UnrollingLayer::updateMap(const std::vector<int8_t>& map, const UpdateMapMetadata& metadata)
@@ -194,7 +162,6 @@ void UnrollingLayer::touch(size_t start_x, size_t start_y, size_t end_x, size_t 
 void UnrollingLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                                   double* max_x, double* max_y)
 {
-  ROS_INFO_STREAM(">>> updateBounds");
   if (max_map_x_ == 0 && max_map_y_ == 0 && min_map_x_ == std::numeric_limits<size_t>::max() &&
       min_map_y_ == std::numeric_limits<size_t>::max())
   {
@@ -224,12 +191,10 @@ void UnrollingLayer::updateBounds(double robot_x, double robot_y, double robot_y
   min_map_y_ = std::numeric_limits<size_t>::max();
   max_map_x_ = 0;
   max_map_y_ = 0;
-  ROS_INFO_STREAM("<< done updateBounds");
 }
 
 void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-  ROS_INFO_STREAM(">>> updateCosts (" << min_i << ", " << min_j << ") -> (" << max_i << ", " << max_j << ")");
   uint8_t* master_array = master_grid.getCharMap();
   uint8_t* line_array = getCharMap();
   unsigned int span = master_grid.getSizeInCellsX();
@@ -243,7 +208,6 @@ void UnrollingLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
       master_array[it] = line_array[it];
     }
   }
-  ROS_INFO_STREAM("<<< done updateCosts");
 }
 
 }  // namespace unrolling_layer
