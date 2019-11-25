@@ -36,6 +36,16 @@ private:
   double waypoint_radius_;          // detection radius for waypoint
 
   /**
+  Waits for a transform from utm to odom
+   */
+  void waitForTransform();
+
+  /**
+  Waits for the action lib server to become available
+   */
+  void waitForServer();
+
+  /**
   Loads waypoints from path_, transforms them into the UTM frame, and stores
   them in waypoints_.
   */
@@ -50,32 +60,20 @@ private:
   static double convertDmsToDec(std::string dms);
 
   /**
-  sends the PoseStamped as a goal
+  sends `pose` as a goal and waits if `waiting` is true
 
-  @param[in] PoseStamped to send
+  @param[in] pose PoseStamped to send
+  @param[in] waiting True if client should wait for server response
    */
-  void sendPoseAsGoal(const geometry_msgs::PoseStamped& pose);
+  void sendPoseAsGoal(const geometry_msgs::PoseStamped& pose, bool waiting);
 
   /**
-  sends the PoseStamped as a goal and waits
+  sends `point` as a goal with orientation of yaw = 0 and waits if `waiting` is true
 
-  @param[in] PoseStamped to send
+  @param[in] point PointStamped to send
+  @param[in] waiting True if client should wait for server response
    */
-  void sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped& pose);
-
-  /**
-  sends the PointStamped as a goal, orientation is that of yaw = 0
-
-  @param[in] PointStamped to send
-   */
-  void sendPointAsGoal(const geometry_msgs::PointStamped& point);
-
-  /**
-  sends the PointStamped as a goal and waits, orientation is that of yaw = 0
-
-  @param[in] PointStamped to send
-   */
-  void sendPointAsGoalAndWait(const geometry_msgs::PointStamped& point);
+  void sendPointAsGoal(const geometry_msgs::PointStamped& point, bool waiting);
 
   /**
   (ROS Callback) sends waypoints from rviz to the navigation server
