@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node name="slam" pkg="igvc_perception" type="slam" output="screen" >
+        <param name="odomNoiseRatio" value="0.01"/>
+    </node>
+</launch>
