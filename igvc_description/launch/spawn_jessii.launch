@@ -18,7 +18,7 @@
 
   <!-- uncomment below line to change to using the old robot -->
   <!--<param name="robot_description" command="cat $(find igvc_description)/urdf/jessi.urdf" />-->
-
+m
   <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
         args="-param robot_description
               -gazebo_namespace /gazebo
