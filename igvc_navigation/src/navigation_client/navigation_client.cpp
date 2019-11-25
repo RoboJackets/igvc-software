@@ -13,35 +13,41 @@ NavigationClient::NavigationClient()
   assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
   assertions::getParam(private_nh, "waypoint_radius", waypoint_radius_);
 
-  const double waiting_time = 5.0;
-  // wait for the action server to come up
-  while (!client.waitForServer(ros::Duration(waiting_time)))
-  {
-    ROS_INFO("Waiting for the move_base action server to come up");
-  }
-
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
 
-  // wait for the utm->odom transform to become available
-  while (!tf_listener_.waitForTransform("odom", "utm", ros::Time(0), ros::Duration(waiting_time)))
-  {
-    ROS_INFO_STREAM("utm->odom transform not found. waiting...");
-  }
-
-  ROS_INFO_STREAM("utm->odom transform found!");
+  waitForTransform();
+  waitForServer();
 
   if (reading_from_file_)
   {
     loadWaypointsFile();
     for (const geometry_msgs::PointStamped& waypoint : waypoints_list_)
     {
-      sendPointAsGoalAndWait(waypoint);
+      sendPointAsGoal(waypoint, true);
     }
   }
   else
   {
     ROS_INFO_STREAM("Waiting for waypoints from rviz.");
-    ros::spin();
+  }
+}
+
+void NavigationClient::waitForTransform()
+{
+  const double waiting_time = 5.0;
+  while (!tf_listener_.waitForTransform("odom", "utm", ros::Time(0), ros::Duration(waiting_time)))
+  {
+    ROS_INFO_STREAM("utm->odom transform not found. waiting...");
+  }
+  ROS_INFO_STREAM("utm->odom transform found!");
+}
+
+void NavigationClient::waitForServer()
+{
+  const double waiting_time = 5.0;
+  while (!client.waitForServer(ros::Duration(waiting_time)))
+  {
+    ROS_INFO("Waiting for the move_base action server to come up");
   }
 }
 
@@ -52,7 +58,7 @@ void NavigationClient::loadWaypointsFile()
   if (waypoint_file_path_.empty())
   {
     ROS_ERROR_STREAM("Could not load waypoints. Empty file path.");
-    return;
+    ros::shutdown();
   }
 
   std::ifstream file;
@@ -61,7 +67,7 @@ void NavigationClient::loadWaypointsFile()
   if (!file.is_open())
   {
     ROS_INFO_STREAM("Could not open file: " << waypoint_file_path_);
-    return;
+    ros::shutdown();
   }
 
   std::string line;
@@ -122,27 +128,24 @@ double NavigationClient::convertDmsToDec(std::string dms)
   return degrees;
 }
 
-void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose)
+void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose, bool waiting)
 {
   ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y
                                     << ") with yaw = " << tf::getYaw(pose.pose.orientation));
   mbf_msgs::MoveBaseGoal goal;
   goal.target_pose = pose;
 
-  client.sendGoal(goal);
+  if (waiting)
+  {
+    client.sendGoalAndWait(goal);
+  }
+  else
+  {
+    client.sendGoal(goal);
+  }
 }
 
-void NavigationClient::sendPoseAsGoalAndWait(const geometry_msgs::PoseStamped& pose)
-{
-  ROS_INFO_STREAM("Sending pose and waiting: (" << pose.pose.position.x << ", " << pose.pose.position.y
-                                                << ") with yaw = " << tf::getYaw(pose.pose.orientation));
-  mbf_msgs::MoveBaseGoal goal;
-  goal.target_pose = pose;
-
-  client.sendGoalAndWait(goal);
-}
-
-void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point)
+void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point, bool waiting)
 {
   ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ") with yaw = 0");
   mbf_msgs::MoveBaseGoal goal;
@@ -151,19 +154,14 @@ void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point)
   goal.target_pose.pose.position = point.point;
   goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
-  client.sendGoal(goal);
-}
-
-void NavigationClient::sendPointAsGoalAndWait(const geometry_msgs::PointStamped& point)
-{
-  ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ") with yaw = 0");
-  mbf_msgs::MoveBaseGoal goal;
-
-  goal.target_pose.header = point.header;
-  goal.target_pose.pose.position = point.point;
-  goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-
-  client.sendGoalAndWait(goal);
+  if (waiting)
+  {
+    client.sendGoalAndWait(goal);
+  }
+  else
+  {
+    client.sendGoal(goal);
+  }
 }
 
 void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& pose)
@@ -174,7 +172,7 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
   }
   else
   {
-    sendPoseAsGoal(pose);
+    sendPoseAsGoal(pose, false);
   }
 }
 
@@ -182,4 +180,5 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "navigation_client");
   NavigationClient nav = NavigationClient();
+  ros::spin();
 }
