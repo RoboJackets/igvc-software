@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-
-<!-- map.launch -->
-<launch>
-
-    <node name="action_server" pkg="igvc_navigation" type="action_server" output="screen" >
-    </node>
-
-</launch>
