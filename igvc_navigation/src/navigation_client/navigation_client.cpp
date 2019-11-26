@@ -11,7 +11,6 @@ NavigationClient::NavigationClient()
 
   assertions::getParam(private_nh, "reading_from_file", reading_from_file_);
   assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
-  assertions::getParam(private_nh, "waypoint_radius", waypoint_radius_);
 
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
 

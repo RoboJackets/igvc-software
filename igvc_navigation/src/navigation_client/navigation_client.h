@@ -36,7 +36,6 @@ private:
   // params
   bool reading_from_file_;          // true if reading from waypoint file, false if from rviz
   std::string waypoint_file_path_;  // path to waypoint file
-  double waypoint_radius_;          // detection radius for waypoint
 
   /**
   Waits for a transform from utm to odom
