@@ -17,13 +17,7 @@
     <arg name="yaw" default="0"/>
 
     <param name="/use_sim_time" value="true"/>
-
-    <!-- WARNING: this waypoint instance will always use ground truth -->
-    <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
-        <param name="file" value="$(arg waypoints)" />
-        <param name="localization_topic" value="/ground_truth" />
-        <param name="gps_topic" value="/fix" />
-    </node>
+    <param name="/waypoint_file_path" value="$(arg waypoints)" />
 
     <!-- Create the world. -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
