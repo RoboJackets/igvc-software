@@ -11,7 +11,6 @@ NavigationClient::NavigationClient()
 
   assertions::getParam(private_nh, "reading_from_file", reading_from_file_);
   assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
-  assertions::getParam(private_nh, "waypoint_radius", waypoint_radius_);
 
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
 
@@ -20,11 +19,8 @@ NavigationClient::NavigationClient()
 
   if (reading_from_file_)
   {
-    loadWaypointsFile();
-    for (const geometry_msgs::PointStamped& waypoint : waypoints_list_)
-    {
-      sendPointAsGoal(waypoint, true);
-    }
+    std::vector<geometry_msgs::PointStamped> waypoints = loadWaypointsFromFile();
+    sendWaypoints(waypoints);
   }
   else
   {
@@ -51,15 +47,38 @@ void NavigationClient::waitForServer()
   }
 }
 
-void NavigationClient::loadWaypointsFile()
+std::vector<geometry_msgs::PointStamped> NavigationClient::loadWaypointsFromFile()
 {
   ROS_INFO_STREAM_ONCE("Loading waypoints from " << waypoint_file_path_);
+
+  std::vector<geometry_msgs::PointStamped> waypoints;
 
   if (waypoint_file_path_.empty())
   {
     ROS_ERROR_STREAM("Could not load waypoints. Empty file path.");
     ros::shutdown();
+    // return the empty waypoints list
+    return waypoints;
   }
+
+  // get the latitude and longitudes from the waypoint file
+  std::vector<LatLong> coordinates = parseWaypointFile();
+
+  // convert the latitude and longitudes to PointStamped in odom
+  for (LatLong lat_long : coordinates)
+  {
+    geometry_msgs::PointStamped waypoint = convertLatLongToOdom(lat_long);
+    waypoints.push_back(waypoint);
+  }
+
+  ROS_INFO_STREAM_ONCE(waypoints.size() << " waypoints loaded.");
+  return waypoints;
+}
+
+std::vector<LatLong> NavigationClient::parseWaypointFile()
+{
+  std::vector<LatLong> coordinates;
+  std::vector<LatLong> empty;  // return result when error occurs
 
   std::ifstream file;
   file.open(waypoint_file_path_.c_str());
@@ -68,57 +87,61 @@ void NavigationClient::loadWaypointsFile()
   {
     ROS_INFO_STREAM("Could not open file: " << waypoint_file_path_);
     ros::shutdown();
+    return empty;
   }
 
-  std::string line;
-  auto line_index = 1;
-  while (!file.eof())
+  unsigned short line_index = 1;
+  for (std::string line; std::getline(file, line);)
   {
-    getline(file, line);
-
-    if (!line.empty() && line[0] != '#')
+    std::vector<std::string> tokens = split(line, ',');
+    if (tokens.size() != 2)
     {
-      std::vector<std::string> tokens = split(line, ',');
-
-      if (tokens.size() != 2)
-      {
-        ROS_ERROR_STREAM(waypoint_file_path_ << ":" << line_index << " - " << tokens.size() << " tokens instead of 2.");
-        return;
-      }
-
-      // convert latitude and longiture to decimal degrees if currently in degrees minutes second. specified by '?'
-      // symbol
-      double lat = (tokens[0].find('?') != std::string::npos) ? convertDmsToDec(tokens[0]) : stod(tokens[0]);
-      double lon = (tokens[1].find('?') != std::string::npos) ? convertDmsToDec(tokens[1]) : stod(tokens[1]);
-
-      // transform latitude and longitude to UTM frame
-      geometry_msgs::PointStamped waypoint_utm;
-      RobotLocalization::NavsatConversions::UTM(lat, lon, &(waypoint_utm.point.x), &(waypoint_utm.point.y));
-      waypoint_utm.header.frame_id = "utm";
-
-      // transform utm frame to odom frame
-      geometry_msgs::PointStamped waypoint_odom;
-      tf_listener_.transformPoint("odom", ros::Time(0), waypoint_utm, "odom", waypoint_odom);
-      waypoints_list_.push_back(waypoint_odom);
+      ROS_ERROR_STREAM(waypoint_file_path_ << ":" << line_index << " - " << tokens.size() << " tokens instead of 2.");
+      ros::shutdown();
+      return empty;
     }
-    line_index++;
+
+    // Convert latitude and longitude to decimal degrees if currently in degrees minutes second. Specified by '?'
+    // symbol.
+    LatLong coord{};
+    coord.latitude = (tokens[0].find('?') != std::string::npos) ? convertDmsToDec(tokens[0]) : stod(tokens[0]);
+    coord.longitude = (tokens[1].find('?') != std::string::npos) ? convertDmsToDec(tokens[1]) : stod(tokens[1]);
+
+    coordinates.push_back(coord);
+    ++line_index;
   }
 
-  ROS_INFO_STREAM_ONCE(waypoints_list_.size() << " waypoints loaded.");
+  return coordinates;
+}
+
+geometry_msgs::PointStamped NavigationClient::convertLatLongToOdom(LatLong lat_long)
+{
+  geometry_msgs::PointStamped waypoint_utm;
+  RobotLocalization::NavsatConversions::UTM(lat_long.latitude, lat_long.longitude, &(waypoint_utm.point.x),
+                                            &(waypoint_utm.point.y));
+  waypoint_utm.header.frame_id = "utm";
+
+  // transform utm frame to odom frame
+  geometry_msgs::PointStamped waypoint_odom;
+  tf_listener_.transformPoint("odom", ros::Time(0), waypoint_utm, "odom", waypoint_odom);
+  return waypoint_odom;
 }
 
 double NavigationClient::convertDmsToDec(std::string dms)
 {
-  auto q_mark_iter = dms.find('?');
-  auto apos_iter = dms.find('\'');
-  auto quote_iter = dms.find('\"');
-  auto degrees = stod(dms.substr(0, q_mark_iter));
-  auto minutes = stod(dms.substr(q_mark_iter + 1, apos_iter));
-  auto seconds = stod(dms.substr(apos_iter + 1, quote_iter));
-  auto dir_char = dms[dms.size() - 1];
+  const auto seconds_in_minute = 60.0;
+  const auto seconds_in_hour = 3600.0;
 
-  const double seconds_in_minute = 60.0;
-  const double seconds_in_hour = 3600.0;
+  const auto q_mark_iter = dms.find('?');
+  const auto apos_iter = dms.find('\'');
+  const auto quote_iter = dms.find('\"');
+  const auto dir_char = dms[dms.size() - 1];
+
+  const auto minutes = stod(dms.substr(q_mark_iter + 1, apos_iter));
+  const auto seconds = stod(dms.substr(apos_iter + 1, quote_iter));
+
+  auto degrees = stod(dms.substr(0, q_mark_iter));
+
   degrees += minutes / seconds_in_minute;
   degrees += seconds / seconds_in_hour;
 
@@ -128,7 +151,15 @@ double NavigationClient::convertDmsToDec(std::string dms)
   return degrees;
 }
 
-void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose, bool waiting)
+void NavigationClient::sendWaypoints(const std::vector<geometry_msgs::PointStamped>& waypoints)
+{
+  for (const geometry_msgs::PointStamped& waypoint : waypoints)
+  {
+    sendGoal(waypoint, true);
+  }
+}
+
+void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool waiting)
 {
   ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y
                                     << ") with yaw = " << tf::getYaw(pose.pose.orientation));
@@ -145,23 +176,13 @@ void NavigationClient::sendPoseAsGoal(const geometry_msgs::PoseStamped& pose, bo
   }
 }
 
-void NavigationClient::sendPointAsGoal(const geometry_msgs::PointStamped& point, bool waiting)
+void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool waiting)
 {
-  ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ") with yaw = 0");
-  mbf_msgs::MoveBaseGoal goal;
-
-  goal.target_pose.header = point.header;
-  goal.target_pose.pose.position = point.point;
-  goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-
-  if (waiting)
-  {
-    client.sendGoalAndWait(goal);
-  }
-  else
-  {
-    client.sendGoal(goal);
-  }
+  geometry_msgs::PoseStamped pose;
+  pose.header = point.header;
+  pose.pose.position = point.point;
+  pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+  sendGoal(pose, waiting);
 }
 
 void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& pose)
@@ -172,7 +193,7 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
   }
   else
   {
-    sendPoseAsGoal(pose, false);
+    sendGoal(pose, false);
   }
 }
 

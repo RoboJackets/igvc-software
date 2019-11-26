@@ -18,8 +18,6 @@
 
     <param name="/use_sim_time" value="true"/>
     <param name="/waypoint_file_path" value="$(arg waypoints)" />
-    <param name="localization_topic" value="/ground_truth" />
-    <param name="gps_topic" value="/fix" />
 
     <!-- Create the world. -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">

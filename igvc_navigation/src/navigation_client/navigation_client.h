@@ -15,6 +15,12 @@
 
 using MoveBaseClient = actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction>;
 
+struct LatLong
+{
+  double latitude;
+  double longitude;
+};
+
 class NavigationClient
 {
 public:
@@ -27,13 +33,9 @@ private:
   // action lib client
   MoveBaseClient client = MoveBaseClient("move_base_flex/move_base", true);
 
-  // waypoint poses to send
-  std::vector<geometry_msgs::PointStamped> waypoints_list_;
-
   // params
   bool reading_from_file_;          // true if reading from waypoint file, false if from rviz
   std::string waypoint_file_path_;  // path to waypoint file
-  double waypoint_radius_;          // detection radius for waypoint
 
   /**
   Waits for a transform from utm to odom
@@ -46,13 +48,26 @@ private:
   void waitForServer();
 
   /**
-  Loads waypoints from path_, transforms them into the UTM frame, and stores
-  them in waypoints_.
+  Loads waypoints from file_path, transforms them into the UTM frame, and returns a vector of PointStamped
+  @param[in] file_path Path to waypoint file
   */
-  void loadWaypointsFile();
+  std::vector<geometry_msgs::PointStamped> loadWaypointsFromFile();
 
   /**
-  degrees minutes seconds to decimal degrees conversion function
+  Reads over a waypoint file and returns the latitudes and longitudes
+  @return vector of LatLongs corresponding to waypoints
+   */
+  std::vector<LatLong> parseWaypointFile();
+
+  /**
+  Converts latitudes and longitudes to the odom frame
+  @param[in] latlong latitude and longitude to convert
+  @return PointStamped in odom frame
+   */
+  geometry_msgs::PointStamped convertLatLongToOdom(LatLong lat_long);
+
+  /**
+  Converts degrees minutes seconds to decimal degrees
 
   @param[in] dms lat or long in degrees minutes seconds
   @return input value in decimal degrees
@@ -60,12 +75,17 @@ private:
   static double convertDmsToDec(std::string dms);
 
   /**
+  Sends all waypoints to navigation server
+   */
+  void sendWaypoints(const std::vector<geometry_msgs::PointStamped>& waypoints);
+
+  /**
   sends `pose` as a goal and waits if `waiting` is true
 
   @param[in] pose PoseStamped to send
   @param[in] waiting True if client should wait for server response
    */
-  void sendPoseAsGoal(const geometry_msgs::PoseStamped& pose, bool waiting);
+  void sendGoal(const geometry_msgs::PoseStamped& pose, bool waiting);
 
   /**
   sends `point` as a goal with orientation of yaw = 0 and waits if `waiting` is true
@@ -73,7 +93,7 @@ private:
   @param[in] point PointStamped to send
   @param[in] waiting True if client should wait for server response
    */
-  void sendPointAsGoal(const geometry_msgs::PointStamped& point, bool waiting);
+  void sendGoal(const geometry_msgs::PointStamped& point, bool waiting);
 
   /**
   (ROS Callback) sends waypoints from rviz to the navigation server
