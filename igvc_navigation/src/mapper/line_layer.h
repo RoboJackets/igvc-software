@@ -33,6 +33,8 @@ public:
 
   void onInitialize() override;
   void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) override;
+  void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, double* max_x,
+                    double* max_y) override;
 
   struct IndexDistPair
   {
@@ -98,6 +100,7 @@ private:
                     size_t camera_idx);
   void cleanupProjections();
   void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
+  void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
 
   grid_map::Index calculateBufferIndex(const Eigen::Vector3f& point, const grid_map::Index& camera_index) const;
 
@@ -105,6 +108,9 @@ private:
 
   void updateProbabilityLayer();
   void transferToCostmap();
+  void updateRollingWindow();
+  void updateStaticWindow();
+
   void debugPublishMap();
   void publishCostmap();
   void initCostTranslationTable();

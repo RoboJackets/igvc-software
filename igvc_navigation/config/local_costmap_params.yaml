@@ -5,15 +5,21 @@ local_costmap:
         - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
         - {name: line_layer,     type: "line_layer::LineLayer"}
     publish_frequency: 5.0
-    footprint: [[0.4,0.4],[-0.4,0.4],[-0.4,-0.4],[0.4,-0.4]]
-    width: 200
-    height: 200
-    origin_x: -100
-    origin_y: -100
-    track_unknown_space: true
+    footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
+    width: 40
+    height: 40
+    origin_x: -20
+    origin_y: -20
+#    width: 200
+#    height: 200
+#    origin_x: -100
+#    origin_y: -100
+    update_frequency: 10
+    track_unknown_space: false
     unknown_cost_value: 30
     static_map: false
-    rolling_window: false
+    rolling_window: true
+#    rolling_window: false
     resolution: 0.1
 lidar_layer:
     map:
@@ -24,6 +30,7 @@ lidar_layer:
         occupied_threshold: 0.5
         max_occupancy: 0.99
         min_occupancy: 0.01
+        costmap_topic: "/mapper/debug/lidar/costmap"
         debug:
             map_topic: "/mapper/debug/lidar/gridmap"
             enabled: false
@@ -53,12 +60,13 @@ line_layer:
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        max_distance: 10
         probabilities:
             miss: 0.7
             hit: 0.7
-            miss_exponential_coeff: 0.05
+            miss_exponential_coeff: 0.1
             miss_angle_exponential_coeff: 5
-            hit_exponential_coeff: 0.05
+            hit_exponential_coeff: 0.1
         debug:
             line_topic: "/line_layer/debug/center/line"
             nonline_topic: "/line_layer/debug/center/nonline"
@@ -68,6 +76,7 @@ line_layer:
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        max_distance: 10
         probabilities:
             miss: 0.7
             hit: 0.7
@@ -83,6 +92,7 @@ line_layer:
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        max_distance: 10
         probabilities:
             miss: 0.7
             hit: 0.7
