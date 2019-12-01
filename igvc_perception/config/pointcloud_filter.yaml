@@ -21,7 +21,7 @@ pointcloud_filter:
     fast_segment_filter:
         ground_topic: "/ground"
         nonground_topic: "/nonground"
-        num_segments: 45
+        num_segments: 270
         error_t: .015
         slope_t: .4
         intercept_z_t: 100

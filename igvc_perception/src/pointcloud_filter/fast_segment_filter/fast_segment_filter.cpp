@@ -10,10 +10,10 @@ void FastSegmentFilter::filter(pointcloud_filter::Bundle &bundle)
 
   for (const auto &point : bundle.pointcloud->points)
   {
-    int segment_id = getAngleFromPoint(point) * config_.num_segments / 360;
+    int segment_id = getSegIdFromPoint(point);
     segments_[segment_id].raw_points_.emplace_back(point);
   }
-  processSegments();
+  computePrototypePoints();
   getLinesFromSegments();
   if (config_.debug_viz)
   {
@@ -25,27 +25,24 @@ void FastSegmentFilter::filter(pointcloud_filter::Bundle &bundle)
   ground_pub_.publish(ground_points_);
   nonground_pub_.publish(nonground_points_);
 
-  bundle.free_pointcloud->points = std::move(ground_points_.points);
   bundle.occupied_pointcloud->points = std::move(nonground_points_.points);
 }
 
 double Line::distFromPoint(const Prototype point) const
 {
   Eigen::Vector3d vect;
-  vect(0) = point.point_.x;
-  vect(1) = point.point_.y;
-  vect(2) = point.point_.z;
-  double t = -(intercept_ - vect).dot(params_) / (params_.dot(params_));
+  vect << point.point_.x, point.point_.y, point.point_.z;
+  double t = -(intercept_ - vect).dot(params_) / (params_.squaredNorm());
   Eigen::Vector3d pt_on_line = t * params_ + intercept_;
   return (pt_on_line - vect).squaredNorm();
 }
 
-bool Line::fitPoints(const Prototype new_point)
+bool Line::attemptFitPoint(const Prototype new_point)
 {
   int total_points = model_points_.size() + 1;
   if (total_points < 3)
   {
-    if (model_points_.size() == 0)
+    if (model_points_.empty())
     {
       start_point_ = new_point;
     }
@@ -111,7 +108,7 @@ FastSegmentFilter::FastSegmentFilter(const ros::NodeHandle &nh) : private_nh_{ n
   ;
 }
 
-void FastSegmentFilter::processSegments()
+void FastSegmentFilter::computePrototypePoints()
 {
   for (const auto &seg : segments_)
   {
@@ -140,30 +137,31 @@ void FastSegmentFilter::getLinesFromSegments()
 {
   for (auto &seg : segments_)
   {
-    std::vector<Prototype> sorted_points = seg.second.prototype_points_;
-    sort(sorted_points.begin(), sorted_points.end());
+    sort(seg.second.prototype_points_.begin(), seg.second.prototype_points_.end());
     Line curr_line = Line(config_.error_t);
-    for (Prototype pt : sorted_points)
+    for (const Prototype &pt : seg.second.prototype_points_)
     {
-      if (!curr_line.fitPoints(pt))
+      if (!curr_line.attemptFitPoint(pt))
       {
         curr_line.is_ground_ = evaluateIsGround(curr_line);
         seg.second.lines_.emplace_back(curr_line);
         curr_line = Line(config_.error_t);
-        curr_line.fitPoints(pt);
+        curr_line.attemptFitPoint(pt);
       }
     }
     curr_line.is_ground_ = evaluateIsGround(curr_line);
-    seg.second.lines_.emplace_back(curr_line);
+    if (curr_line.model_points_.size() > 1)
+    {
+      seg.second.lines_.emplace_back(curr_line);
+    }
   }
 }
 
 void FastSegmentFilter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &ground_points,
                                        pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &nonground_points)
 {
-  for (const auto &seg : segments_)
+  for (const auto &[segment_id, segment] : segments_)
   {
-    Segment segment = seg.second;
     for (const auto &point : segment.raw_points_)
     {
       Line mapped_line;
@@ -192,27 +190,21 @@ void FastSegmentFilter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::Poin
   }
 }
 
-int FastSegmentFilter::getAngleFromPoint(const velodyne_pointcloud::PointXYZIR point)
-{
-  return (int)(atan2(point.y, point.x) * 180 / M_PI) % 360;
-}
-/*
 int FastSegmentFilter::getSegIdFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
-  double angle = atan2(point.y, point.x);
-  return angle * config_.num_segments / 2 * M_PI;
+  double angle = atan2(point.y, point.x) + M_PI;
+  return angle * config_.num_segments / (2 * M_PI);
 }
-*/
 
 double FastSegmentFilter::getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
-  return sqrt(point.x * point.x + point.y * point.y);
+  return std::hypot(point.x, point.y);
 }
 
 double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1,
                                                    const velodyne_pointcloud::PointXYZIR point2)
 {
-  return pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2) + pow(point1.z - point2.z, 2);
+  return std::hypot(point1.x - point2.x, point1.y - point2.y, point1.z - point2.z);
 }
 
 bool FastSegmentFilter::evaluateIsGround(Line &l)
@@ -230,9 +222,11 @@ bool FastSegmentFilter::evaluateIsGround(Line &l)
   {
     ground = true;
   }
-  double slope = abs(l.end_point_.point_.z - l.start_point_.point_.z) /
-                 sqrt(pow(l.end_point_.point_.y - l.start_point_.point_.y, 2) +
-                      pow(l.end_point_.point_.x - l.start_point_.point_.x, 2));
+  double dx = l.end_point_.point_.x - l.start_point_.point_.x;
+  double dy = l.end_point_.point_.y - l.start_point_.point_.y;
+  double dz = l.end_point_.point_.z - l.start_point_.point_.z;
+  double len_xy = std::hypot(dx, dy);
+  double slope = std::abs(dz) / len_xy;
   ground = slope < config_.slope_t && l.end_point_.point_.z < config_.intercept_z_t;
   return ground;
 }
