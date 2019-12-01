@@ -2,6 +2,7 @@
 
 <launch>
     <node name="slam" pkg="igvc_perception" type="slam" output="screen" >
-        <param name="odomNoiseRatio" value="0.01"/>
+        <param name="biasUpdateRatio" value="20"/> <!--# of IMU factors per bias factor-->
+        <param name="biasNoiseConst" value="0.001"/>
     </node>
 </launch>

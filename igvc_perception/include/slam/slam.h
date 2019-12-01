@@ -18,6 +18,10 @@
 #include <gtsam/nonlinear/Values.h>
 #include <slam/slam.h>
 #include <tf/transform_listener.h>
+#include <gtsam/inference/Symbol.h>
+#include <gtsam/navigation/ImuBias.h>
+#include <gtsam/navigation/ImuFactor.h>
+#include <gtsam/nonlinear/ISAM2.h>
 
 class Slam {
 public:
@@ -36,6 +40,8 @@ private:
     void ImuCallback(const sensor_msgs::Imu &msg);
     void OdomCallback(const nav_msgs::Odometry &msg);
     void Optimize();
+    void InitializeImuParams();
+    void InitializePriors();
 
     // Defining some types
     typedef gtsam::noiseModel::Diagonal noiseDiagonal;
@@ -44,8 +50,15 @@ private:
     gtsam::Values currEstimate;
     gtsam::NonlinearFactorGraph graph;
     gtsam::Pose2 previousPose;
-    long pose_index_;
-    double odomNoiseRatio;
+    unsigned long pose_index_;
+    int imu_bias_counter_;
+    int BIAS_UPDATE_RATE;
+    double BIAS_NOISE_CONST;
+    gtsam::ISAM2 isam;
+    const double KGRAVITY = 9.81;
+    gtsam::PreintegratedImuMeasurements accum;
+    ros::Time lastImuMeasurement;
+    bool imu_recieved_;
 };
 
 #endif //SRC_SLAM_H
