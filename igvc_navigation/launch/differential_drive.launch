@@ -5,7 +5,7 @@
 
     <node name="differential_drive" pkg="igvc_navigation" type="differential_drive" output="screen" >
         <param name="axle_length" value="0.52"/>
-        <param name="max_vel" value="3.0"/>
+        <param name="max_vel" value="1.0"/>
     </node>
 
 </launch>

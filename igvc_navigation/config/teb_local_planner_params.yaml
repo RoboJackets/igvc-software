@@ -22,9 +22,9 @@ TebLocalPlannerROS:
   max_vel_x: 1.6
   max_vel_x_backwards: 0.8
   max_vel_y: 0.0
-  max_vel_theta: 2.0
-  acc_lim_x: 4.0
-  acc_lim_theta: 5.0
+  max_vel_theta: 2.5
+  acc_lim_x: 2.0
+  acc_lim_theta: 4.0
   min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
   footprint_model:
