@@ -32,12 +32,12 @@ double Line::distFromPoint(const Prototype point) const
 {
   Eigen::Vector3d vect;
   vect << point.point_.x, point.point_.y, point.point_.z;
-  double t = -(intercept_ - vect).dot(params_) / (params_.squaredNorm());
-  Eigen::Vector3d pt_on_line = t * params_ + intercept_;
+  double t = -(intercept_ - vect).dot(slope_) / (slope_.squaredNorm());
+  Eigen::Vector3d pt_on_line = t * slope_ + intercept_;
   return (pt_on_line - vect).squaredNorm();
 }
 
-bool Line::attemptFitPoint(const Prototype new_point)
+bool Line::attemptFitPoint(const Prototype &new_point)
 {
   int total_points = model_points_.size() + 1;
   if (total_points < 3)
@@ -53,7 +53,7 @@ bool Line::attemptFitPoint(const Prototype new_point)
     model_points_.emplace_back(new_point);
     return true;
   }
-  Eigen::Vector3d old_params = params_;
+  Eigen::Vector3d old_params = slope_;
   Eigen::Vector3d old_intercept = intercept_;
   MatrixXd A(total_points, 3);
   MatrixXd mean(1, 3);
@@ -78,12 +78,7 @@ bool Line::attemptFitPoint(const Prototype new_point)
   }
   mean /= -total_points;
   A += mean.replicate(total_points, 1);
-  Eigen::JacobiSVD<MatrixXd> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
-  params_ = svd.matrixV().col(0);
-  intercept_(0) = -mean(0, 0);
-  intercept_(1) = -mean(0, 1);
-  intercept_(2) = -mean(0, 2);
-  params_.normalize();
+  getSlopeIntercept(A, mean);
   double squared_error = distFromPoint(new_point);
   for (Prototype pt : model_points_)
   {
@@ -91,13 +86,23 @@ bool Line::attemptFitPoint(const Prototype new_point)
   }
   if (squared_error > error_t_)
   {
-    params_ = old_params;
+    slope_ = old_params;
     intercept_ = old_intercept;
     return false;
   }
   model_points_.emplace_back(new_point);
   end_point_ = new_point;
   return true;
+}
+
+void Line::getSlopeIntercept(const MatrixXd &A, const MatrixXd &mean)
+{
+  Eigen::JacobiSVD<MatrixXd> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+  slope_ = svd.matrixV().col(0);
+  intercept_(0) = -mean(0, 0);
+  intercept_(1) = -mean(0, 1);
+  intercept_(2) = -mean(0, 2);
+  slope_.normalize();
 }
 
 FastSegmentFilter::FastSegmentFilter(const ros::NodeHandle &nh) : private_nh_{ nh }, config_{ nh }
@@ -210,14 +215,8 @@ double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pointcloud::Po
 bool FastSegmentFilter::evaluateIsGround(Line &l)
 {
   bool ground = false;
-  bool all_below = true;
-  for (const auto &pt : l.model_points_)
-  {
-    if (pt.point_.z > config_.dist_t)
-    {
-      all_below = false;
-    }
-  }
+  const auto above_intercept = [&](const Prototype &pt) { return pt.point_.z > config_.dist_t; };
+  bool all_below = std::all_of(l.model_points_.begin(), l.model_points_.end(), above_intercept);
   if (all_below)
   {
     ground = true;

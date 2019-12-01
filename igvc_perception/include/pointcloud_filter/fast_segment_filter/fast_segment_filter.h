@@ -35,9 +35,17 @@ struct Prototype
   }
 };
 
+/**
+ * A struct to represent a line over the form:
+ *   slope_ * t + intercept_
+ * where t is a parameter.
+ * The slope and intercept define the line. The slope is defined from a least squares approach using SVD.
+ * And the intercept is defined as the mean of the points used to estimate the slope.
+ */
+
 struct Line
 {
-  Eigen::Vector3d params_ = {};
+  Eigen::Vector3d slope_ = {};
   Eigen::Vector3d intercept_ = {};
   Prototype start_point_ = {};
   Prototype end_point_ = {};
@@ -64,7 +72,17 @@ struct Line
    *         False otherwise
    *
    */
-  bool attemptFitPoint(const Prototype new_point);
+  bool attemptFitPoint(const Prototype &new_point);
+
+  /**
+   * Computes a slope and intercept for the line given a set of points. Uses SVD
+   * to compute the slope and uses the mean of the points as the intercept.
+   *
+   * @param A Matrix representing the sample points to fit the line/get slope from
+   * @param mean Matrix that is a 3d point which is the mean of all the sample points
+   *
+   */
+  void getSlopeIntercept(const MatrixXd &A, const MatrixXd &mean);
 };
 
 struct Segment
