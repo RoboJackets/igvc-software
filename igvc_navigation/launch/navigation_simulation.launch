@@ -11,6 +11,11 @@
         <arg name="reading_from_file" value="$(arg reading_from_file)"/>
     </include>
 
+    <!-- Launch navigation server -->
+    <include file="$(find igvc_navigation)/launch/navigation_server.launch">
+        <arg name="fix_goal_poses" value="$(arg reading_from_file)"/>
+    </include>
+
     <!-- Launch differential drive controller -->
     <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
 

@@ -316,3 +316,8 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
       break;
   }
 }
+
+int main(int argc, char** argv){
+    ros::init(argc, argv, "navigation_server");
+    NavigationServer nav = NavigationServer();
+}
