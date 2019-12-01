@@ -12,18 +12,19 @@
 
 #include <Eigen/Dense>
 
-typedef Eigen::Matrix<double, Eigen::Dynamic, 3> MatrixXd;
-typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VectorXd;
+using MatrixXd = Eigen::Matrix<double, Eigen::Dynamic, 3>;
+using VectorXd = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 
 namespace pointcloud_filter
 {
+/**
+ * A class that represents a prototype point, where a prototype
+ * point is a point that will be used to model lines within segments.
+ */
 struct Prototype
 {
   double distance_;
   velodyne_pointcloud::PointXYZIR point_;
-  double blue_;
-  double red_;
-  double green_;
 
   bool operator<(const Prototype &p) const
   {
@@ -39,19 +40,14 @@ struct Line
   Prototype end_point_;
   double error_t_;
   std::vector<Prototype> model_points_;
-  bool isGround_;
-  double blue_;
-  double red_;
-  double green_;
+  bool is_ground_;
 
-  Line()
+  Line() = default;
+  Line(double threshold) : error_t_(threshold)
   {
   }
-  Line(double threshold)
-  {
-    error_t_ = threshold;
-  }
-  double distFromPoint(const Prototype p);
+
+  double distFromPoint(const Prototype p) const;
   bool fitPoints(const Prototype new_point);
 };
 
@@ -67,7 +63,7 @@ class FastSegmentFilter
 public:
   FastSegmentFilter(const ros::NodeHandle &nh);
 
-  std::map<int, Segment> segments_;
+  std::unordered_map<int, Segment> segments_;
   pcl::PointCloud<velodyne_pointcloud::PointXYZIR> ground_points_;
   pcl::PointCloud<velodyne_pointcloud::PointXYZIR> nonground_points_;
 

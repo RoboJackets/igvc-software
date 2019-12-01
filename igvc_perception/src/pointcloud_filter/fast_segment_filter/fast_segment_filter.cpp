@@ -29,7 +29,7 @@ void FastSegmentFilter::filter(pointcloud_filter::Bundle &bundle)
   bundle.occupied_pointcloud->points = std::move(nonground_points_.points);
 }
 
-double Line::distFromPoint(const Prototype point)
+double Line::distFromPoint(const Prototype point) const
 {
   Eigen::Vector3d vect;
   vect(0) = point.point_.x;
@@ -130,7 +130,7 @@ void FastSegmentFilter::processSegments()
           prototype_pt = point;
         }
       }
-      Prototype ptype = { getDistanceFromPoint(prototype_pt), prototype_pt, 0, 0, 0 };
+      Prototype ptype = { getDistanceFromPoint(prototype_pt), prototype_pt };
       segments_[seg.first].prototype_points_.emplace_back(ptype);
     }
   }
@@ -147,19 +147,13 @@ void FastSegmentFilter::getLinesFromSegments()
     {
       if (!curr_line.fitPoints(pt))
       {
-        curr_line.isGround_ = evaluateIsGround(curr_line);
+        curr_line.is_ground_ = evaluateIsGround(curr_line);
         seg.second.lines_.emplace_back(curr_line);
         curr_line = Line(config_.error_t);
         curr_line.fitPoints(pt);
       }
     }
-    curr_line.isGround_ = evaluateIsGround(curr_line);
-    for (Prototype &pt : curr_line.model_points_)
-    {
-      pt.blue_ = curr_line.blue_;
-      pt.green_ = curr_line.green_;
-      pt.red_ = curr_line.red_;
-    }
+    curr_line.is_ground_ = evaluateIsGround(curr_line);
     seg.second.lines_.emplace_back(curr_line);
   }
 }
@@ -186,7 +180,7 @@ void FastSegmentFilter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::Poin
           }
         }
       }
-      if (mapped_line.isGround_)  // Removed max dist = nonground since was more pain than good
+      if (mapped_line.is_ground_)  // Removed max dist = nonground since was more pain than good
       {
         ground_points.push_back(point);
       }
@@ -202,6 +196,13 @@ int FastSegmentFilter::getAngleFromPoint(const velodyne_pointcloud::PointXYZIR p
 {
   return (int)(atan2(point.y, point.x) * 180 / M_PI) % 360;
 }
+/*
+int FastSegmentFilter::getSegIdFromPoint(const velodyne_pointcloud::PointXYZIR point)
+{
+  double angle = atan2(point.y, point.x);
+  return angle * config_.num_segments / 2 * M_PI;
+}
+*/
 
 double FastSegmentFilter::getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
@@ -233,24 +234,6 @@ bool FastSegmentFilter::evaluateIsGround(Line &l)
                  sqrt(pow(l.end_point_.point_.y - l.start_point_.point_.y, 2) +
                       pow(l.end_point_.point_.x - l.start_point_.point_.x, 2));
   ground = slope < config_.slope_t && l.end_point_.point_.z < config_.intercept_z_t;
-
-  // DEBUG VIZ COLORING
-  if (ground)
-  {
-    l.blue_ = 1.0;
-    l.red_ = 0.0;
-  }
-  else
-  {
-    l.red_ = 1.0;
-    l.blue_ = 0.0;
-  }
-  for (Prototype &pt : l.model_points_)
-  {
-    pt.blue_ = l.blue_;
-    pt.green_ = l.green_;
-    pt.red_ = l.red_;
-  }
   return ground;
 }
 
@@ -275,9 +258,14 @@ void FastSegmentFilter::debugViz()
         points.type = visualization_msgs::Marker::POINTS;
         points.scale.x = 0.05;
         points.scale.y = 0.05;
-        points.color.b = pt.blue_;
-        points.color.r = pt.red_;
-        points.color.g = pt.green_;
+        if (line.is_ground_)
+        {
+          points.color.b = 1.0;
+        }
+        else
+        {
+          points.color.r = 1.0;
+        }
         points.color.a = 1.0;
         geometry_msgs::Point p;
         p.x = pt.point_.x;
@@ -295,9 +283,14 @@ void FastSegmentFilter::debugViz()
       line_list.pose.orientation.w = 1.0;
       line_list.type = visualization_msgs::Marker::LINE_STRIP;
       line_list.scale.x = 0.025;
-      line_list.color.b = line.blue_;
-      line_list.color.r = line.red_;
-      line_list.color.g = line.green_;
+      if (line.is_ground_)
+      {
+        line_list.color.b = 1.0;
+      }
+      else
+      {
+        line_list.color.r = 1.0;
+      }
       line_list.color.a = 1.0;
       geometry_msgs::Point p1;
       p1.x = line.start_point_.point_.x;
