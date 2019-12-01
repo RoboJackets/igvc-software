@@ -7,13 +7,13 @@
 #include <actionlib/client/simple_action_client.h>
 #include <mbf_msgs/MoveBaseAction.h>
 
-
 #include <mbf_msgs/MoveBaseAction.h>
 #include <mbf_msgs/GetPathAction.h>
 #include <mbf_msgs/ExePathAction.h>
 #include <mbf_msgs/RecoveryAction.h>
 
-class NavigationServer {
+class NavigationServer
+{
 public:
   using ActionClientGetPath = actionlib::SimpleActionClient<mbf_msgs::GetPathAction>;
   using ActionClientExePath = actionlib::SimpleActionClient<mbf_msgs::ExePathAction>;
@@ -26,14 +26,14 @@ public:
 private:
   enum NavigationState
   {
-      NONE,
-      GET_PATH,
-      EXE_PATH,
-      RECOVERY,
-      OSCILLATING,
-      SUCCEEDED,
-      CANCELED,
-      FAILED
+    NONE,
+    GET_PATH,
+    EXE_PATH,
+    RECOVERY,
+    OSCILLATING,
+    SUCCEEDED,
+    CANCELED,
+    FAILED
   };
 
   // params
@@ -60,7 +60,7 @@ private:
   ros::Time time_of_last_get_path;
   ros::Duration time_between_get_path = ros::Duration(0.5);
 
-  void start(GoalHandle& goal_handle);
+  void start(GoalHandle &goal_handle);
 
   void cancel();
 
@@ -68,7 +68,8 @@ private:
 
   void runGetPath();
 
-  void actionGetPathDone(const actionlib::SimpleClientGoalState &state, const mbf_msgs::GetPathResultConstPtr &result_ptr);
+  void actionGetPathDone(const actionlib::SimpleClientGoalState &state,
+                         const mbf_msgs::GetPathResultConstPtr &result_ptr);
 
   void runExePath(nav_msgs::Path path);
 
@@ -76,7 +77,8 @@ private:
 
   void actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback);
 
-  void actionExePathDone(const actionlib::SimpleClientGoalState &state, const mbf_msgs::ExePathResultConstPtr &result_ptr);
+  void actionExePathDone(const actionlib::SimpleClientGoalState &state,
+                         const mbf_msgs::ExePathResultConstPtr &result_ptr);
 
   /**
   Attempts to run recovery behavior.
@@ -84,8 +86,8 @@ private:
    */
   bool attemptRecovery();
 
-  void actionRecoveryDone(const actionlib::SimpleClientGoalState &state, const mbf_msgs::RecoveryResultConstPtr &result_ptr);
+  void actionRecoveryDone(const actionlib::SimpleClientGoalState &state,
+                          const mbf_msgs::RecoveryResultConstPtr &result_ptr);
 };
 
-
-#endif //SRC_NAVIGATION_SERVER_H
+#endif  // SRC_NAVIGATION_SERVER_H
