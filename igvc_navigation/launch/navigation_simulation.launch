@@ -3,7 +3,7 @@
 
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
-    
+
     <!-- Launch navigation server -->
     <include file="$(find igvc_navigation)/launch/navigation_server.launch">
         <arg name="fix_goal_poses" value="$(arg reading_from_file)"/>

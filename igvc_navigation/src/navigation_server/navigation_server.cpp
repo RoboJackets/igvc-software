@@ -1,8 +1,6 @@
 #include "navigation_server.h"
 #include <parameter_assertions/assertions.h>
 
-#include <utility>
-
 NavigationServer::NavigationServer()
   : current_state_(NONE)
   , recovery_trigger_(NONE)
@@ -166,18 +164,7 @@ void NavigationServer::runExePath(nav_msgs::Path path)
   mbf_msgs::ExePathGoal exe_path_goal;
   exe_path_goal.controller = exe_path_controller_;
   exe_path_goal.path = std::move(path);
-  action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2),
-                                   boost::bind(&NavigationServer::actionExePathActive, this),
-                                   boost::bind(&NavigationServer::actionExePathFeedback, this, _1));
-}
-
-void NavigationServer::actionExePathActive()
-{
-  ROS_DEBUG_STREAM_NAMED("nav_server", "The 'exe_path' action is running.");
-}
-
-void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback)
-{
+  action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2));
 }
 
 void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState &state,
@@ -317,7 +304,8 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
   }
 }
 
-int main(int argc, char** argv){
-    ros::init(argc, argv, "navigation_server");
-    NavigationServer nav = NavigationServer();
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "navigation_server");
+  NavigationServer nav = NavigationServer();
 }

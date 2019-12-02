@@ -30,15 +30,14 @@ private:
     GET_PATH,
     EXE_PATH,
     RECOVERY,
-    OSCILLATING,
     SUCCEEDED,
     CANCELED,
     FAILED
   };
 
   // params
-  bool recovery_enabled_;
-  bool fix_goal_poses_;
+  bool recovery_enabled_ = true;
+  bool fix_goal_poses_ = true;
 
   NavigationState current_state_;
   NavigationState recovery_trigger_;
@@ -72,10 +71,6 @@ private:
                          const mbf_msgs::GetPathResultConstPtr &result_ptr);
 
   void runExePath(nav_msgs::Path path);
-
-  void actionExePathActive();
-
-  void actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback);
 
   void actionExePathDone(const actionlib::SimpleClientGoalState &state,
                          const mbf_msgs::ExePathResultConstPtr &result_ptr);
