@@ -1,15 +1,15 @@
+#include <functional>
 #include <geometry_msgs/Vector3.h>
+#include <iterator>
+#include <mutex>
 #include <nav_msgs/Odometry.h>
 #include <parameter_assertions/assertions.h>
+#include <random>
 #include <robot_localization/navsat_conversions.h>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
-#include <mutex>
-#include <functional>
-#include <random>
-#include <iterator>
 
 ros::Publisher g_ground_truth_pub;
 // TODO make this a minimal object
@@ -17,19 +17,18 @@ nav_msgs::Odometry g_og_pose;
 ros::Time g_last_estimate;
 double noise;
 
-void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
+void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 {
   g_last_estimate = msg->header.stamp;
 }
 
-void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
+void groundTruthCallback(const nav_msgs::Odometry::ConstPtr &msg)
 {
-  //random noise generator
-  auto dist = std::bind(std::normal_distribution<double>{0.0, noise},
-                   std::mt19937(std::random_device{}()));
+  // random noise generator
+  auto dist = std::bind(std::normal_distribution<double>{ 0.0, noise }, std::mt19937(std::random_device{}()));
   // get the starting location as the origin
   if (g_og_pose.header.stamp.toSec() == 0)
-  { 
+  {
     g_og_pose.pose = msg->pose;
     g_og_pose.header = msg->header;
     g_og_pose.pose.pose.position.x = msg->pose.pose.position.x + dist();
@@ -61,7 +60,8 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     // publish odom message
     g_ground_truth_pub.publish(result);
 
-    // publish transform for tf if there has not been a update from the localization node in the last second
+    // publish transform for tf if there has not been a update from the
+    // localization node in the last second
     // since it also publishes the same transform
     if (std::abs(msg->header.stamp.toSec() - g_last_estimate.toSec()) > 1.0)
     {
@@ -74,7 +74,7 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
   }
 }
 
-void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm)
+void utm_callback(const ros::TimerEvent &event, const tf::Transform &odom_to_utm)
 {
   static tf::TransformBroadcaster br;
   static tf::TransformListener tf_listener;
@@ -88,7 +88,7 @@ void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm
     {
       tf_listener.lookupTransform("odom", "utm", ros::Time(0), transform);
     }
-    catch (const tf::TransformException& ex)
+    catch (const tf::TransformException &ex)
     {
       found = false;
     }
@@ -96,7 +96,8 @@ void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm
     if (found && transform.getRotation() != odom_to_utm.getRotation() &&
         transform.getOrigin() != odom_to_utm.getOrigin())
     {
-      ROS_WARN_STREAM("Anther odom -> utm tf broadcast detected. Disabling ground_truth odom -> utm tf broadcast.");
+      ROS_WARN_STREAM("Anther odom -> utm tf broadcast detected. Disabling "
+                      "ground_truth odom -> utm tf broadcast.");
       enabled = false;
       return;
     }
@@ -104,14 +105,14 @@ void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm
   }
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "ground_truth_republisher");
 
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  nh.getParam("/noise",noise);
+  nh.getParam("/noise", noise);
 
   std::string ground_truth_topic, estimate_topic, pub_topic, diff_topic;
 
