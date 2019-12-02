@@ -29,7 +29,7 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
                    std::mt19937(std::random_device{}()));
   // get the starting location as the origin
   if (g_og_pose.header.stamp.toSec() == 0)
-  {
+  { 
     g_og_pose.pose = msg->pose;
     g_og_pose.header = msg->header;
     g_og_pose.pose.pose.position.x = msg->pose.pose.position.x + dist();
