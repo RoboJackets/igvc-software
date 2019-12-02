@@ -59,9 +59,9 @@ private:
   ros::Time time_of_last_get_path;
   ros::Duration time_between_get_path = ros::Duration(0.5);
 
-  void start(GoalHandle &goal_handle);
+  void start(GoalHandle goal_handle);
 
-  void cancel();
+  void cancel(GoalHandle goal_handle);
 
   void processLoop();
 
