@@ -55,8 +55,8 @@ bool Line::attemptFitPoint(const Prototype &new_point)
   }
   Eigen::Vector3d old_params = slope_;
   Eigen::Vector3d old_intercept = intercept_;
-  MatrixXd A(total_points, 3);
-  MatrixXd mean(1, 3);
+  Eigen::MatrixXd A(total_points, 3);
+  Eigen::MatrixXd mean(1, 3);
   for (int i = 0; i < total_points; i++)
   {
     Prototype pt;
@@ -80,7 +80,7 @@ bool Line::attemptFitPoint(const Prototype &new_point)
   A += mean.replicate(total_points, 1);
   getSlopeIntercept(A, mean);
   double squared_error = distFromPoint(new_point);
-  for (Prototype pt : model_points_)
+  for (const Prototype &pt : model_points_)
   {
     squared_error += distFromPoint(pt);
   }
@@ -95,9 +95,9 @@ bool Line::attemptFitPoint(const Prototype &new_point)
   return true;
 }
 
-void Line::getSlopeIntercept(const MatrixXd &A, const MatrixXd &mean)
+void Line::getSlopeIntercept(const Eigen::MatrixXd &A, const Eigen::MatrixXd &mean)
 {
-  Eigen::JacobiSVD<MatrixXd> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
   slope_ = svd.matrixV().col(0);
   intercept_(0) = -mean(0, 0);
   intercept_(1) = -mean(0, 1);
@@ -214,20 +214,18 @@ double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pointcloud::Po
 
 bool FastSegmentFilter::evaluateIsGround(Line &l)
 {
-  bool ground = false;
   const auto above_intercept = [&](const Prototype &pt) { return pt.point_.z > config_.dist_t; };
   bool all_below = std::all_of(l.model_points_.begin(), l.model_points_.end(), above_intercept);
   if (all_below)
   {
-    ground = true;
+    return true;
   }
   double dx = l.end_point_.point_.x - l.start_point_.point_.x;
   double dy = l.end_point_.point_.y - l.start_point_.point_.y;
   double dz = l.end_point_.point_.z - l.start_point_.point_.z;
   double len_xy = std::hypot(dx, dy);
   double slope = std::abs(dz) / len_xy;
-  ground = slope < config_.slope_t && l.end_point_.point_.z < config_.intercept_z_t;
-  return ground;
+  return slope < config_.slope_t && l.end_point_.point_.z < config_.intercept_z_t;
 }
 
 void FastSegmentFilter::debugViz()
@@ -237,7 +235,7 @@ void FastSegmentFilter::debugViz()
 
   for (const auto &seg : segments_)
   {
-    for (Line line : seg.second.lines_)
+    for (const Line &line : seg.second.lines_)
     {
       for (Prototype pt : line.model_points_)
       {

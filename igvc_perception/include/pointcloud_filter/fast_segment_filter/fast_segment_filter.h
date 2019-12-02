@@ -12,9 +12,6 @@
 
 #include <Eigen/Dense>
 
-using MatrixXd = Eigen::Matrix<double, Eigen::Dynamic, 3>;
-using VectorXd = Eigen::Matrix<double, Eigen::Dynamic, 1>;
-
 namespace pointcloud_filter
 {
 /**
@@ -82,7 +79,7 @@ struct Line
    * @param mean Matrix that is a 3d point which is the mean of all the sample points
    *
    */
-  void getSlopeIntercept(const MatrixXd &A, const MatrixXd &mean);
+  void getSlopeIntercept(const Eigen::MatrixXd &A, const Eigen::MatrixXd &mean);
 };
 
 struct Segment
