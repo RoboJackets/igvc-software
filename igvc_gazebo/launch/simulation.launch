@@ -18,6 +18,9 @@
 
     <param name="/use_sim_time" value="true"/>
 
+    <!-- Sensor noise -->
+    <param name="noise" type="double" value="0.0"/>
+
     <!-- WARNING: this waypoint instance will always use ground truth -->
     <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
         <param name="file" value="$(arg waypoints)" />

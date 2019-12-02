@@ -7,11 +7,15 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 #include <mutex>
+#include <functional>
+#include <random>
+#include <iterator>
 
 ros::Publisher g_ground_truth_pub;
 // TODO make this a minimal object
 nav_msgs::Odometry g_og_pose;
 ros::Time g_last_estimate;
+double noise;
 
 void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
@@ -20,13 +24,16 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 
 void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
+  //random noise generator
+  auto dist = std::bind(std::normal_distribution<double>{0.0, noise},
+                   std::mt19937(std::random_device{}()));
   // get the starting location as the origin
   if (g_og_pose.header.stamp.toSec() == 0)
   {
     g_og_pose.pose = msg->pose;
     g_og_pose.header = msg->header;
-    g_og_pose.pose.pose.position.x = msg->pose.pose.position.x;
-    g_og_pose.pose.pose.position.y = msg->pose.pose.position.y;
+    g_og_pose.pose.pose.position.x = msg->pose.pose.position.x + dist();
+    g_og_pose.pose.pose.position.y = msg->pose.pose.position.y + dist();
     ROS_INFO_STREAM("setting g_og_pose to " << g_og_pose.pose.pose.position.x << ", "
                                             << g_og_pose.pose.pose.position.y);
   }
@@ -36,8 +43,8 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     result.pose = msg->pose;
 
     // use the initial location as an offset (makes the starting location 0, 0)
-    result.pose.pose.position.x = msg->pose.pose.position.x - g_og_pose.pose.pose.position.x;
-    result.pose.pose.position.y = msg->pose.pose.position.y - g_og_pose.pose.pose.position.y;
+    result.pose.pose.position.x = msg->pose.pose.position.x - g_og_pose.pose.pose.position.x + dist();
+    result.pose.pose.position.y = msg->pose.pose.position.y - g_og_pose.pose.pose.position.y + dist();
 
     result.twist = msg->twist;
 
@@ -103,6 +110,8 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
+
+  nh.getParam("/noise",noise);
 
   std::string ground_truth_topic, estimate_topic, pub_topic, diff_topic;
 
