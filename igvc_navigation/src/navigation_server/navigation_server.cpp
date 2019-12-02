@@ -8,7 +8,8 @@ NavigationServer::NavigationServer()
   , action_client_get_path_(private_nh_, "get_path")
   , action_client_exe_path_(private_nh_, "exe_path")
   , action_client_recovery_(private_nh_, "recovery")
-  , action_server_(private_nh_, "move_to_waypoint", boost::bind(&NavigationServer::start, this, _1), boost::bind(&NavigationServer::cancel, this, _1), false)
+  , action_server_(private_nh_, "move_to_waypoint", boost::bind(&NavigationServer::start, this, _1),
+                   boost::bind(&NavigationServer::cancel, this, _1), false)
 {
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
   assertions::getParam(private_nh_, "fix_goal_poses", fix_goal_poses_);
