@@ -43,8 +43,9 @@ void NavigationClient::waitForServer()
   const double waiting_time = 5.0;
   while (!client.waitForServer(ros::Duration(waiting_time)))
   {
-    ROS_INFO("Waiting for the move_base action server to come up");
+    ROS_INFO_STREAM("Waiting for the navigation server to come up");
   }
+  ROS_INFO_STREAM("Connected to navigation server!");
 }
 
 std::vector<geometry_msgs::PointStamped> NavigationClient::loadWaypointsFromFile()
@@ -204,7 +205,7 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
 {
   if (reading_from_file_)
   {
-    ROS_ERROR("Cannot send goal from rviz, reading from file.");
+    ROS_ERROR_STREAM("Cannot send goal from rviz, reading from file.");
   }
   else
   {
