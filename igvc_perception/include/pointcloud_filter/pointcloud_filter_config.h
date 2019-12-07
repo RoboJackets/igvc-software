@@ -1,9 +1,8 @@
 #ifndef SRC_POINTCLOUD_FILTER_CONFIG_H
 #define SRC_POINTCLOUD_FILTER_CONFIG_H
 
-#include <ros/ros.h>
-
 #include <pointcloud_filter/back_filter/back_filter_config.h>
+#include <ros/ros.h>
 
 namespace pointcloud_filter
 {

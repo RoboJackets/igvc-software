@@ -1,12 +1,9 @@
-#include <sensor_msgs/PointCloud2.h>
-
+#include <parameter_assertions/assertions.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-
-#include <parameter_assertions/assertions.h>
-
 #include <pointcloud_filter/pointcloud_filter.h>
+#include <sensor_msgs/PointCloud2.h>
 
 namespace pointcloud_filter
 {
@@ -21,6 +18,7 @@ PointcloudFilter::PointcloudFilter(const ros::NodeHandle& nh, const ros::NodeHan
   , tf_transform_filter_{ &buffer_ }
   , ground_filter_{ private_nh_ }
   , raycast_filter_{ private_nh_ }
+  , fast_segment_filter_{ private_nh_ }
 {
   setupPubSub();
 }
@@ -41,6 +39,8 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
   radius_filter_.filter(bundle);
 
   back_filter_.filter(bundle);
+
+  fast_segment_filter_.filter(bundle);
 
   std::string base_frame = config_.base_frame;
   std::string lidar_frame = raw_pointcloud->header.frame_id;
