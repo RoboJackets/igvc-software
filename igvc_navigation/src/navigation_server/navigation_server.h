@@ -43,6 +43,9 @@ private:
   GoalHandle current_goal_handle_;
   bool fix_goal_poses_ = true;
 
+  ros::NodeHandle nh_;
+  ros::Publisher current_goal_pose_publisher_;
+
   ros::NodeHandle private_nh_;
   ActionClientGetPath action_client_get_path_;
   ActionClientExePath action_client_exe_path_;

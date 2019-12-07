@@ -32,7 +32,7 @@ public:
 
 private:
   // action lib client
-  MoveBaseClient client = MoveBaseClient("move_to_waypoint", true);
+  MoveBaseClient client = MoveBaseClient("/move_to_waypoint", true);
 
   // params
   bool reading_from_file_;          // true if reading from waypoint file, false if from rviz

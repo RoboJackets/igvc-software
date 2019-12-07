@@ -4,14 +4,17 @@
 NavigationServer::NavigationServer()
   : current_state_(NONE)
   , recovery_trigger_(NONE)
+  , nh_()
   , private_nh_("~")
-  , action_client_get_path_(private_nh_, "get_path")
-  , action_client_exe_path_(private_nh_, "exe_path")
-  , action_client_recovery_(private_nh_, "recovery")
-  , action_server_(private_nh_, "move_to_waypoint", boost::bind(&NavigationServer::start, this, _1),
+  , action_client_get_path_(private_nh_, "/move_base_flex/get_path")
+  , action_client_exe_path_(private_nh_, "/move_base_flex/exe_path")
+  , action_client_recovery_(private_nh_, "/move_base_flex/recovery")
+  , action_server_(private_nh_, "/move_to_waypoint", boost::bind(&NavigationServer::start, this, _1),
                    boost::bind(&NavigationServer::cancel, this, _1), false)
 {
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
+
+  current_goal_pose_publisher_ = nh_.advertise<geometry_msgs::PoseStamped>("/move_to_waypoint/current_goal_pose", 1);
 
   action_server_.start();
 }
@@ -47,6 +50,8 @@ void NavigationServer::start(GoalHandle goal_handle)
   ROS_DEBUG_STREAM_NAMED("nav_server", "Started action: move_to_waypoint");
 
   const igvc_msgs::NavigateWaypointGoal &goal = *(goal_handle.getGoal().get());
+
+  current_goal_pose_publisher_.publish(goal.target_pose);
 
   recovery_behaviors_ = goal.recovery_behaviors;
   current_recovery_behavior_ = recovery_behaviors_.begin();

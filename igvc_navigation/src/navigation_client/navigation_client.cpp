@@ -180,7 +180,7 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
 
 void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool waiting)
 {
-  ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y);
+  ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ")");
 
   geometry_msgs::PoseStamped pose;
   pose.header = point.header;

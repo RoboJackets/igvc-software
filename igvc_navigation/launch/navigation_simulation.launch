@@ -4,6 +4,9 @@
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
 
+    <!-- Launch navigation (simulation version) -->
+    <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
+
     <!-- Launch navigation server -->
     <include file="$(find igvc_navigation)/launch/navigation_server.launch"/>
 
