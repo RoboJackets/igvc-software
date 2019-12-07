@@ -163,8 +163,9 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
 {
   ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y
                                     << ") with yaw = " << tf::getYaw(pose.pose.orientation));
-  mbf_msgs::MoveBaseGoal goal;
+  igvc_msgs::NavigateWaypointGoal goal;
   goal.target_pose = pose;
+  goal.fix_goal_orientation = false;
 
   if (waiting)
   {
@@ -178,11 +179,25 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
 
 void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool waiting)
 {
+  ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y);
+
   geometry_msgs::PoseStamped pose;
   pose.header = point.header;
   pose.pose.position = point.point;
   pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-  sendGoal(pose, waiting);
+
+  igvc_msgs::NavigateWaypointGoal goal;
+  goal.target_pose = pose;
+  goal.fix_goal_orientation = true;
+
+  if (waiting)
+  {
+    client.sendGoalAndWait(goal);
+  }
+  else
+  {
+    client.sendGoal(goal);
+  }
 }
 
 void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& pose)

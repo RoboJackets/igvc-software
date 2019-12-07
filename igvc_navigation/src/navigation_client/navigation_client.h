@@ -1,9 +1,10 @@
 #ifndef SRC_NAVIGATION_CLIENT_H
 #define SRC_NAVIGATION_CLIENT_H
 
-#include <actionlib/client/simple_action_client.h>
-#include <mbf_msgs/MoveBaseAction.h>
 #include <ros/ros.h>
+
+#include <actionlib/client/simple_action_client.h>
+#include <igvc_msgs/NavigateWaypointAction.h>
 #include <tf/transform_listener.h>
 
 #include <fstream>
@@ -13,7 +14,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Odometry.h>
 
-using MoveBaseClient = actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction>;
+using MoveBaseClient = actionlib::SimpleActionClient<igvc_msgs::NavigateWaypointAction>;
 
 struct LatLong
 {

@@ -12,7 +12,6 @@ NavigationServer::NavigationServer()
                    boost::bind(&NavigationServer::cancel, this, _1), false)
 {
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
-  assertions::getParam(private_nh_, "fix_goal_poses", fix_goal_poses_);
 
   action_server_.start();
 }
@@ -47,7 +46,7 @@ void NavigationServer::start(GoalHandle goal_handle)
 
   ROS_DEBUG_STREAM_NAMED("nav_server", "Started action: move_to_waypoint");
 
-  const mbf_msgs::MoveBaseGoal &goal = *(goal_handle.getGoal().get());
+  const igvc_msgs::NavigateWaypointGoal &goal = *(goal_handle.getGoal().get());
 
   recovery_behaviors_ = goal.recovery_behaviors;
   current_recovery_behavior_ = recovery_behaviors_.begin();
@@ -56,8 +55,9 @@ void NavigationServer::start(GoalHandle goal_handle)
   get_path_goal_.use_start_pose = false;
   get_path_goal_.planner = goal.planner;
   exe_path_controller_ = goal.controller;
+  fix_goal_poses_ = goal.fix_goal_orientation;
 
-  mbf_msgs::MoveBaseResult move_base_result;
+  igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
 
   // wait for server connections
   ros::Duration connection_timeout(1.0);
@@ -67,9 +67,9 @@ void NavigationServer::start(GoalHandle goal_handle)
   {
     ROS_ERROR_STREAM_NAMED("nav_server", "Could not connect to one or more of move_base_flex actions: 'get_path', "
                                          "'exe_path', 'recovery'!");
-    move_base_result.outcome = mbf_msgs::MoveBaseResult::INTERNAL_ERROR;
-    move_base_result.message = "Could not connect to the move_base_flex actions!";
-    goal_handle.setAborted(move_base_result, move_base_result.message);
+    navigate_waypoint_result.outcome = igvc_msgs::NavigateWaypointResult ::INTERNAL_ERROR;
+    navigate_waypoint_result.message = "Could not connect to the move_base_flex actions!";
+    goal_handle.setAborted(navigate_waypoint_result, navigate_waypoint_result.message);
     return;
   }
 
@@ -100,7 +100,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
                                          const mbf_msgs::GetPathResultConstPtr &result_ptr)
 {
   const mbf_msgs::GetPathResult &result = *(result_ptr.get());
-  mbf_msgs::MoveBaseResult move_base_result;
+  igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
 
   switch (state.state_)
   {
@@ -136,18 +136,18 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
       else
       {
         // copy result from get_path action
-        move_base_result.outcome = result.outcome;
-        move_base_result.message = result.message;
+        navigate_waypoint_result.outcome = result.outcome;
+        navigate_waypoint_result.message = result.message;
         ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result.message);
-        current_goal_handle_.setAborted(move_base_result, state.getText());
+        current_goal_handle_.setAborted(navigate_waypoint_result, state.getText());
       }
       break;
     case actionlib::SimpleClientGoalState::PREEMPTED:
       // the get_path action has been preempted.
       // copy result from get_path action
-      move_base_result.outcome = result.outcome;
-      move_base_result.message = result.message;
-      current_goal_handle_.setCanceled(move_base_result, state.getText());
+      navigate_waypoint_result.outcome = result.outcome;
+      navigate_waypoint_result.message = result.message;
+      current_goal_handle_.setCanceled(navigate_waypoint_result, state.getText());
       break;
     case actionlib::SimpleClientGoalState::LOST:
       ROS_FATAL_STREAM_NAMED("nav_server", "Connection lost to the action \"get_path\"!");
@@ -172,15 +172,15 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
                                          const mbf_msgs::ExePathResultConstPtr &result_ptr)
 {
   const mbf_msgs::ExePathResult &result = *(result_ptr.get());
-  mbf_msgs::MoveBaseResult move_base_result;
+  igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
 
   switch (state.state_)
   {
     case actionlib::SimpleClientGoalState::SUCCEEDED:
-      move_base_result.outcome = mbf_msgs::MoveBaseResult::SUCCESS;
-      move_base_result.message = "Action 'move_to_waypoint' succeeded!";
-      ROS_INFO_STREAM_NAMED("nav_server", move_base_result.message);
-      current_goal_handle_.setSucceeded(move_base_result, move_base_result.message);
+      navigate_waypoint_result.outcome = igvc_msgs::NavigateWaypointResult::SUCCESS;
+      navigate_waypoint_result.message = "Action 'move_to_waypoint' succeeded!";
+      ROS_INFO_STREAM_NAMED("nav_server", navigate_waypoint_result.message);
+      current_goal_handle_.setSucceeded(navigate_waypoint_result, navigate_waypoint_result.message);
       current_state_ = SUCCEEDED;
       break;
     case actionlib::SimpleClientGoalState::ABORTED:
@@ -193,7 +193,7 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
         case mbf_msgs::ExePathResult::INVALID_PLUGIN:
         case mbf_msgs::ExePathResult::INTERNAL_ERROR:
           // none of these errors is recoverable
-          current_goal_handle_.setAborted(move_base_result, state.getText());
+          current_goal_handle_.setAborted(navigate_waypoint_result, state.getText());
           break;
         default:
           // all the rest are, so we start calling the recovery behaviors in sequence
@@ -204,7 +204,7 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
           else
           {
             ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the controller: " << result.message);
-            current_goal_handle_.setAborted(move_base_result, state.getText());
+            current_goal_handle_.setAborted(navigate_waypoint_result, state.getText());
           }
           break;
       }
@@ -248,9 +248,9 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
 {
   const mbf_msgs::RecoveryResult &result = *(result_ptr.get());
 
-  mbf_msgs::MoveBaseResult move_base_result;
-  move_base_result.outcome = result.outcome;
-  move_base_result.message = result.message;
+  igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
+  navigate_waypoint_result.outcome = result.outcome;
+  navigate_waypoint_result.message = result.message;
 
   switch (state.state_)
   {
@@ -271,7 +271,7 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
       {
         ROS_DEBUG_STREAM_NAMED("nav_server", "All recovery behaviors failed. Abort recovering and abort the move_base "
                                              "action");
-        current_goal_handle_.setAborted(move_base_result, "All recovery behaviors failed.");
+        current_goal_handle_.setAborted(navigate_waypoint_result, "All recovery behaviors failed.");
       }
       else
       {
@@ -309,4 +309,5 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "navigation_server");
   NavigationServer nav = NavigationServer();
+  ros::spin();
 }

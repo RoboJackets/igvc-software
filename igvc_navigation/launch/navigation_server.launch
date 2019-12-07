@@ -1,6 +1,5 @@
 <launch>
-    <arg name="fix_goal_poses"/>
     <node name="navigation_server" pkg="igvc_navigation" type="navigation_server" output="screen">
-        <param name="fix_goal_poses" value="$(arg fix_goal_poses)"/>
+        <param name="recovery_enabled" value="true"/>
     </node>
 </launch>

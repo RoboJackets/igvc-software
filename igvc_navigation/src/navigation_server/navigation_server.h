@@ -5,12 +5,12 @@
 
 #include <actionlib/server/action_server.h>
 #include <actionlib/client/simple_action_client.h>
-#include <mbf_msgs/MoveBaseAction.h>
+//#include <mbf_msgs/MoveBaseAction.h>
 
-#include <mbf_msgs/MoveBaseAction.h>
 #include <mbf_msgs/GetPathAction.h>
 #include <mbf_msgs/ExePathAction.h>
 #include <mbf_msgs/RecoveryAction.h>
+#include <igvc_msgs/NavigateWaypointAction.h>
 
 class NavigationServer
 {
@@ -19,7 +19,7 @@ public:
   using ActionClientExePath = actionlib::SimpleActionClient<mbf_msgs::ExePathAction>;
   using ActionClientRecovery = actionlib::SimpleActionClient<mbf_msgs::RecoveryAction>;
 
-  using GoalHandle = actionlib::ActionServer<mbf_msgs::MoveBaseAction>::GoalHandle;
+  using GoalHandle = actionlib::ActionServer<igvc_msgs::NavigateWaypointAction>::GoalHandle;
 
   NavigationServer();
 
@@ -37,11 +37,11 @@ private:
 
   // params
   bool recovery_enabled_ = true;
-  bool fix_goal_poses_ = true;
 
   NavigationState current_state_;
   NavigationState recovery_trigger_;
   GoalHandle current_goal_handle_;
+  bool fix_goal_poses_ = true;
 
   ros::NodeHandle private_nh_;
   ActionClientGetPath action_client_get_path_;
@@ -54,7 +54,7 @@ private:
   mbf_msgs::GetPathGoal get_path_goal_;
   std::string exe_path_controller_;
 
-  actionlib::ActionServer<mbf_msgs::MoveBaseAction> action_server_;
+  actionlib::ActionServer<igvc_msgs::NavigateWaypointAction> action_server_;
 
   ros::Time time_of_last_get_path;
   ros::Duration time_between_get_path = ros::Duration(0.5);
