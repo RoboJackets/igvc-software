@@ -23,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3.2.0 REQUIRED)
 find_package(PCL REQUIRED filters)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
