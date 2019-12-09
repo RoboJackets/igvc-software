@@ -1,0 +1,4 @@
+<launch>
+    <arg name="file_path"/>
+    <param name="/waypoint_file_path" value="$(arg file_path)"/>
+</launch>
