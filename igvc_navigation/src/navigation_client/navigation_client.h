@@ -60,6 +60,13 @@ private:
   std::vector<LatLong> parseWaypointFile();
 
   /**
+  Removes the whitespace from a string and returns the new string
+  @param str String to remove whitespace from
+  @return A new string without whitespace
+   */
+  static std::string removeWhitespace(const std::string& str);
+
+  /**
   Converts latitudes and longitudes to the odom frame
   @param[in] latlong latitude and longitude to convert
   @return PointStamped in odom frame

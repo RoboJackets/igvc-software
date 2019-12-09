@@ -93,25 +93,42 @@ std::vector<LatLong> NavigationClient::parseWaypointFile()
   unsigned short line_index = 1;
   for (std::string line; std::getline(file, line);)
   {
-    std::vector<std::string> tokens = split(line, ',');
-    if (tokens.size() != 2)
+    std::string clean_line = removeWhitespace(line);
+    if (line.front() != '#' && !clean_line.empty())
     {
-      ROS_ERROR_STREAM(waypoint_file_path_ << ":" << line_index << " - " << tokens.size() << " tokens instead of 2.");
-      ros::shutdown();
-      return empty;
+      std::vector<std::string> tokens = split(clean_line, ',');
+      if (tokens.size() != 2)
+      {
+        ROS_ERROR_STREAM(waypoint_file_path_ << ":" << line_index << " - " << tokens.size() << " tokens instead of 2.");
+        ros::shutdown();
+        return empty;
+      }
+
+      // Convert latitude and longitude to decimal degrees if currently in degrees minutes second. Specified by '?'
+      // symbol.
+      LatLong coord{};
+      coord.latitude = (tokens[0].find('?') != std::string::npos) ? convertDmsToDec(tokens[0]) : stod(tokens[0]);
+      coord.longitude = (tokens[1].find('?') != std::string::npos) ? convertDmsToDec(tokens[1]) : stod(tokens[1]);
+
+      coordinates.push_back(coord);
+      ++line_index;
     }
-
-    // Convert latitude and longitude to decimal degrees if currently in degrees minutes second. Specified by '?'
-    // symbol.
-    LatLong coord{};
-    coord.latitude = (tokens[0].find('?') != std::string::npos) ? convertDmsToDec(tokens[0]) : stod(tokens[0]);
-    coord.longitude = (tokens[1].find('?') != std::string::npos) ? convertDmsToDec(tokens[1]) : stod(tokens[1]);
-
-    coordinates.push_back(coord);
-    ++line_index;
   }
 
   return coordinates;
+}
+
+std::string NavigationClient::removeWhitespace(const std::string& str)
+{
+  std::string new_string;
+  for (char c : str)
+  {
+    if (c != ' ')
+    {
+      new_string += c;
+    }
+  }
+  return new_string;
 }
 
 geometry_msgs::PointStamped NavigationClient::convertLatLongToOdom(LatLong lat_long)
