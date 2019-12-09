@@ -93,10 +93,11 @@ std::vector<LatLong> NavigationClient::parseWaypointFile()
   unsigned short line_index = 1;
   for (std::string line; std::getline(file, line);)
   {
-    std::string clean_line = removeWhitespace(line);
-    if (line.front() != '#' && !clean_line.empty())
+    // remove whitespace
+    line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+    if (line.front() != '#' && !line.empty())
     {
-      std::vector<std::string> tokens = split(clean_line, ',');
+      std::vector<std::string> tokens = split(line, ',');
       if (tokens.size() != 2)
       {
         ROS_ERROR_STREAM(waypoint_file_path_ << ":" << line_index << " - " << tokens.size() << " tokens instead of 2.");
@@ -116,19 +117,6 @@ std::vector<LatLong> NavigationClient::parseWaypointFile()
   }
 
   return coordinates;
-}
-
-std::string NavigationClient::removeWhitespace(const std::string& str)
-{
-  std::string new_string;
-  for (char c : str)
-  {
-    if (c != ' ')
-    {
-      new_string += c;
-    }
-  }
-  return new_string;
 }
 
 geometry_msgs::PointStamped NavigationClient::convertLatLongToOdom(LatLong lat_long)
