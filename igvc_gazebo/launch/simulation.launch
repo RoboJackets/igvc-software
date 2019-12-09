@@ -3,7 +3,8 @@
 <launch>
     <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
     <arg name="world_name" default="$(find igvc_description)/urdf/worlds/qualification.world"/>
-    <arg name="waypoints" default="$(find igvc_gazebo)/config/waypoints_qual_0.csv" />
+    <arg name="waypoint_folder_path" default="$(find igvc_gazebo)/config"/>
+    <arg name="waypoint_file_name" default="waypoints_qual_0.csv"/>
     <arg name="cmd_timeout" default="0.5"/>
     <!-- accelerate lidar with GPU -->
     <arg name="gpu" default="false"/>
@@ -19,7 +20,8 @@
     <param name="/use_sim_time" value="true"/>
 
     <include file="$(find igvc_navigation)/launch/set_waypoint_file_path.launch">
-        <arg name="file_path" value="$(arg waypoints)"/>
+        <arg name="folder_path" value="$(arg waypoint_folder_path)"/>
+        <arg name="file_name" value="$(arg waypoint_file_name)"/>
     </include>
 
     <!-- Create the world. -->
