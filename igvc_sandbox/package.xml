@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>igvc_sandbox</name>
+  <version>0.0.0</version>
+  <description>The RoboJackets' IGVC code base</description>
+
+  <maintainer email="mhannay3@gatech.edu">Matthew Hannay</maintainer>
+
+  <license>MIT</license>
+
+  <author email="matthew.barulic@gmail.com">Matthew Barulic</author>
+  <author email="chaussee.al@gmail.com">Al Chaussee</author>
+
+  <url type="website">http://www.robojackets.org</url>
+  <url type="website">http://www.github.com/robojackets/igvc-software</url>
+  <url type="website">http://robojackets.github.io/igvc-software</url>
+  <url type="website">http://www.noruts.com</url>
+
+</package>
