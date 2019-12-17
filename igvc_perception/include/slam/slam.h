@@ -3,16 +3,14 @@
 
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
-// Pose2 == (x, y, theta)
-#include <gtsam/geometry/Pose2.h>
+// Pose2 == (Point3, Rot3)
+#include <gtsam/geometry/Pose3.h>
 // PriorFactor == Initial Pose
 #include <gtsam/slam/PriorFactor.h>
 // BetweenFactor == Odom measurement
 #include <gtsam/slam/BetweenFactor.h>
 // The factor graph we are creating. Nonlinear since angle measurements are nonlinear.
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
-// May want to choose a different optimizer later, but for now we use this one.
-#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 #include <gtsam/nonlinear/Marginals.h>
 // Helps initialize initial guess
 #include <gtsam/nonlinear/Values.h>
@@ -22,6 +20,7 @@
 #include <gtsam/navigation/ImuBias.h>
 #include <gtsam/navigation/ImuFactor.h>
 #include <gtsam/nonlinear/ISAM2.h>
+#include <slam/type_conversions.h>
 
 class Slam {
 public:
@@ -45,20 +44,19 @@ private:
 
     // Defining some types
     typedef gtsam::noiseModel::Diagonal noiseDiagonal;
+    typedef gtsam::Vector3 Vec3;
 
     // Establishing global variables
-    gtsam::Values currEstimate;
+    gtsam::Values initEstimate, result;
     gtsam::NonlinearFactorGraph graph;
-    gtsam::Pose2 previousPose;
+    gtsam::Pose3 previousPose;
     unsigned long pose_index_;
-    int imu_bias_counter_;
-    int BIAS_UPDATE_RATE;
     double BIAS_NOISE_CONST;
     gtsam::ISAM2 isam;
     const double KGRAVITY = 9.81;
     gtsam::PreintegratedImuMeasurements accum;
     ros::Time lastImuMeasurement;
-    bool imu_recieved_;
+    bool imu_received_;
 };
 
 #endif //SRC_SLAM_H

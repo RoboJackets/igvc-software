@@ -13,12 +13,13 @@ if (GTSAMCMakeTools_FOUND)
         find_package(Eigen3 3.3 REQUIRED)
         add_executable(slam
                 main.cpp
-                slam.cpp)
+                slam.cpp
+                type_conversions.cpp)
         target_include_directories(slam PRIVATE ${catkin_INCLUDE_DIRS})
         target_link_libraries(slam gtsam ${catkin_LIBRARIES} Eigen3::Eigen)
         add_dependencies(slam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
     else()
-        message(WARNING "Could not find gtsam, not compiling slam!")
+        message(WARNING "Could not find gtsam. Not compiling slam!")
     endif()
 else()
     message(WARNING "Could not find GTSAMCMakeTools. Not compiling SLAM")
