@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import cv2
 import functools
 import numpy as np
@@ -8,6 +9,7 @@ from torch.autograd import Variable
 from torchvision import transforms
 
 import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 from train_eval.models.model import UNet
 
 # ROS imports.
@@ -21,8 +23,6 @@ from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image as ImMsg
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.msg import PointField
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 transform = transforms.Compose([
     transforms.ToTensor(),
