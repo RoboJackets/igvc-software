@@ -214,7 +214,7 @@ double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pointcloud::Po
 
 bool FastSegmentFilter::evaluateIsGround(Line &l)
 {
-  const auto above_intercept = [&](const Prototype &pt) { return pt.point_.z > config_.dist_t; };
+  const auto above_intercept = [&](const Prototype &pt) { return pt.point_.z < config_.dist_t; };
   bool all_below = std::all_of(l.model_points_.begin(), l.model_points_.end(), above_intercept);
   if (all_below)
   {

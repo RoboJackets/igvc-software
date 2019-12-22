@@ -23,7 +23,7 @@ pointcloud_filter:
         nonground_topic: "/nonground"
         num_segments: 270
         error_t: .015
-        slope_t: .4
+        slope_t: .3
         intercept_z_t: 100
         dist_t: .1
         debug_viz: true
