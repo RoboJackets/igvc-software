@@ -34,7 +34,7 @@ add_library(line_layer
     camera_config.cpp camera_config.h
     projection_config.cpp projection_config.h
     gridmap_layer.cpp gridmap_layer.h
-    )
+        fakecone.cpp fakecone.h fakecone_layer.cpp fakecone_layer.h fakecone_layer_config.cpp fakecone_layer_config.h)
 add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(line_layer ${catkin_LIBRARIES})
 
