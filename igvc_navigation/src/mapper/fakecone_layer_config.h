@@ -1,14 +1,19 @@
-//
-// Created by aaronmao on 12/28/19.
-//
-
 #ifndef SRC_FAKECONE_LAYER_CONFIG_H
 #define SRC_FAKECONE_LAYER_CONFIG_H
 
+#include <ros/ros.h>
+#include "map_config.h"
 
-class fakecone_layer_config {
+namespace fakecone_layer
+{
+    class FakeconeLayerConfig
+            {
+            public:
+                explicit FakeconeLayerConfig(const ros::NodeHandle& parent_nh);
 
-};
-
+                ros::NodeHandle nh;
+                map::MapConfig map;
+            };
+}
 
 #endif //SRC_FAKECONE_LAYER_CONFIG_H

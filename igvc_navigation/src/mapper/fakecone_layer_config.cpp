@@ -3,3 +3,12 @@
 //
 
 #include "fakecone_layer_config.h"
+
+namespace fakecone_layer
+{
+FakeconeLayerConfig::FakeconeLayerConfig(const ros::NodeHandle &parent_nh)
+    : nh {parent_nh, "fakecone_layer"}
+    , map{nh}
+{
+}
+}

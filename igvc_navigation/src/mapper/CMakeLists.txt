@@ -30,11 +30,12 @@ target_link_libraries(lidar_layer ${catkin_LIBRARIES})
 add_library(line_layer
     line_layer.cpp line_layer.h
     line_layer_config.cpp line_layer_config.h
+    fakecone_layer.cpp fakecone_layer.h
+    fakecone_layer_config.cpp fakecone_layer_config.h
     map_config.cpp map_config.h
     camera_config.cpp camera_config.h
     projection_config.cpp projection_config.h
-    gridmap_layer.cpp gridmap_layer.h
-        fakecone.cpp fakecone.h fakecone_layer.cpp fakecone_layer.h fakecone_layer_config.cpp fakecone_layer_config.h)
+    gridmap_layer.cpp gridmap_layer.h)
 add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(line_layer ${catkin_LIBRARIES})
 
