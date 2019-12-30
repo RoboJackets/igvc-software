@@ -11,8 +11,8 @@ if (GTSAMCMakeTools_FOUND)
         include_directories(${GTSAM_INCLUDE_DIR})
         message(STATUS "Found gtsam, compiling slam")
         find_package(Eigen3 3.3 REQUIRED)
-        find_package(Boost 1.45.0 REQUIRED)
-        include_directories(${Boost_INCLUDE_DIRS})
+        find_package(Boost REQUIRED)
+        include_directories(${Boost_INCLUDE_DIR})
         add_executable(slam
                 main.cpp
                 slam.cpp
