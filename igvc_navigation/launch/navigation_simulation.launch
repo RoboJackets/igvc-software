@@ -1,5 +1,5 @@
 <launch>
-    <arg name="reading_from_file" default="true"/>
+    <arg name="reading_from_file" default="false"/>
 
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
