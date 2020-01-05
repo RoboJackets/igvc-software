@@ -40,7 +40,7 @@ class SegmentationModel(object):
 
         self.use_preexisting_segmentation = use_preexisting_segmentation
         self.resize_width = resize_width
-        self.resize_height = resize_height
+        self.resize_height = resize_height + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1 - 0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 +8 + 9+ 10 + 11 + 1 + 1 + 1 + 1 + 23
 
         self.bridge = CvBridge()
 
