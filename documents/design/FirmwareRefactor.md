@@ -1,6 +1,6 @@
 # Firmware Refactor Design Document
 
-Author: Dallas Downing
+*Author:* Dallas Downing
 
 ## Motivation
 
@@ -8,15 +8,16 @@ The firmware for IGVC has largely been neglected for the past few years, being a
 
 Here is a short list of the problems that have been identified with the firmware and the mbed. Note that this is not a comprehensive list as many issues depend on the electrical system and the main computer. Most of the issues are explained later in the design section.
 
-All mbed code is contained in one `main.cpp` file, which makes understanding and editing the code difficult
-Asynchronous networking code (for communicating with the computer) runs in the same thread as “real-time” code (PID control)
-There are no errors messages sent from the mbed to the computer, making it difficult to see what the mbed is doing when it fails or encounters a problem
-Messages sent between the computer and the mbed follow the same format with many optional fields instead of using dedicated message formats for different commands
-The E-stop signal is treated as a normal digital input but should be an interrupt input to stop the robot as soon as possible
+- All mbed code is contained in one `main.cpp` file, which makes understanding and editing the code difficult
+- Asynchronous networking code (for communicating with the computer) runs in the same thread as “real-time” code (PID control)
+- There are no errors messages sent from the mbed to the computer, making it difficult to see what the mbed is doing when it fails or encounters a problem
+- Messages sent between the computer and the mbed follow the same format with many optional fields instead of using dedicated message formats for different commands
+- The E-stop signal is treated as a normal digital input but should be an interrupt input to stop the robot as soon as possible
 
 There are also a number of new features being added to the electrical system that the mbed now must support. Part of the redesign was made keeping these features in mind. The specifics of their implementation has been left out of this document, but it should be clear how one might implement such features using the new firmware.
-A “virtual bumper” system using lidar lites that can warn and stop the robot preemptively before it hits an obstacle
-A diagnostics system with various sensors for detecting hardware issues with the robot 
+
+- A “virtual bumper” system using lidar lites that can warn and stop the robot preemptively before it hits an obstacle
+- A diagnostics system with various sensors for detecting hardware issues with the robot 
 
 ## Background
 
@@ -86,7 +87,7 @@ This does nothing to explain what it is or how it works. A similar issue can be 
 
 #### `EncoderPair`
 
-An `EncoderPair` wrapper class will accomplish the same objective as the `MotorController`. It will handle the interrupt input and the digital input for the encoders. It will keep track of and return the tick counts for each encoder. The main advantage for using this is that is removes some global variables and some functions from the main.cpp file. While this change is not super involved or critical, it will allow future modification to improve encoder performance.
+An `EncoderPair` wrapper class will accomplish the same objective as the `MotorController`. It will handle the interrupt input and the digital input for the encoders. It will keep track of and return the tick counts for each encoder. The main advantage for using this is that is removes some global variables and some functions from the `main.cpp` file. While this change is not super involved or critical, it will allow future modification to improve encoder performance.
 
 #### E-Stop Status Interrupt
 
