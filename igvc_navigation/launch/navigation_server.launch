@@ -1,5 +1,8 @@
 <launch>
     <node name="navigation_server" pkg="igvc_navigation" type="navigation_server" output="screen">
         <param name="recovery_enabled" value="true"/>
+        <param name="oscillation_timeout" value="15"/>
+        <param name="oscillation_distance" value="0.2"/>
+        <param name="oscillation_wait_time" value="60"/>
     </node>
 </launch>

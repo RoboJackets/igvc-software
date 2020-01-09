@@ -35,6 +35,7 @@ find_package(catkin REQUIRED COMPONENTS
              grid_map_octomap
              grid_map_rviz_plugin
              grid_map_visualization
+             mbf_utility
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)

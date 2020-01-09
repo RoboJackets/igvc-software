@@ -1,5 +1,6 @@
 #include "navigation_server.h"
 #include <parameter_assertions/assertions.h>
+#include <mbf_utility/navigation_utility.h>
 
 NavigationServer::NavigationServer()
   : current_state_(NONE)
@@ -12,7 +13,14 @@ NavigationServer::NavigationServer()
   , action_server_(private_nh_, "/move_to_waypoint", boost::bind(&NavigationServer::start, this, _1),
                    boost::bind(&NavigationServer::cancel, this, _1), false)
 {
+  ROS_INFO_STREAM_NAMED("nav_server", "Navigation server created.");
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
+  assertions::getParam(private_nh_, "oscillation_distance", oscillation_distance_);
+  double timeout, wait_time;
+  assertions::getParam(private_nh_, "oscillation_timeout", timeout);
+  assertions::getParam(private_nh_, "oscillation_wait_time", wait_time);
+  oscillation_timeout_ = ros::Duration(timeout);
+  oscillation_wait_time_ = ros::Duration(wait_time);
 
   current_goal_pose_publisher_ = nh_.advertise<geometry_msgs::PoseStamped>("/move_to_waypoint/current_goal_pose", 1);
 
@@ -45,7 +53,7 @@ void NavigationServer::start(GoalHandle goal_handle)
 {
   current_goal_handle_ = goal_handle;
   current_state_ = GET_PATH;
-  goal_handle.setAccepted();
+  current_goal_handle_.setAccepted();
 
   ROS_DEBUG_STREAM_NAMED("nav_server", "Started action: move_to_waypoint");
 
@@ -53,7 +61,8 @@ void NavigationServer::start(GoalHandle goal_handle)
 
   current_goal_pose_publisher_.publish(goal.target_pose);
 
-  recovery_behaviors_ = goal.recovery_behaviors;
+  // get recovery behaviors from goal, or use default behaviors
+  recovery_behaviors_ = goal.recovery_behaviors.empty() ? default_recovery_behaviors_ : goal.recovery_behaviors;
   current_recovery_behavior_ = recovery_behaviors_.begin();
 
   get_path_goal_.target_pose = goal.target_pose;
@@ -78,6 +87,7 @@ void NavigationServer::start(GoalHandle goal_handle)
     return;
   }
 
+  start_time_ = ros::Time::now();
   runGetPath();
   processLoop();
 }
@@ -145,6 +155,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
         navigate_waypoint_result.message = result.message;
         ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result.message);
         current_goal_handle_.setAborted(navigate_waypoint_result, state.getText());
+        current_state_ = FAILED;
       }
       break;
     case actionlib::SimpleClientGoalState::PREEMPTED:
@@ -153,13 +164,16 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
       navigate_waypoint_result.outcome = result.outcome;
       navigate_waypoint_result.message = result.message;
       current_goal_handle_.setCanceled(navigate_waypoint_result, state.getText());
+      current_state_ = CANCELED;
       break;
     case actionlib::SimpleClientGoalState::LOST:
       ROS_FATAL_STREAM_NAMED("nav_server", "Connection lost to the action \"get_path\"!");
       current_goal_handle_.setAborted();
+      current_state_ = FAILED;
       break;
     default:
       ROS_FATAL_STREAM_NAMED("nav_server", "Unreachable state reached for get_path: " << state.toString());
+      current_state_ = FAILED;
       break;
   }
 }
@@ -170,7 +184,9 @@ void NavigationServer::runExePath(nav_msgs::Path path)
   mbf_msgs::ExePathGoal exe_path_goal;
   exe_path_goal.controller = exe_path_controller_;
   exe_path_goal.path = std::move(path);
-  action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2));
+  action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2),
+                                   boost::bind(&NavigationServer::actionExePathActive, this),
+                                   boost::bind(&NavigationServer::actionExePathFeedback, this, _1));
 }
 
 void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState &state,
@@ -209,14 +225,82 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
           else
           {
             ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the controller: " << result.message);
+            ROS_DEBUG_STREAM_NAMED("nav_server", current_goal_handle_.getGoalStatus());
             current_goal_handle_.setAborted(navigate_waypoint_result, state.getText());
+            current_state_ = FAILED;
           }
           break;
       }
       break;
+    case actionlib::SimpleClientGoalState::PREEMPTED:
+      ROS_DEBUG_STREAM_NAMED("nav_server", "Action `exe_path` preempted.");
+      break;
     default:
       ROS_FATAL_STREAM_NAMED("nav_server", "Unreachable state reached for exe_path: " << state.toString());
+      current_state_ = FAILED;
       break;
+  }
+}
+
+void NavigationServer::actionExePathActive()
+{
+  ROS_DEBUG_STREAM_NAMED("nav_server", "The \"exe_path\" action is active.");
+}
+
+void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback)
+{
+  move_base_feedback_.outcome = feedback->outcome;
+  move_base_feedback_.message = feedback->message;
+  move_base_feedback_.angle_to_goal = feedback->angle_to_goal;
+  move_base_feedback_.dist_to_goal = feedback->dist_to_goal;
+  move_base_feedback_.current_pose = feedback->current_pose;
+  move_base_feedback_.last_cmd_vel = feedback->last_cmd_vel;
+  robot_pose_ = feedback->current_pose;
+  current_goal_handle_.publishFeedback(move_base_feedback_);
+
+  // oscillation checking is disabled if oscillation_timeout_ = 0
+  // wait until oscillation_wait_time has passed to start checking for oscillation
+  if (!oscillation_timeout_.isZero() && ros::Time::now() > start_time_ + oscillation_wait_time_)
+  {
+    // check if robot has moved more than oscillation distance
+    double distance = mbf_utility::distance(robot_pose_, previous_oscillation_pose_);
+    ROS_INFO_STREAM_NAMED("nav_server", "Distance from previous pose: " << distance);
+    if (distance >= oscillation_distance_)
+    {
+      last_oscillation_reset_ = ros::Time::now();
+      previous_oscillation_pose_ = robot_pose_;
+
+      if (recovery_trigger_ == OSCILLATING)
+      {
+        ROS_INFO_STREAM_NAMED("nav_server", "Recovered from robot oscillation: restart recovery behaviors");
+        current_recovery_behavior_ = recovery_behaviors_.begin();
+        recovery_trigger_ = NONE;
+      }
+    }
+    // check if time has passed timeout
+    else if (last_oscillation_reset_ + oscillation_timeout_ < ros::Time::now())
+    {
+      std::stringstream oscillation_msgs;
+      oscillation_msgs << "Robot is oscillating for " << (ros::Time::now() - last_oscillation_reset_).toSec() << "s!";
+      ROS_WARN_STREAM_NAMED("nav_server", oscillation_msgs.str());
+      action_client_exe_path_.cancelGoal();
+
+      if (attemptRecovery())
+      {
+        recovery_trigger_ = OSCILLATING;
+      }
+      else
+      {
+        igvc_msgs::NavigateWaypointResult move_base_result;
+        move_base_result.outcome = igvc_msgs::NavigateWaypointResult::OSCILLATION;
+        move_base_result.message = oscillation_msgs.str();
+        move_base_result.final_pose = robot_pose_;
+        move_base_result.angle_to_goal = move_base_feedback_.angle_to_goal;
+        move_base_result.dist_to_goal = move_base_feedback_.dist_to_goal;
+        current_goal_handle_.setAborted(move_base_result, move_base_result.message);
+        current_state_ = FAILED;
+      }
+    }
   }
 }
 
@@ -277,6 +361,7 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
         ROS_DEBUG_STREAM_NAMED("nav_server", "All recovery behaviors failed. Abort recovering and abort the move_base "
                                              "action");
         current_goal_handle_.setAborted(navigate_waypoint_result, "All recovery behaviors failed.");
+        current_state_ = FAILED;
       }
       else
       {
@@ -289,23 +374,28 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
       break;
     case actionlib::SimpleClientGoalState::PREEMPTED:
       ROS_INFO_STREAM_NAMED("nav_server", "The recovery action has been preempted!");
+      current_state_ = FAILED;
       break;
 
     case actionlib::SimpleClientGoalState::RECALLED:
       ROS_INFO_STREAM_NAMED("nav_server", "The recovery action has been recalled!");
+      current_state_ = FAILED;
       break;
 
     case actionlib::SimpleClientGoalState::REJECTED:
       ROS_FATAL_STREAM_NAMED("nav_server", "The recovery action has been rejected!");
       current_goal_handle_.setRejected();
+      current_state_ = FAILED;
       break;
     case actionlib::SimpleClientGoalState::LOST:
       ROS_FATAL_STREAM_NAMED("nav_server", "The recovery action has lost the connection to the server!");
       current_goal_handle_.setAborted();
+      current_state_ = FAILED;
       break;
     default:
       ROS_FATAL_STREAM_NAMED("nav_server", "Reached unreachable case! Unknown state!");
       current_goal_handle_.setAborted();
+      current_state_ = FAILED;
       break;
   }
 }
