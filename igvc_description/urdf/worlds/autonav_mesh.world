@@ -30,12 +30,12 @@
     <include>
       <uri>model:///urdf/models/ramp</uri>
       <name>ramp_0</name> <!-- THE NAME MUST BE UNIQUE-->
-      <pose>16.361 3.674 0 0 -0 -0.670</pose>
+      <pose>16.3618 3.6701 -0.13 0.0101 0.0119 -0.670</pose>
     </include>
     <include>
       <uri>model:///urdf/models/ramp</uri>
       <name>ramp_1</name> <!-- THE NAME MUST BE UNIQUE-->
-      <pose>-16.608 3.804 0 0 -0 0.955</pose>
+      <pose>-16.6108 3.8005 -0.17 0.0022 -0.0186 0.955</pose>
     </include>
     <!-- barrels -->
     <include>
