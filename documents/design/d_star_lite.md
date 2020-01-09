@@ -8,20 +8,23 @@
 
 ## The Problem
 
-Currently, Jessii, our IGVC robot, uses A* in order to plan its path through the obstacle
-course. This is all done with ROS package move_base_flex, which serves to allow the robot to
-utilize an enhanced version of the planner, controller, and recovery plugin ROS interfaces. 
-However, there is a better path planner algorithm, D* lite, which builds upon the Lifelong
-Planning A* (LPA) algorithm and D* algorithms. Thus, to resolve this issue, I will be replacing
-the currently used A* algorithm with the better D* lite algorithm in order to improve Jessii's
-path planning on the obstacle course.
+- The ROS package move_base_flex serves to allow the robot to utilize an enhanced version of 
+the planner, controller, and recovery plugin ROS interfaces:
+
+- There is a better path planner algorithm, D* lite which builds upon the Lifelong
+Planning A* (LPA) algorithm and D* algorithms. 
+
+- Thus, to resolve this issue, I will be replacing the currently used A* algorithm with the 
+better D* lite algorithm in order to improve Jessii's path planning on the obstacle course.
 
 ## Proposed Solution
 
 - Read a research paper on D* lite by researchers Sven Koenig and
 Maxim Likhachev in order to understand the technical details behind Lifelong Planning A* and D* Lite for
-robot navigation in unknown terrain, which essentially includes goal-directed navigation and the mapping of
-unknown terrain, concepts that will be useful to understand when implementingthe D* lite algorithm. 
+robot navigation in unknown terrain. 
+
+- Includes goal-directed navigation and the mapping of unknown terrain, concepts that will be useful to 
+understand when implementingthe D* lite algorithm. 
 
 - Read up on move_base_flex, a ROS package responsible for the planning, control, and recovery features
 for Jessii.
@@ -35,10 +38,11 @@ the software base.
 
 ## Questions & Research
 
-Currently, I do not know much about D* Lite (which is why I will be reading the research paper to extract
-information that will be essential for creating a working implementation of the algorithm). In addition,
-I will need to read up on A* and LPA (Lifelong Planning A*) in order to understand why D* Lite is better than
-these algorithms and how I can seamlessly reap the benefits.
+- I do not know much about D* Lite (which is why I will be reading the research paper to extract
+information that will be essential for creating a working implementation of the algorithm). 
+
+- I will need to read up on A* and LPA (Lifelong Planning A*) in order to understand why D* Lite 
+is better than these algorithms and how I can seamlessly reap the benefits.
 
 Link to D* Lite paper: https://aaai.org/Papers/AAAI/2002/AAAI02-072.pdf
 
@@ -46,11 +50,13 @@ Link to D* Lite paper: https://aaai.org/Papers/AAAI/2002/AAAI02-072.pdf
 
 ### Affected Packages
 
-The parts of the software that I will have to change are the move_base_flex wrapper_global_planner.h file,
-which contains the makePlan() method that will ultimately be responsible for holding my D* lite algorithm 
-implementation. I will also be editing the planner core file within the navigation folder in order to render 
-a map of the unknown terrain that Jessii will be crossing and using to calculate a path with the D* lite 
-algorithm.
+- The parts of the software that I will have to change are the:
+
+- move_base_flex wrapper_global_planner.h file containing the makePlan() method that will ultimately be 
+responsible for holding my D* lite algorithm implementation.
+
+- Planner core file within the navigation folder in order to render a map of the unknown terrain that Jessii
+will be crossing and using to calculate a path with the D* lite algorithm.
 
 ### Schedule
 
