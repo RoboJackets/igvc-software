@@ -73,11 +73,11 @@ private:
   ros::Time last_oscillation_reset_;
   ros::Duration oscillation_wait_time_;
   ros::Duration oscillation_timeout_;
-  double oscillation_distance_;
+  double oscillation_distance_ = 0.0;
 
   void start(GoalHandle goal_handle);
 
-  void cancel(GoalHandle goal_handle);
+  void cancel();
 
   void processLoop();
 
@@ -91,7 +91,7 @@ private:
   void actionExePathDone(const actionlib::SimpleClientGoalState &state,
                          const mbf_msgs::ExePathResultConstPtr &result_ptr);
 
-  void actionExePathActive();
+  static void actionExePathActive();
 
   void actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback);
 
@@ -103,6 +103,8 @@ private:
 
   void actionRecoveryDone(const actionlib::SimpleClientGoalState &state,
                           const mbf_msgs::RecoveryResultConstPtr &result_ptr);
+
+  void runNextRecoveryBehavior(const igvc_msgs::NavigateWaypointResult &navigate_waypoint_result);
 };
 
 #endif  // SRC_NAVIGATION_SERVER_H

@@ -11,7 +11,7 @@ NavigationServer::NavigationServer()
   , action_client_exe_path_(private_nh_, "/move_base_flex/exe_path")
   , action_client_recovery_(private_nh_, "/move_base_flex/recovery")
   , action_server_(private_nh_, "/move_to_waypoint", boost::bind(&NavigationServer::start, this, _1),
-                   boost::bind(&NavigationServer::cancel, this, _1), false)
+                   boost::bind(&NavigationServer::cancel, this), false)
 {
   ROS_INFO_STREAM_NAMED("nav_server", "Navigation server created.");
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
@@ -27,7 +27,7 @@ NavigationServer::NavigationServer()
   action_server_.start();
 }
 
-void NavigationServer::cancel(GoalHandle goal_handle)
+void NavigationServer::cancel()
 {
   current_state_ = CANCELED;
 
@@ -45,8 +45,6 @@ void NavigationServer::cancel(GoalHandle goal_handle)
   {
     action_client_recovery_.cancelGoal();
   }
-
-  goal_handle.setCanceled();
 }
 
 void NavigationServer::start(GoalHandle goal_handle)
@@ -96,7 +94,7 @@ void NavigationServer::processLoop()
 {
   while (ros::ok() && current_state_ != CANCELED && current_state_ != FAILED && current_state_ != SUCCEEDED)
   {
-    if (current_state_ == EXE_PATH && ros::Time::now() - time_of_last_get_path > time_between_get_path)
+    if (current_state_ == EXE_PATH && ros::Time::now() > time_of_last_get_path + time_between_get_path)
     {
       runGetPath();
       time_of_last_get_path = ros::Time::now();
@@ -185,7 +183,7 @@ void NavigationServer::runExePath(nav_msgs::Path path)
   exe_path_goal.controller = exe_path_controller_;
   exe_path_goal.path = std::move(path);
   action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2),
-                                   boost::bind(&NavigationServer::actionExePathActive, this),
+                                   NavigationServer::actionExePathActive,
                                    boost::bind(&NavigationServer::actionExePathFeedback, this, _1));
 }
 
@@ -234,6 +232,7 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
       break;
     case actionlib::SimpleClientGoalState::PREEMPTED:
       ROS_DEBUG_STREAM_NAMED("nav_server", "Action `exe_path` preempted.");
+
       break;
     default:
       ROS_FATAL_STREAM_NAMED("nav_server", "Unreachable state reached for exe_path: " << state.toString());
@@ -278,7 +277,7 @@ void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackCons
       }
     }
     // check if time has passed timeout
-    else if (last_oscillation_reset_ + oscillation_timeout_ < ros::Time::now())
+    else if (ros::Time::now() > last_oscillation_reset_ + oscillation_timeout_)
     {
       std::stringstream oscillation_msgs;
       oscillation_msgs << "Robot is oscillating for " << (ros::Time::now() - last_oscillation_reset_).toSec() << "s!";
@@ -353,50 +352,52 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
       break;
     case actionlib::SimpleClientGoalState::ABORTED:
       ROS_DEBUG_STREAM_NAMED("nav_server", "Recovery behavior aborted!");
-      ROS_DEBUG_STREAM_NAMED("nav_server", "The recovery behavior '" << *current_recovery_behavior_ << "' failed. ");
-      ROS_DEBUG_STREAM("Recovery behavior message: " << result.message << ", outcome: " << result.outcome);
-      current_recovery_behavior_++;
-      if (current_recovery_behavior_ == recovery_behaviors_.end())
-      {
-        ROS_DEBUG_STREAM_NAMED("nav_server", "All recovery behaviors failed. Abort recovering and abort the move_base "
-                                             "action");
-        current_goal_handle_.setAborted(navigate_waypoint_result, "All recovery behaviors failed.");
-        current_state_ = FAILED;
-      }
-      else
-      {
-        ROS_INFO_STREAM_NAMED("nav_server", "Run the next recovery behavior'" << *current_recovery_behavior_ << "'.");
-        mbf_msgs::RecoveryGoal recovery_goal;
-        recovery_goal.behavior = *current_recovery_behavior_;
-        action_client_recovery_.sendGoal(recovery_goal,
-                                         boost::bind(&NavigationServer::actionRecoveryDone, this, _1, _2));
-      }
+      runNextRecoveryBehavior(navigate_waypoint_result);
       break;
     case actionlib::SimpleClientGoalState::PREEMPTED:
       ROS_INFO_STREAM_NAMED("nav_server", "The recovery action has been preempted!");
-      current_state_ = FAILED;
+      runNextRecoveryBehavior(navigate_waypoint_result);
       break;
-
-    case actionlib::SimpleClientGoalState::RECALLED:
-      ROS_INFO_STREAM_NAMED("nav_server", "The recovery action has been recalled!");
-      current_state_ = FAILED;
-      break;
-
     case actionlib::SimpleClientGoalState::REJECTED:
       ROS_FATAL_STREAM_NAMED("nav_server", "The recovery action has been rejected!");
-      current_goal_handle_.setRejected();
+      runNextRecoveryBehavior(navigate_waypoint_result);
       current_state_ = FAILED;
+      break;
+    case actionlib::SimpleClientGoalState::RECALLED:
+      ROS_INFO_STREAM_NAMED("nav_server", "The recovery action has been recalled!");
       break;
     case actionlib::SimpleClientGoalState::LOST:
       ROS_FATAL_STREAM_NAMED("nav_server", "The recovery action has lost the connection to the server!");
-      current_goal_handle_.setAborted();
+      current_goal_handle_.setAborted(navigate_waypoint_result);
       current_state_ = FAILED;
       break;
     default:
       ROS_FATAL_STREAM_NAMED("nav_server", "Reached unreachable case! Unknown state!");
-      current_goal_handle_.setAborted();
+      current_goal_handle_.setAborted(navigate_waypoint_result);
       current_state_ = FAILED;
       break;
+  }
+}
+
+void NavigationServer::runNextRecoveryBehavior(const igvc_msgs::NavigateWaypointResult &navigate_waypoint_result)
+{
+  ROS_DEBUG_STREAM_NAMED("nav_server", "The recovery behavior '" << *current_recovery_behavior_ << "' failed. ");
+  ROS_DEBUG_STREAM("Recovery behavior message: " << navigate_waypoint_result.message
+                                                 << ", outcome: " << navigate_waypoint_result.outcome);
+  current_recovery_behavior_++;
+  if (current_recovery_behavior_ == recovery_behaviors_.end())
+  {
+    ROS_DEBUG_STREAM_NAMED("nav_server", "All recovery behaviors failed. Abort recovering and abort the move_base "
+                                         "action");
+    current_goal_handle_.setAborted(navigate_waypoint_result, "All recovery behaviors failed.");
+    current_state_ = FAILED;
+  }
+  else
+  {
+    ROS_INFO_STREAM_NAMED("nav_server", "Run the next recovery behavior'" << *current_recovery_behavior_ << "'.");
+    mbf_msgs::RecoveryGoal recovery_goal;
+    recovery_goal.behavior = *current_recovery_behavior_;
+    action_client_recovery_.sendGoal(recovery_goal, boost::bind(&NavigationServer::actionRecoveryDone, this, _1, _2));
   }
 }
 
