@@ -12,7 +12,8 @@ Here is a short list of the problems that have been identified with the firmware
 - Asynchronous networking code (for communicating with the computer) runs in the same thread as “real-time” code (PID control)
 - There are no errors messages sent from the mbed to the computer, making it difficult to see what the mbed is doing when it fails or encounters a problem
 - Messages sent between the computer and the mbed follow the same format with many optional fields instead of using dedicated message formats for different commands
-- The E-stop signal is treated as a normal digital input but should be an interrupt input to stop the robot as soon as possible
+- The E-stop signal is treated as a normal digital input but should be an interrupt input to stop the mbed and computer quickly
+        - Note that the motors are disconnected electrically when the e-stop is triggered
 
 There are also a number of new features being added to the electrical system that the mbed now must support. Part of the redesign was made keeping these features in mind. The specifics of their implementation has been left out of this document, but it should be clear how one might implement such features using the new firmware.
 
@@ -149,7 +150,7 @@ The latest revision of the logic board includes pins for external status LEDs (b
 
 ## Required Work
 
-The section will break down the implementation of this design document into _ major groups. This is intended to help create a timeline for the order of work and help assign people to different tasks.
+The section will break down the implementation of this design document into 5 major groups. This is intended to help create a timeline for the order of work and help assign people to different tasks.
 
 1. **Define diagnostics devices**
     1. Determine what CAN devices are available
