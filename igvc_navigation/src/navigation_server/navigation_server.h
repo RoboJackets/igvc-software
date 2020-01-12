@@ -68,7 +68,6 @@ private:
   ros::Duration time_between_get_path = ros::Duration(0.5);
 
   igvc_msgs::NavigateWaypointFeedback move_base_feedback_;
-  geometry_msgs::PoseStamped robot_pose_;
   geometry_msgs::PoseStamped previous_oscillation_pose_;
   ros::Time last_oscillation_reset_;
   ros::Duration oscillation_wait_time_;
@@ -94,6 +93,8 @@ private:
   static void actionExePathActive();
 
   void actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback);
+
+  void checkForOscillation(geometry_msgs::PoseStamped robot_pose);
 
   /**
   Attempts to run recovery behavior.
