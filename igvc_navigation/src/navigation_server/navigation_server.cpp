@@ -260,7 +260,7 @@ void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackCons
   checkForOscillation(feedback->current_pose);
 }
 
-void NavigationServer::checkForOscillation(geometry_msgs::PoseStamped robot_pose)
+void NavigationServer::checkForOscillation(const geometry_msgs::PoseStamped& robot_pose)
 {
   // oscillation checking is disabled if oscillation_timeout_ = 0
   // wait until oscillation_wait_time has passed to start checking for oscillation
