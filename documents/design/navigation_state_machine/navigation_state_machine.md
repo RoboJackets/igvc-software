@@ -45,6 +45,10 @@ The implementation of the state machine is such:
     - If ANYTHING ELSE:
         - Report what happened
 
+Simplified image of the state machine:
+![state machine](navigation_state_machine.gif "state machine")
+The ellipses at the bottom represent final states, blue rectangles are actions, and the bottom rectangles describe special arrows.
+
 ## Questions & Research
 
 Which recovery behaviors should the robot use, and what order should they be in?
