@@ -94,7 +94,7 @@ private:
 
   void actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback);
 
-  void checkForOscillation(const geometry_msgs::PoseStamped& robot_pose);
+  void checkForOscillation(const geometry_msgs::PoseStamped &robot_pose);
 
   /**
   Attempts to run recovery behavior.
