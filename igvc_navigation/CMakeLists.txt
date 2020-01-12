@@ -202,7 +202,7 @@ add_library(
     GraphSearch/src/Node.cpp
     GraphSearch/src/Graph.cpp
     GraphSearch/src/PriorityQueue.cpp
-)
+        src/fake_cone/fake_cone.cpp src/fake_cone/fake_cone.h)
 add_dependencies(GraphSearch ${catkin_EXPORTED_TARGETS})
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
@@ -224,3 +224,5 @@ add_subdirectory(src/back_circle)
 
 add_subdirectory(src/action_server)
 add_subdirectory(src/differential_drive)
+
+add_subdirectory(src/fake_cone)
