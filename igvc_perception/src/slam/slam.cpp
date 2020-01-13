@@ -30,7 +30,8 @@ void Slam::ImuCallback(const sensor_msgs::Imu &msg){
         accum.integrateMeasurement(measuredAcc, measuredOmega, 0.005);
     } else {
         double deltaT = (currTime-lastImuMeasurement).toSec();
-        accum.integrateMeasurement(measuredAcc, measuredOmega, deltaT);
+        if (deltaT > 0)
+            accum.integrateMeasurement(measuredAcc, measuredOmega, deltaT);
     }
     lastImuMeasurement = currTime;
 }
