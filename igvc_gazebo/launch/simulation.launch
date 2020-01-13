@@ -17,6 +17,7 @@
     <arg name="pitch" default="0.0"/>
     <arg name="yaw" default="0"/>
 
+    <param name="/running_simulation" value="true"/>
     <param name="/use_sim_time" value="true"/>
 
     <include file="$(find igvc_navigation)/launch/set_waypoint_file_path.launch">

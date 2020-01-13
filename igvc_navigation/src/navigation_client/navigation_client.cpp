@@ -9,8 +9,16 @@ NavigationClient::NavigationClient()
 {
   ros::NodeHandle private_nh("~");
 
-  assertions::getParam(private_nh, "reading_from_file", reading_from_file_);
-  assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
+  bool running_simulation;
+  if (private_nh.getParam("/running_simulation", running_simulation))
+  {
+    assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
+    assertions::getParam(private_nh, "read_from_file", reading_from_file_);
+  }
+  else
+  {
+    reading_from_file_ = false;
+  }
 
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
 
@@ -20,6 +28,7 @@ NavigationClient::NavigationClient()
   if (reading_from_file_)
   {
     std::vector<geometry_msgs::PointStamped> waypoints = loadWaypointsFromFile();
+    ROS_INFO_STREAM("Reading from file.");
     sendWaypoints(waypoints);
   }
   else
