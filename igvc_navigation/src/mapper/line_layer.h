@@ -94,7 +94,7 @@ private:
   void calculateCachedRays(const sensor_msgs::CameraInfo& info, size_t camera_index);
 
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
-  cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image) const;
+  cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image, bool isToMono) const;
 
   void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom,
                     size_t camera_idx);
@@ -117,6 +117,11 @@ private:
 
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
+
+    cv::Mat findBarrel(const cv::Mat &);
+
+    void projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat,
+                      const geometry_msgs::TransformStamped &camera_to_odom, size_t camera_idx);
 };
 }  // namespace line_layer
 

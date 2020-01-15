@@ -6,7 +6,7 @@
     <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
 
     <!-- Launch action server -->
-    <include file="$(find igvc_navigation)/launch/action_server.launch" />
+<!--    <include file="$(find igvc_navigation)/launch/action_server.launch" />-->
 
     <!-- Launch differential drive controller -->
     <include file="$(find igvc_navigation)/launch/differential_drive.launch" />

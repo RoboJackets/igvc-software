@@ -6,6 +6,7 @@
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <opencv2/videoio.hpp>
+#include <opencv2/opencv.hpp>
 #include <unordered_set>
 #include "camera_config.h"
 #include "map_config.h"
@@ -126,11 +127,13 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   geometry_msgs::TransformStamped camera_to_odom =
       getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
 
-  cv::Mat segmented_mat = convertToMat(segmented_image);
+  cv::Mat segmented_mat = convertToMat(segmented_image, true);
+  cv::Mat raw_mat = convertToMat(raw_image, false);
 
-  projectImage(segmented_mat, camera_to_odom, camera_index);
+  projectImage(raw_mat, segmented_mat, camera_to_odom, camera_index);
   cleanupProjections();
   insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
+  ROS_INFO_STREAM("General Kenobi");
 
   debugPublishPC(debug_publishers_[camera_index].debug_line_pub_, line_buffer_, camera_to_odom);
   debugPublishPC(debug_publishers_[camera_index].debug_nonline_pub_, freespace_buffer_, camera_to_odom);
@@ -176,13 +179,35 @@ geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::strin
   return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
 }
 
-cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const
-{
-  cv_bridge::CvImageConstPtr cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
-  return cv_bridge_image->image;
+cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const {
+    if (isToMono) {
+        cv_bridge::CvImageConstPtr cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
+        return cv_bridge_image->image;
+    } else {
+        cv_bridge::CvImageConstPtr cv_bridge_image = cv_bridge::toCvShare(image, "bgr8");
+        return cv_bridge_image->image;
+    }
+
 }
 
-void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom,
+cv::Mat LineLayer::findBarrel(const cv::Mat&inMat){
+    // Gaussian Blur
+    cv::Mat blur;
+    cv::GaussianBlur(inMat,  blur, cv::Size(13,13), 0, 0);
+    //hsv threshold
+//    ROS_INFO_STREAM(blur.channels());
+    cv::Mat hsv_frame;
+//    ROS_INFO_STREAM("before paul");
+    cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
+//    ROS_INFO_STREAM("after paul");
+    cv::inRange(hsv_frame, cv::Scalar(0,0,200), cv::Scalar(29,255,255), hsv_frame);
+    //open and closing
+    cv::morphologyEx(hsv_frame,hsv_frame, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3)));
+    cv::morphologyEx(hsv_frame,hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3)));
+    hsv_frame.setTo(100, hsv_frame);
+    return hsv_frame;
+}
+void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom,
                              size_t camera_idx)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
@@ -201,13 +226,15 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
   map_.getIndex({ translate_vector.x, translate_vector.y }, camera_index);
 
   constexpr uchar true_val = 255U;
-
+  constexpr uchar true_barrel = 100U;
+  //Start
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = segmented_mat.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
-      // TODO: Mask using barrels
+      cv::Mat barrel_frame = LineLayer::findBarrel(raw_mat);
+
       const int ray_idx = i * cols + j;
       Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
 
@@ -215,10 +242,14 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
 
       bool is_line = row_ptr[j] == true_val;
+      bool is_barrel = row_ptr[j] == true_barrel;
       grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
       if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
-        if (is_line)
+        if(is_barrel){
+          continue;
+        }
+        else if (is_line)
         {
           line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
@@ -543,6 +574,7 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
   }
 
   pub.publish(pointcloud);
+  ROS_INFO_STREAM("Hello there");
 }
 
 void LineLayer::initCostTranslationTable()
