@@ -50,7 +50,7 @@ void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "jaymii_controller");
+  ros::init(argc, argv, "jessii_controller");
 
   ros::NodeHandle handle;
   ros::NodeHandle pNh("~");

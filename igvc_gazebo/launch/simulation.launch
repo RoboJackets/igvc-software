@@ -34,7 +34,7 @@
         <arg name="debug" value="false"/>
     </include>
 
-    <include file="$(find igvc_description)/launch/spawn_jaymii.launch">
+    <include file="$(find igvc_description)/launch/spawn_jessii.launch">
         <arg name="x" value="$(arg x)"/>
         <arg name="y" value="$(arg y)"/>
         <arg name="z" value="$(arg z)"/>
