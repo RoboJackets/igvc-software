@@ -15,7 +15,7 @@ robot.
 - I will first watch more videos and read more articles abut timed-elastic-bands control to make sure
   that I understand how TEB works. I will learn what the appropriate values for each paramater
   are and what will changing each of the variables do.
-- Then, I will try to use rviz to adjust, test, and tune the parameters before I make changes to the file.
+- Then, I will try to use rviz and rqt_reconfigure to adjust, test, and tune the TEB parameters in the .ymal file.
 - If all the parameters seem to be tuned, I will then make changes to the values in the file, and test
   on the robot if possible.
 
@@ -23,6 +23,12 @@ robot.
 
 I need to research more about model predictive control and timed-elastic-bands in order to solve this issue,
 and I also need to read more about teb_local_planner on ROS Wiki.
+
+A preliminary list of resources that I will be using include:
+https://www.mathworks.com/videos/series/understanding-model-predictive-control.html
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7331052&tag=1
+http://wiki.ros.org/teb_local_planner/Tutorials/Setup%20and%20test%20Optimization
+https://www.youtube.com/watch?v=e1Bw6JOgHME
 
 ## Overall Scope
 
