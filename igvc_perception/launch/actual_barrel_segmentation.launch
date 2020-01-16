@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+  <node name="barrel_seg" pkg="igvc_perception" type="barrel_seg" output="screen">
+    <param name="clusterTolerance" type="double" value="0.3" />
+    <param name="minClusterSize" type="int" value="100" />
+    <param name="maxClusterSize" type="int" value="500" />
+  </node>
+</launch>
