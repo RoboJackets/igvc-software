@@ -10,9 +10,165 @@ ros::NodeHandle nh;
 ros::Publisher fake_cone_dubug;
 
 int OCCUPY_THRESHOLD = 70;
+double COEFFICIENT_THRESHOLD = 0.8;
 
 namespace fake_cone
 {
+    bool FakeConeService::equals(geometry_msgs::Point a, geometry_msgs::Point b) {
+        return a.x == b.x && a.y == b.y;
+    }
+
+    bool FakeConeService::contains(std::vector<geometry_msgs::Point> &array, geometry_msgs::Point point) {
+        bool result = true;
+        for (geometry_msgs::Point element : array) {
+            if (equals(element, point)) {
+                result = false;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    geometry_msgs::Point FakeConeService::convert1DIndexTo2D(nav_msgs::OccupancyGrid &localMap, int index) {
+        geometry_msgs::Point point;
+
+        point.x = index % localMap.info.width;
+        point.y = index / localMap.info.width;
+
+        return point;
+    }
+
+    int FakeConeService::convert2DIndexTo1D(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point) {
+        int result = point.y * localCostMap.info.width + point.x;
+    }
+
+    std::vector<geometry_msgs::Point> FakeConeService::linearProbe(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point) {
+        std::vector<geometry_msgs::Point> possibleLine;
+        std::vector<geometry_msgs::Point> visited;
+        std::vector<geometry_msgs::Point> queue;
+
+        //Initialize the queue
+        for (geometry_msgs::Point element : nearbyOccupied(localCostMap, point)) {
+            if (localCostMap.data[convert2DIndexTo1D(localCostMap, element)] > OCCUPY_THRESHOLD) {
+                queue.push_back(element);
+            }
+        }
+
+        while (!queue.empty()) {
+            geometry_msgs::Point element = queue.back();
+            visited.push_back(element);
+            possibleLine.push_back(element);
+            for (geometry_msgs::Point nearbyPoint : nearbyOccupied(localCostMap, element)) {
+                if (!contains(visited, nearbyPoint)) {
+                    queue.push_back(nearbyPoint);
+                }
+            }
+            queue.pop_back();
+        }
+
+        return possibleLine;
+    }
+
+    std::vector<geometry_msgs::Point> FakeConeService::nearbyOccupied(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point) {
+        return filterOccupied(localCostMap, gatherNearby(localCostMap, point));
+    }
+
+    std::vector<geometry_msgs::Point> FakeConeService::filterOccupied(nav_msgs::OccupancyGrid &localCostMap, std::vector<geometry_msgs::Point> input) {
+
+        std::vector<geometry_msgs::Point> occupiedList;
+        for (geometry_msgs::Point point : input) {
+            int index = point.x + point.y * localCostMap.info.width;
+            if (localCostMap.data[index] > OCCUPY_THRESHOLD) {
+                occupiedList.push_back(point);
+            }
+        }
+
+        return occupiedList;
+    }
+
+    std::vector<geometry_msgs::Point> FakeConeService::gatherNearby(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point) {
+
+        geometry_msgs::Point temp;
+        std::vector<geometry_msgs::Point> nearbyPoints;
+
+        //this is on the left edge
+        if ((int)point.x % localCostMap.info.width == 0) {
+            temp = geometry_msgs::Point{point};
+            temp.x = temp.x + 1;
+            nearbyPoints.push_back(temp);
+            temp.y = temp.y + 1;
+            nearbyPoints.push_back(temp);
+            temp.y = temp.y - 2;
+            nearbyPoints.push_back(temp);
+        }
+        //this is on the right edge
+        else if ((int) point.x % localCostMap.info.width == localCostMap.info.width - 1) {
+            temp = geometry_msgs::Point{point};
+            temp.x = temp.x - 1;
+            nearbyPoints.push_back(temp);
+            temp.y = temp.y + 1;
+            nearbyPoints.push_back(temp);
+            temp.y = temp.y - 2;
+            nearbyPoints.push_back(temp);
+        }
+
+        temp = geometry_msgs::Point{point};
+        temp.y = temp.y + 1;
+        nearbyPoints.push_back(temp);
+        temp.y = temp.y - 2;
+        nearbyPoints.push_back(temp);
+
+        return nearbyPoints;
+    }
+
+    std::vector<geometry_msgs::Point> FakeConeService::connectEndpoints(geometry_msgs::Point left, geometry_msgs::Point right) {
+        std::vector<geometry_msgs::Point> connectingPoint;
+        connectingPoint.push_back(left);
+        connectingPoint.push_back(right);
+
+        int slope_new = 2 * (right.y - left.y);
+        int slope_error = slope_new - (right.x - left.x);
+
+        for (int x = left.x, y = left.y; x <= right.x; x++) {
+            geometry_msgs::Point temp;
+            temp.x = x;
+            temp.y = y;
+            connectingPoint.push_back(temp);
+
+            if (slope_error >= 0) {
+                y++;
+                slope_error -= 2 * (right.x - left.x);
+            }
+        }
+    }
+
+    double FakeConeService::calculateRCoefficient(nav_msgs::OccupancyGrid &localMap,  std::vector<geometry_msgs::Point> linePoints) {
+
+        double sigmaX = 0;
+        double sigmaY = 0;
+        double sigmaXY = 0;
+        double sigmaXsqr = 0;
+        double sigmaYsqr = 0;
+        int size = linePoints.size();
+
+        for(geometry_msgs::Point linePoint : linePoints) {
+            sigmaX += linePoint.x;
+            sigmaY += linePoint.y;
+            sigmaXY += (linePoint.x * linePoint.y);
+            sigmaXsqr += linePoint.x * linePoint.x;
+            sigmaYsqr += linePoint.y * linePoint.y;
+        }
+
+        double slope = ((size * sigmaXY) - (sigmaX * sigmaY)) / (size * sigmaXsqr - sigmaX * sigmaX);
+        double intercept = (sigmaY - slope * sigmaX) / size;
+        double rCoefficient = (sigmaXY - sigmaX * sigmaY / size)
+                              / sqrt((sigmaXsqr - (sigmaX * sigmaX) / size)
+                                     * (sigmaYsqr - (sigmaY * sigmaY) / size));
+
+        return rCoefficient;
+    }
+
     void localCostmapCallback(nav_msgs::OccupancyGrid &localCostMap) {
         //float mapResolution = localCostMap.info.resolution;
         int mapSize = localCostMap.info.height * localCostMap.info.width;
@@ -25,69 +181,7 @@ namespace fake_cone
         }
     }
 
-    void FakeConeService::linearProbe(nav_msgs::OccupancyGrid &localCostMap, int index, std::vector<std::vector<int>> &lines, std::vector<int> line, std::vector<int> visited) {
-
-        if(nearbyOccupied(localCostMap, index).empty()) {
-            lines.push_back(line);
-        } else {
-            std::vector<int> nearby = nearbyOccupied(localCostMap, index);
-            line.push_back(index);
-
-             for (int i = 0; i < nearby.size(); i++) {
-                 for (int j = 0; j < nearby.size(); j++) {
-                     if (i == j) {
-                         linearProbe(localCostMap, nearby.at(j), lines, line, visited);
-                     } else {
-
-                     }
-                 }
-             }
-        }
-    }
-
-    std::vector<int> FakeConeService::nearbyOccupied(nav_msgs::OccupancyGrid &localCostMap, int index) {
-        return filterOccupied(localCostMap, gatherNearby(localCostMap, index));
-    }
-
-    std::vector<int> FakeConeService::filterOccupied(nav_msgs::OccupancyGrid &localCostMap, std::vector<int> input) {
-
-        std::vector<int> result;
-        while (!input.empty()) {
-            int temp = input.back();
-            if (localCostMap.data[temp] > OCCUPY_THRESHOLD) {
-                result.push_back(temp);
-            }
-            input.pop_back();
-        }
-
-        return result;
-    }
-
-    std::vector<int> FakeConeService::gatherNearby(nav_msgs::OccupancyGrid &localCostMap, int index) {
-        int mapWidth = localCostMap.info.width;
-
-        std::vector<int> nearby;
-
-        nearby.push_back(index - mapWidth);
-        nearby.push_back(index + mapWidth);
-
-        //If the element is at the start of the row
-        if (index % mapWidth == 1) {
-            nearby.push_back(index + 1);
-            nearby.push_back(index - mapWidth + 1);
-            nearby.push_back(index + mapWidth + 1);
-        }
-        //If the element is at the end of the row
-        else if (index % mapWidth == mapWidth - 1) {
-            nearby.push_back(index - 1);
-            nearby.push_back(index - mapWidth - 1);
-            nearby.push_back(index + mapWidth -1);
-        }
-
-        return nearby;
-    }
-
-    void FakeConeService::scanAndGenerate(int x, int y)
+    void FakeConeService::scanAndGenerate()
     {
         //Scan the surrounding costmap and then linearly probe for an endpoint
         ros::Subscriber localCostmapSub = nh.subscribe("/move_base_flex/local_costmap/costmap", 0, localCostmapCallback);
@@ -95,6 +189,9 @@ namespace fake_cone
 
     int main(int argc, char **argv) {
         ros::init(argc, argv, "fake_cone_service");
+
+        ros::ServiceServer service = nh.advertiseService("fake_cone", scanAndGenerate);
+
 
         fake_cone_dubug = nh.advertise<std::string>("fake_cone/Debug", 1);
     }

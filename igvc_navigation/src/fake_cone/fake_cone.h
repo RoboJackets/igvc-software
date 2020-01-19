@@ -14,10 +14,16 @@ namespace fake_cone{
         void scanAndGenerate(int x, int y);
 
     private:
-        void linearProbe(nav_msgs::OccupancyGrid &localCostMap, int index, std::vector<std::vector<int>> &lines, std::vector<int> line, std::vector<int> visited);
-        std::vector<int> nearbyOccupied(nav_msgs::OccupancyGrid &localCostMap, int index);
-        std::vector<int> gatherNearby(nav_msgs::OccupancyGrid &localCostMap, int index);
-        std::vector<int> filterOccupied(nav_msgs::OccupancyGrid &localCostMap, std::vector<int> input);
+        bool equals(geometry_msgs::Point a, geometry_msgs::Point b);
+        bool contains(std::vector<geometry_msgs::Point> &array, geometry_msgs::Point point);
+        geometry_msgs::Point convert1DIndexTo2D(nav_msgs::OccupancyGrid &localMap, int index);
+        int convert2DIndexTo1D(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
+        std::vector<geometry_msgs::Point> connectEndpoints(geometry_msgs::Point left, geometry_msgs::Point right);
+        double calculateRCoefficient(nav_msgs::OccupancyGrid &localMap,  std::vector<geometry_msgs::Point> linePoints);
+        std::vector<geometry_msgs::Point> linearProbe(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
+        std::vector<geometry_msgs::Point> nearbyOccupied(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
+        std::vector<geometry_msgs::Point> gatherNearby(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
+        std::vector<geometry_msgs::Point> filterOccupied(nav_msgs::OccupancyGrid &localCostMap, std::vector<geometry_msgs::Point> input);
     };
 }
 
