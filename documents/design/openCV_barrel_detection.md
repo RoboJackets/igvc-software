@@ -36,15 +36,6 @@ this should block out the orange from the image, and the blur and closing should
 
 ## Questions & Research
 
-Are there things you are unsure about or don't know? What do you need to research to be able to
-complete this project? If you need information from the mechanical or electrical subteams,
-be sure to describe that here. If your solution requires more research to implement, describe
-what kind of topics you need look at. Link any research papers/articles that you find here.
-
-**Of course, if you have _any_ questions or concerns, feel free to bring them up at any time.
-If you ever feel lost or don't know what to do or work on, Oswin or any old software member
-can help you out. You are not expected to know every technical detail about the project. Expressing
-what you don't know will make it easier to do research and ask for help.**
 
 not too many questions, should be simple. One question I do have is if these barrels are guaranteed to be orange. If not, I might need to add more masks.
 
