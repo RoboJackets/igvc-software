@@ -11,7 +11,6 @@
 namespace fake_cone{
     class FakeConeService {
     public:
-        void scanAndGenerate(int x, int y);
 
     private:
         bool equals(geometry_msgs::Point a, geometry_msgs::Point b);

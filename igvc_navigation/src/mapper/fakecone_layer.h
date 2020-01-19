@@ -7,7 +7,7 @@
 
 
 #include <pcl/point_cloud.h>
-#include <pcl/impl/point_types.hpp>
+#include <pcl/point_types.h>
 #include "gridmap_layer.h"
 #include "fakecone_layer_config.h"
 
