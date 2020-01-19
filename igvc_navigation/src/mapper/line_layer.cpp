@@ -133,7 +133,6 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   projectImage(raw_mat, segmented_mat, camera_to_odom, camera_index);
   cleanupProjections();
   insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
-  ROS_INFO_STREAM("General Kenobi");
 
   debugPublishPC(debug_publishers_[camera_index].debug_line_pub_, line_buffer_, camera_to_odom);
   debugPublishPC(debug_publishers_[camera_index].debug_nonline_pub_, freespace_buffer_, camera_to_odom);
@@ -234,29 +233,36 @@ void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_ma
     for (int j = 0; j < cols; j++)
     {
       cv::Mat barrel_frame = LineLayer::findBarrel(raw_mat);
-
+        ROS_INFO_STREAM("Making barrel mat");
       const int ray_idx = i * cols + j;
       Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
-
+      ROS_INFO_STREAM("1");
       double scale = -translation[2] / eigen_ray[2];
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
-
+        ROS_INFO_STREAM("2");
+        ROS_INFO_STREAM(row_ptr[j]);
       bool is_line = row_ptr[j] == true_val;
       bool is_barrel = row_ptr[j] == true_barrel;
+      ROS_INFO_STREAM("3");
       grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
+      ROS_INFO_STREAM("4");
       if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
+
         if(is_barrel){
-          continue;
+            ROS_INFO_STREAM("IN BARREL");
+            continue;
         }
         else if (is_line)
         {
+            ROS_INFO_STREAM("IN LINE");
           line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
         }
         else
         {
+            ROS_INFO_STREAM("IN FREESPACE");
           freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
@@ -574,7 +580,6 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
   }
 
   pub.publish(pointcloud);
-  ROS_INFO_STREAM("Hello there");
 }
 
 void LineLayer::initCostTranslationTable()
