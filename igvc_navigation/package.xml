@@ -50,6 +50,8 @@
   <depend>dynamic_reconfigure</depend>
   <depend>actionlib</depend>
   <depend>mbf_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>nav_core</depend>
 
   <build_depend>cv_bridge</build_depend>
   <build_depend>pcl_ros</build_depend>
@@ -57,7 +59,6 @@
   <build_depend>igvc_utils</build_depend>
   <build_depend>octomap</build_depend>
   <build_depend>octomap_ros</build_depend>
-  <build_depend>grid_map</build_depend>
 
   <!-- Run dependencies -->
   <exec_depend>cv_bridge</exec_depend>
@@ -66,7 +67,6 @@
   <exec_depend>laser_geometry</exec_depend>
   <exec_depend>nmea_navsat_driver</exec_depend>
   <exec_depend>gps_common</exec_depend>
-  <exec_depend>pluginlib</exec_depend>
   <exec_depend>teb_local_planner</exec_depend>
   <exec_depend>global_planner</exec_depend>
   <exec_depend>clear_costmap_recovery</exec_depend>
@@ -74,8 +74,8 @@
 
   <test_depend>rostest</test_depend>
 
-  <!-- costmap2d layer pluginlib stuff -->
   <export>
     <costmap_2d plugin="${prefix}/src/mapper/costmap_plugins.xml" />
+    <nav_core plugin="${prefix}/src/back_up_recovery/back_up_recovery.xml"/>
   </export>
 </package>
