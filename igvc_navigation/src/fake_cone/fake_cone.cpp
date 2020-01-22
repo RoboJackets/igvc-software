@@ -166,23 +166,4 @@ namespace fake_cone
 
         return rCoefficient;
     }
-
-    void localCostmapCallback(nav_msgs::OccupancyGrid &localCostMap) {
-        //float mapResolution = localCostMap.info.resolution;
-        int mapSize = localCostMap.info.height * localCostMap.info.width;
-
-        //map size 400*400
-        for (int grid = 0; grid < mapSize; grid++) {
-            if (localCostMap.data[grid] > OCCUPY_THRESHOLD) {
-
-            }
-        }
-    }
-
-    bool FakeConeService::scanAndGenerate()
-    {
-        //Scan the surrounding costmap and then linearly probe for an endpoint
-        //ros::Subscriber localCostmapSub = nh.subscribe("/move_base_flex/local_costmap/costmap", 0, localCostmapCallback);
-        return true;
-    }
 }

@@ -10,9 +10,10 @@
 #include <nav_msgs/OccupancyGrid.h>
 
 namespace fake_cone{
-    class FakeConeService {
+    class FakeConeService{
     public:
-        bool scanAndGenerate();
+        double calculateRCoefficient(nav_msgs::OccupancyGrid &localMap,  std::vector<geometry_msgs::Point> linePoints);
+        std::vector<geometry_msgs::Point> linearProbe(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
 
     private:
         bool equals(geometry_msgs::Point a, geometry_msgs::Point b);
@@ -20,8 +21,6 @@ namespace fake_cone{
         geometry_msgs::Point convert1DIndexTo2D(nav_msgs::OccupancyGrid &localMap, int index);
         int convert2DIndexTo1D(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
         std::vector<geometry_msgs::Point> connectEndpoints(geometry_msgs::Point left, geometry_msgs::Point right);
-        double calculateRCoefficient(nav_msgs::OccupancyGrid &localMap,  std::vector<geometry_msgs::Point> linePoints);
-        std::vector<geometry_msgs::Point> linearProbe(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
         std::vector<geometry_msgs::Point> nearbyOccupied(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
         std::vector<geometry_msgs::Point> gatherNearby(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
         std::vector<geometry_msgs::Point> filterOccupied(nav_msgs::OccupancyGrid &localCostMap, std::vector<geometry_msgs::Point> input);
