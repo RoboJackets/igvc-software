@@ -23,6 +23,13 @@ add_message_files(
     trajectory.msg
 )
 
+# Generate messages in the "srv" folder
+add_service_files(
+    DIRECTORY srv
+    FILES
+    fake_cone.srv
+)
+
 # Generate added messages and services with any dependencies listed here
 generate_messages(
     DEPENDENCIES

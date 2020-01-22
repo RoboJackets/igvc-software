@@ -1,4 +1,4 @@
-add_executable(fake_cone fake_cone.cpp)
+add_executable(fake_cone fake_cone.cpp main.cpp)
 add_dependencies(fake_cone ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fake_cone ${catkin_LIBRARIES})
 

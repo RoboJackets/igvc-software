@@ -5,12 +5,14 @@
 #ifndef SRC_FAKE_CONE_H
 #define SRC_FAKE_CONE_H
 
-
+#include <ros/ros.h>
+#include <geometry_msgs/Point.h>
 #include <nav_msgs/OccupancyGrid.h>
 
 namespace fake_cone{
     class FakeConeService {
     public:
+        bool scanAndGenerate();
 
     private:
         bool equals(geometry_msgs::Point a, geometry_msgs::Point b);

@@ -6,8 +6,6 @@
 #include "fake_cone.h"
 #include <nav_msgs/OccupancyGrid.h>
 
-ros::NodeHandle nh;
-ros::Publisher fake_cone_dubug;
 
 int OCCUPY_THRESHOLD = 70;
 double COEFFICIENT_THRESHOLD = 0.8;
@@ -181,17 +179,10 @@ namespace fake_cone
         }
     }
 
-    bool scanAndGenerate()
+    bool FakeConeService::scanAndGenerate()
     {
         //Scan the surrounding costmap and then linearly probe for an endpoint
         //ros::Subscriber localCostmapSub = nh.subscribe("/move_base_flex/local_costmap/costmap", 0, localCostmapCallback);
         return true;
-    }
-
-    int main(int argc, char **argv) {
-        ros::init(argc, argv, "fake_cone_service");
-
-        //ros::ServiceServer service = nh.advertiseService("fake_cone_service", scanAndGenerate);
-        //fake_cone_dubug = nh.advertise<std::string>("fake_cone/Debug", 1);
     }
 }
