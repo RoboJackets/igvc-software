@@ -25,7 +25,7 @@ void BackUpRecovery::initialize(std::string name, tf2_ros::Buffer *, costmap_2d:
     // get some parameters from the parameter server
     ros::NodeHandle private_nh("~/" + name);
 
-    private_nh.param("velocity", velocity_, 0.7);
+    private_nh.param("velocity", velocity_, 0.8);
     private_nh.param("frequency", frequency_, 20.0);
     private_nh.param("threshold_distance", threshold_distance_,
                      0.6);  // distance robot backs up before exiting back up behavior
