@@ -81,9 +81,6 @@ void BackUpRecovery::runBehavior()
   vel_msg.linear.x = -velocity_;
   vel_pub.publish(vel_msg);
 
-  ROS_INFO_STREAM("Threshold: " << threshold_distance_);
-  ROS_INFO_STREAM("Distance: " << igvc::get_distance(current_position, start_position));
-
   while (n.ok() && igvc::get_distance(current_position, start_position) < threshold_distance_ && next_step_valid)
   {
     local_costmap_->getRobotPose(global_pose);
@@ -92,9 +89,6 @@ void BackUpRecovery::runBehavior()
     y = current_position.y - std::sin(current_yaw) * obstacle_distance_;
     footprint_cost = world_model_->footprintCost(x, y, current_yaw, local_costmap_->getRobotFootprint(), 0.0, 0.0);
     next_step_valid = footprint_cost >= 0.0;
-
-    ROS_INFO_STREAM("Distance:" << igvc::get_distance(current_position, start_position));
-    ROS_INFO_STREAM("Next step valid: " << next_step_valid);
 
     vel_pub.publish(vel_msg);
     r.sleep();
