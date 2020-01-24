@@ -26,6 +26,7 @@
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
+  <depend>actionlib_msgs</depend>
 
   <exec_depend>message_runtime</exec_depend>
 
