@@ -52,6 +52,7 @@
   <depend>mbf_msgs</depend>
   <depend>pluginlib</depend>
   <depend>nav_core</depend>
+  <depend>grid_map_core</depend>
 
   <build_depend>cv_bridge</build_depend>
   <build_depend>pcl_ros</build_depend>
