@@ -278,6 +278,7 @@ void NavigationServer::checkForOscillation(const geometry_msgs::PoseStamped &rob
   {
     // check if robot has moved more than oscillation distance
     double distance = igvc::get_distance(robot_pose.pose.position, previous_oscillation_pose_.pose.position);
+
     ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server: Distance from previous pose: " << distance);
     if (distance >= oscillation_distance_)
     {
