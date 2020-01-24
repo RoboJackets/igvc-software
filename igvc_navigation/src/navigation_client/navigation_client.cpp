@@ -9,8 +9,11 @@ NavigationClient::NavigationClient()
 {
   ros::NodeHandle private_nh("~");
 
-  assertions::getParam(private_nh, "reading_from_file", reading_from_file_);
-  assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
+  assertions::getParam(private_nh, "read_from_file", reading_from_file_);
+  if (reading_from_file_)
+  {
+    assertions::getParam(private_nh, "/waypoint_file_path", waypoint_file_path_);
+  }
 
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
 
@@ -20,6 +23,7 @@ NavigationClient::NavigationClient()
   if (reading_from_file_)
   {
     std::vector<geometry_msgs::PointStamped> waypoints = loadWaypointsFromFile();
+    ROS_INFO_STREAM("Reading from file.");
     sendWaypoints(waypoints);
   }
   else
@@ -43,8 +47,9 @@ void NavigationClient::waitForServer()
   const double waiting_time = 5.0;
   while (!client.waitForServer(ros::Duration(waiting_time)))
   {
-    ROS_INFO("Waiting for the move_base action server to come up");
+    ROS_INFO_STREAM("Waiting for the navigation server to come up");
   }
+  ROS_INFO_STREAM("Connected to navigation server!");
 }
 
 std::vector<geometry_msgs::PointStamped> NavigationClient::loadWaypointsFromFile()
@@ -168,8 +173,9 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
 {
   ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y
                                     << ") with yaw = " << tf::getYaw(pose.pose.orientation));
-  mbf_msgs::MoveBaseGoal goal;
+  igvc_msgs::NavigateWaypointGoal goal;
   goal.target_pose = pose;
+  goal.fix_goal_orientation = false;
 
   if (waiting)
   {
@@ -183,18 +189,32 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
 
 void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool waiting)
 {
+  ROS_INFO_STREAM("Sending point: (" << point.point.x << ", " << point.point.y << ")");
+
   geometry_msgs::PoseStamped pose;
   pose.header = point.header;
   pose.pose.position = point.point;
   pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-  sendGoal(pose, waiting);
+
+  igvc_msgs::NavigateWaypointGoal goal;
+  goal.target_pose = pose;
+  goal.fix_goal_orientation = true;
+
+  if (waiting)
+  {
+    client.sendGoalAndWait(goal);
+  }
+  else
+  {
+    client.sendGoal(goal);
+  }
 }
 
 void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& pose)
 {
   if (reading_from_file_)
   {
-    ROS_ERROR("Cannot send goal from rviz, reading from file.");
+    ROS_ERROR_STREAM("Cannot send goal from rviz, reading from file.");
   }
   else
   {
