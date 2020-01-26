@@ -21,6 +21,7 @@ LineLayer::LineLayer()
   , config_{ private_nh_ }
   , line_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , freespace_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , barrel_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , not_lines_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
 {
   initGridmap();
@@ -50,6 +51,7 @@ void LineLayer::initPubSub()
     gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
   }
   costmap_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(config_.map.costmap_topic, 1);
+  barrel_pub_ = nh_.advertise<sensor_msgs::Image>("pauls_stuff/barrel", 1);
 
   for (size_t i = 0; i < config_.cameras.size(); i++)
   {
@@ -129,8 +131,9 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
 
   cv::Mat segmented_mat = convertToMat(segmented_image, true);
   cv::Mat raw_mat = convertToMat(raw_image, false);
+  cv::Mat barrel_mat = LineLayer::findBarrel(raw_mat, segmented_mat.rows, segmented_mat.cols, true);
 
-  projectImage(raw_mat, segmented_mat, camera_to_odom, camera_index);
+  projectImage(raw_mat, segmented_mat, barrel_mat, camera_to_odom, camera_index);
   cleanupProjections();
   insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
 
@@ -189,28 +192,39 @@ cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool is
 
 }
 
-cv::Mat LineLayer::findBarrel(const cv::Mat&inMat){
+cv::Mat LineLayer::findBarrel(const cv::Mat&inMat, int rows, int cols, bool debug){
     // Gaussian Blur
     cv::Mat blur;
     cv::GaussianBlur(inMat,  blur, cv::Size(13,13), 0, 0);
-    //hsv threshold
-//    ROS_INFO_STREAM(blur.channels());
+    //hsv threshold;
     cv::Mat hsv_frame;
-//    ROS_INFO_STREAM("before paul");
     cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
-//    ROS_INFO_STREAM("after paul");
-    cv::inRange(hsv_frame, cv::Scalar(0,0,200), cv::Scalar(29,255,255), hsv_frame);
+    cv::inRange(hsv_frame, cv::Scalar(0,0,0), cv::Scalar(35,255,255), hsv_frame);
     //open and closing
     cv::morphologyEx(hsv_frame,hsv_frame, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3)));
     cv::morphologyEx(hsv_frame,hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3)));
     hsv_frame.setTo(100, hsv_frame);
+    // if set to debug, will run
+    cv::resize(hsv_frame, hsv_frame, cv::Size(rows, cols));
+    if (debug){
+        debugBarrel(hsv_frame);
+    }
     return hsv_frame;
 }
-void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom,
+void LineLayer::debugBarrel(const cv::Mat&inMat){
+    //cycles through each 3 frames(left, center, and right) :/
+    cv_bridge::CvImage cv_image;
+    cv_image.image = inMat;
+    cv_image.encoding = "mono8";
+    barrel_pub_.publish(cv_image.toImageMsg());
+
+}
+void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat &barrel_mat, const geometry_msgs::TransformStamped &camera_to_odom,
                              size_t camera_idx)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
   freespace_buffer_.setTo(cv::Scalar(0.0));
+  barrel_buffer_.setTo(cv::Scalar(0.0));
   cv::Rect buffer_rect({}, line_buffer_.size());
 
   int rows = segmented_mat.rows;
@@ -230,39 +244,36 @@ void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_ma
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = segmented_mat.ptr<uchar>(i);
+    const auto *barrel_row_ptr =  barrel_mat.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
-      cv::Mat barrel_frame = LineLayer::findBarrel(raw_mat);
-        ROS_INFO_STREAM("Making barrel mat");
       const int ray_idx = i * cols + j;
       Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
-      ROS_INFO_STREAM("1");
+
       double scale = -translation[2] / eigen_ray[2];
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
-        ROS_INFO_STREAM("2");
-        ROS_INFO_STREAM(row_ptr[j]);
+
+
       bool is_line = row_ptr[j] == true_val;
-      bool is_barrel = row_ptr[j] == true_barrel;
-      ROS_INFO_STREAM("3");
+      bool is_barrel = barrel_row_ptr[j] == true_barrel;
+
       grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
-      ROS_INFO_STREAM("4");
+
       if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
 
         if(is_barrel){
-            ROS_INFO_STREAM("IN BARREL");
-            continue;
+
+            barrel_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
         }
         else if (is_line)
         {
-            ROS_INFO_STREAM("IN LINE");
           line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
         }
         else
         {
-            ROS_INFO_STREAM("IN FREESPACE");
           freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
@@ -464,8 +475,11 @@ void LineLayer::cleanupProjections()
   }
   // Remove lines from freespace
   {
-    cv::bitwise_not(line_buffer_, not_lines_);
-    cv::bitwise_and(freespace_buffer_, not_lines_, freespace_buffer_);
+      cv::bitwise_not(line_buffer_, not_lines_);
+      cv::bitwise_and(freespace_buffer_, not_lines_, freespace_buffer_);
+
+      cv::bitwise_not(barrel_buffer_, not_barrels_);
+      cv::bitwise_and(freespace_buffer_, not_barrels_, freespace_buffer_);
   }
 }
 
