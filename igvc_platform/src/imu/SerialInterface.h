@@ -69,7 +69,8 @@ public:
 
   virtual inline void SerialWriteString(const std::string& str)
   {
-    size_t written_ = this->connection_port->write(str);
+      //used to be size_t written_ = this->connection_port->write(str); but written seemed to be unused.
+      this->connection_port->write(str);
   }
 
   virtual inline uint8_t SerialReadByte()

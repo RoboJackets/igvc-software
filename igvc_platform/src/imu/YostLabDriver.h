@@ -5,6 +5,13 @@
 
 #include <tf/tf.h>
 #include <Eigen/Dense>
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
+// ERROR defined in windows.h causes name collision, undefine the macro to fix the issue
+#ifdef ERROR
+#undef ERROR
+#endif
 
 // This is the  basic ros-based device driver of IMU
 class YostLabDriver : SerialInterface
@@ -26,6 +33,10 @@ public:
   //! \brief restoreFactorySettings resets everything
   //!
   void restoreFactorySettings(void);
+  //!
+  //! \brief imu_diagnostic runs diagnostics
+  //!
+  void imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
   //!
   //! \brief getAxisDirection
   //! \return returns axis directions
@@ -72,6 +83,17 @@ private:
   ros::NodeHandle yostlab_priv_nh_;
   ros::NodeHandle yostlab_nh_;
   ros::Publisher imu_pub_;
+
+  // Diagnostic_updator
+  diagnostic_updater::Updater updater;
+
+  std::string software_version;
+  std::string calibration_mode;
+  std::string mi_mode;
+  std::string axis_direction;
+  double sensor_temp;
+  bool running = false;
+
   // Constants
   const double GRAVITY = 9.80665;
 

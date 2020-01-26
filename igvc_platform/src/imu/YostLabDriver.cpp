@@ -6,8 +6,10 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_)
 {
   this->SerialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
-  // use identity matrix as default orientation correction
+  this->updater.setHardwareIDf("IMU: %s", this->getSerialPort().c_str());
+  this->updater.add("IMU Diagnostic", this, &YostLabDriver::imu_diagnostic);
 
+  // use identity matrix as default orientation correction
   assertions::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
                     std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
   assertions::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
@@ -15,9 +17,11 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_)
 }
 
 //! Destructor
-YostLabDriver::~YostLabDriver()
-{
+YostLabDriver::~YostLabDriver(){
+    this->running = false;
+    this->updater.force_update();
 }
+
 void YostLabDriver::restoreFactorySettings()
 {
   this->SerialWriteString(RESTORE_FACTORY_SETTINGS);
@@ -28,6 +32,25 @@ const std::string YostLabDriver::getSoftwareVersion()
   const std::string buf = this->SerialReadLine();
   ROS_INFO_STREAM(this->logger << "Software version: " << buf);
   return buf;
+}
+
+void YostLabDriver::imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
+{
+    if (running){
+        if(sensor_temp > 185){
+            stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "IMU temp too high");
+        } else if (sensor_temp < -40){
+            stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "IMU temp too low");
+        } else {
+            stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "IMU Online");
+        }
+    } else {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::STALE, "IMU Stopped Running");
+    }
+    stat.add("software_version", software_version);
+    stat.add("calibration_mode", calibration_mode);
+    stat.add("mi_mode", mi_mode);
+    stat.add("axis_direction", axis_direction);
 }
 
 const std::string YostLabDriver::getEulerDecomp()
@@ -131,13 +154,6 @@ void YostLabDriver::run()
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
   this->startGyroCalibration();
 
-  // print/debug statements
-  this->getSoftwareVersion();
-  this->getAxisDirection();
-  this->getEulerDecomp();
-  this->getCalibMode();
-  this->getMIMode();
-
   /*
   Slot #1: untared orientation as quaternion [4x float]
   Slot #2: corrected gyroscope vector [3x float]
@@ -145,12 +161,20 @@ void YostLabDriver::run()
   Slot #4: sensor temp in ºF
   Slot #[4-8]: No Command
   */
+  this->SerialWriteString(SET_AXIS_DIRECTIONS);
   this->SerialWriteString(SET_STREAMING_SLOTS);
 
   // commit settings and start streaming!
   this->SerialWriteString(COMMIT_SETTINGS);
   this->SerialWriteString(SET_STREAMING_TIMING_5_MS);
   this->SerialWriteString(START_STREAMING);
+
+  // print/debug statements
+  software_version = this->getSoftwareVersion();
+  axis_direction = this->getAxisDirection();
+  this->getEulerDecomp();
+  calibration_mode = this->getCalibMode();
+  mi_mode = this->getMIMode();
 
   ros::Rate loop_rate(20);  // 20Hz
 
@@ -165,6 +189,7 @@ void YostLabDriver::run()
 
   while (ros::ok())
   {
+      this->running = true;
     while (this->Available() > 0)
     {
       line_num_ += 1;
@@ -214,19 +239,19 @@ void YostLabDriver::run()
         imu_msg_.linear_acceleration.z = linear_accel_raw[2];
         imu_msg_.linear_acceleration_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
-        double sensor_temp = parsed_val_[10];
+        sensor_temp = parsed_val_[10];
 
         parsed_val_.clear();
         this->imu_pub_.publish(imu_msg_);
 
         double roll, pitch, yaw;
         tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-
-        ROS_INFO_THROTTLE(1.0, "[YostLabImuDriver] R: %f, P: %f, Y: %f -- IMU Temp: %f F ", roll, pitch, yaw,
-                          sensor_temp);
       }
     }
     loop_rate.sleep();
     ros::spinOnce();
+    this->updater.update();
   }
+  this->running = false;
+  this->updater.force_update();
 }
