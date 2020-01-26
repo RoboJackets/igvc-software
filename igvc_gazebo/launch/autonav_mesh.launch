@@ -17,9 +17,8 @@
     <arg name="yaw" value="3.14" if="$(eval track == 1)"/>
 
     <include file="$(find igvc_gazebo)/launch/simulation.launch">
-        <arg name="world_name" value="$(find igvc_description)/urdf/worlds/autonav.world"/>
-        <arg name="waypoint_folder_path" value="$(find igvc_gazebo)/config"/>
-        <arg name="waypoint_file_name" value="waypoints_autonav_$(arg track).csv"/>
+        <arg name="world_name" value="$(find igvc_description)/urdf/worlds/autonav_mesh.world"/>
+        <arg name="waypoints" value="$(find igvc_gazebo)/config/waypoints_autonav_$(arg track).csv" />
 
         <arg name="x" value="$(arg x)"/>
         <arg name="y" value="$(arg y)"/>

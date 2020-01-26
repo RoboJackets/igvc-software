@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="Jaymii" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="Jessii" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <link name="base_footprint" />
   <!-- base link must have geometry so its axis display in rviz-->
   <link name="base_link">
