@@ -23,6 +23,7 @@ LineLayer::LineLayer()
   , freespace_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , barrel_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , not_lines_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , not_barrels_{config_.projection.size_x, config_.projection.size_y, CV_8U }
 {
   initGridmap();
   initPubSub();
