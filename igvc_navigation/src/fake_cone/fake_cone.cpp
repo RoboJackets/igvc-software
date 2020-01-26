@@ -166,4 +166,50 @@ namespace fake_cone
 
         return rCoefficient;
     }
+
+    /**
+     * to_left means that the algorithm will only search to the left of the robot
+     */
+    geometry_msgs::Point FakeConeService::findLine(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point current_pos, bool to_left) {
+        std::vector<geometry_msgs::Point> visited;
+        std::vector<geometry_msgs::Point> queue;
+
+        //initialize the queue
+        visited.push_back(current_pos);
+        for(geometry_msgs::Point element : gatherNearby(localCostMap, current_pos)) {
+                if ((to_left && element.x < current_pos.x) || (!to_left && element.x > current_pos.x)) {
+                    queue.push_back(element);
+                }
+        }
+        
+        while (!queue.empty()) {
+            geometry_msgs::Point head = queue.back();
+            visited.push_back(head);
+            int headOccupancyProb = localCostMap.data[convert2DIndexTo1D(localCostMap, head)];
+            //An occupied point is found on the gridmap
+            if (headOccupancyProb > OCCUPY_THRESHOLD) {
+                return head;
+            }
+
+            for (geometry_msgs::Point element : gatherNearby(localCostMap, head)) {
+                if (((to_left && element.x < current_pos.x) || (!to_left && element.x > current_pos.x)) && !contains(visited, head)) {
+                    queue.push_back(element);
+                }
+            }
+        }
+    }
+
+    geometry_msgs::Point FakeConeService::findEndpoint(std::vector<geometry_msgs::Point> line, geometry_msgs::Point point_on_line, geometry_msgs::Point current_pos) {
+        
+        int curr_y_pos = current_pos.y;
+        geometry_msgs::Point lowest_point = point_on_line;
+        
+        for (geometry_msgs::Point element : line) {
+            if (element.y < lowest_point.y) {
+                lowest_point = element;
+            }
+        }
+
+        return lowest_point;
+    }
 }

@@ -1,4 +1,4 @@
-#include <mapper/probability_utils.h>
+#include <igvc_navigation/include/mapper/probability_utils.h>
 #include "fakecone_layer.h"
 #include "map_config.h"
 
