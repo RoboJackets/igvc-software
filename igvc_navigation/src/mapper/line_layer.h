@@ -100,8 +100,7 @@ private:
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
   cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image, bool isToMono) const;
 
-  void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom,
-                    size_t camera_idx);
+
   void cleanupProjections();
   void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
   void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);

@@ -183,21 +183,21 @@ geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::strin
 }
 
 cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const {
+    cv_bridge::CvImageConstPtr cv_bridge_image;
     if (isToMono) {
-        cv_bridge::CvImageConstPtr cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
-        return cv_bridge_image->image;
-    } else {
-        cv_bridge::CvImageConstPtr cv_bridge_image = cv_bridge::toCvShare(image, "bgr8");
-        return cv_bridge_image->image;
+        cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
     }
+    else {
+        cv_bridge::toCvShare(image, "bgr8");
+    }
+    return cv_bridge_image->image;
 
 }
 
 cv::Mat LineLayer::findBarrel(const cv::Mat&inMat, int rows, int cols, bool debug){
     // Gaussian Blur
     cv::Mat blur;
-    cv::GaussianBlur(inMat,  blur, cv::Size(13,13), 0, 0);
-    //hsv threshold;
+    cv::GaussianBlur(inMat,  blur, cv::Size(11,11), 0, 0);
     cv::Mat hsv_frame;
     cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
     cv::inRange(hsv_frame, cv::Scalar(0,0,0), cv::Scalar(35,255,255), hsv_frame);
@@ -220,7 +220,7 @@ void LineLayer::debugBarrel(const cv::Mat&inMat){
     barrel_pub_.publish(cv_image.toImageMsg());
 
 }
-void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat &barrel_mat, const geometry_msgs::TransformStamped &camera_to_odom,
+void LineLayer::(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat &barrel_mat, const geometry_msgs::TransformStamped &camera_to_odom,
                              size_t camera_idx)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
