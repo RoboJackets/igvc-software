@@ -68,7 +68,7 @@ public:
   void setMIMode(bool on);
 
 private:
-  // whether or not to commit the imu settings
+  // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
   bool commit_settings_;
 
   // IMU orientation correction.
@@ -92,7 +92,8 @@ private:
   std::string mi_mode;
   std::string axis_direction;
   double sensor_temp;
-  bool running = false;
+  double quaternion_length;
+  ros::Time lastUpdateTime;
 
   // Constants
   const double GRAVITY = 9.80665;

@@ -12,5 +12,10 @@
         <param name="orientation_rotation" value="1.570" />
         <remap from="imu" to="magnetometer" />
     </node>
-    <include file="$(find igvc_platform)/launch/quaternion_to_rpy.launch" />
+    <node pkg="diagnostic_aggregator" type="aggregator_node"
+          name="diagnostic_aggregator" >
+        <!-- Load the file you made above -->
+        <rosparam command="load"
+                  file="$(find igvc_platform)/config/analyzers.yaml" />
+    </node>
 </launch>

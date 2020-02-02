@@ -1,0 +1,3 @@
+## Documentation Regarding our IMU:
+* SerialInterface.h appears to be written for C instead of C++ as it uses `malloc`, but we don’t use the functions that use `malloc`.
+* In the `YostLabDriver::run` method, the order of the initial calls that use `this→SerialWriteString()` matters. Using the wrong order causes there to be a chance that the IMU’s response will be incorrectly read in which will result in unnormalized nonsensical orientation readings. This can happen if you commit setting early for example. There does not appear to be any consistency as to when this error occurs other that the chance of it occuring is influenced by the order of the calls.
