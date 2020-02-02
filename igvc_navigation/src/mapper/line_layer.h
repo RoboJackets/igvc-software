@@ -55,9 +55,8 @@ private:
   cv::Mat line_buffer_;       // cv::Mat centered at current position for use as a "buffer" for lines
   cv::Mat freespace_buffer_;  // cv::Mat centered at current position for use as a "buffer" for freespace
   cv::Mat barrel_buffer_;
-  cv::Mat not_lines_;         // not line_buffer_
+  cv::Mat not_lines_;  // not line_buffer_
   cv::Mat not_barrels_;
-
 
   std::vector<image_geometry::PinholeCameraModel> pinhole_models_;
   std::vector<std::vector<Eigen::Vector3d>> cached_rays_;
@@ -100,7 +99,6 @@ private:
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
   cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image, bool isToMono) const;
 
-
   void cleanupProjections();
   void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
   void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
@@ -121,13 +119,12 @@ private:
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
 
-    cv::Mat findBarrel(const cv::Mat &, int rows, int cols, bool debug);
+  cv::Mat findBarrel(const cv::Mat&, int rows, int cols, bool debug);
 
-    void projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat& barrel_mat,
-                      const geometry_msgs::TransformStamped &camera_to_odom, size_t camera_idx);
+  void projectImage(const cv::Mat& raw_mat, const cv::Mat& segmented_mat, const cv::Mat& barrel_mat,
+                    const geometry_msgs::TransformStamped& camera_to_odom, size_t camera_idx);
 
-
-    void debugBarrel(const cv::Mat &inMat);
+  void debugBarrel(const cv::Mat& inMat);
 };
 }  // namespace line_layer
 

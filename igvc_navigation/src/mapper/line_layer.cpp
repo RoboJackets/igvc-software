@@ -5,8 +5,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <opencv2/videoio.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/videoio.hpp>
 #include <unordered_set>
 #include "camera_config.h"
 #include "map_config.h"
@@ -23,7 +23,7 @@ LineLayer::LineLayer()
   , freespace_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , barrel_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , not_lines_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
-  , not_barrels_{config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , not_barrels_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
 {
   initGridmap();
   initPubSub();
@@ -182,46 +182,50 @@ geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::strin
   return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
 }
 
-cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const {
-    cv_bridge::CvImageConstPtr cv_bridge_image;
-    if (isToMono) {
-        cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
-    }
-    else {
-        cv_bridge::toCvShare(image, "bgr8");
-    }
-    return cv_bridge_image->image;
-
+cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const
+{
+  cv_bridge::CvImageConstPtr cv_bridge_image;
+  if (isToMono)
+  {
+    cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
+  }
+  else
+  {
+    cv_bridge::toCvShare(image, "bgr8");
+  }
+  return cv_bridge_image->image;
 }
 
-cv::Mat LineLayer::findBarrel(const cv::Mat&inMat, int rows, int cols, bool debug){
-    // Gaussian Blur
-    cv::Mat blur;
-    cv::GaussianBlur(inMat,  blur, cv::Size(11,11), 0, 0);
-    cv::Mat hsv_frame;
-    cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
-    cv::inRange(hsv_frame, cv::Scalar(0,0,0), cv::Scalar(35,255,255), hsv_frame);
-    //open and closing
-    cv::morphologyEx(hsv_frame,hsv_frame, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3)));
-    cv::morphologyEx(hsv_frame,hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3)));
-    hsv_frame.setTo(100, hsv_frame);
-    // if set to debug, will run
-    cv::resize(hsv_frame, hsv_frame, cv::Size(rows, cols));
-    if (debug){
-        debugBarrel(hsv_frame);
-    }
-    return hsv_frame;
+cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols, bool debug)
+{
+  // Gaussian Blur
+  cv::Mat blur;
+  cv::GaussianBlur(inMat, blur, cv::Size(11, 11), 0, 0);
+  cv::Mat hsv_frame;
+  cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
+  cv::inRange(hsv_frame, cv::Scalar(0, 0, 0), cv::Scalar(35, 255, 255), hsv_frame);
+  // open and closing
+  cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+  cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+  hsv_frame.setTo(100, hsv_frame);
+  // if set to debug, will run
+  cv::resize(hsv_frame, hsv_frame, cv::Size(rows, cols));
+  if (debug)
+  {
+    debugBarrel(hsv_frame);
+  }
+  return hsv_frame;
 }
-void LineLayer::debugBarrel(const cv::Mat&inMat){
-    //cycles through each 3 frames(left, center, and right) :/
-    cv_bridge::CvImage cv_image;
-    cv_image.image = inMat;
-    cv_image.encoding = "mono8";
-    barrel_pub_.publish(cv_image.toImageMsg());
-
+void LineLayer::debugBarrel(const cv::Mat &inMat)
+{
+  // cycles through each 3 frames(left, center, and right) :/
+  cv_bridge::CvImage cv_image;
+  cv_image.image = inMat;
+  cv_image.encoding = "mono8";
+  barrel_pub_.publish(cv_image.toImageMsg());
 }
-void LineLayer::(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat &barrel_mat, const geometry_msgs::TransformStamped &camera_to_odom,
-                             size_t camera_idx)
+void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat &barrel_mat,
+                             const geometry_msgs::TransformStamped &camera_to_odom, size_t camera_idx)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
   freespace_buffer_.setTo(cv::Scalar(0.0));
@@ -241,11 +245,11 @@ void LineLayer::(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv:
 
   constexpr uchar true_val = 255U;
   constexpr uchar true_barrel = 100U;
-  //Start
+  // Start
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = segmented_mat.ptr<uchar>(i);
-    const auto *barrel_row_ptr =  barrel_mat.ptr<uchar>(i);
+    const auto *barrel_row_ptr = barrel_mat.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
       const int ray_idx = i * cols + j;
@@ -254,7 +258,6 @@ void LineLayer::(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv:
       double scale = -translation[2] / eigen_ray[2];
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
 
-
       bool is_line = row_ptr[j] == true_val;
       bool is_barrel = barrel_row_ptr[j] == true_barrel;
 
@@ -262,10 +265,9 @@ void LineLayer::(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv:
 
       if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
-
-        if(is_barrel){
-
-            barrel_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
+        if (is_barrel)
+        {
+          barrel_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
         }
         else if (is_line)
         {
@@ -476,11 +478,11 @@ void LineLayer::cleanupProjections()
   }
   // Remove lines from freespace
   {
-      cv::bitwise_not(line_buffer_, not_lines_);
-      cv::bitwise_and(freespace_buffer_, not_lines_, freespace_buffer_);
+    cv::bitwise_not(line_buffer_, not_lines_);
+    cv::bitwise_and(freespace_buffer_, not_lines_, freespace_buffer_);
 
-      cv::bitwise_not(barrel_buffer_, not_barrels_);
-      cv::bitwise_and(freespace_buffer_, not_barrels_, freespace_buffer_);
+    cv::bitwise_not(barrel_buffer_, not_barrels_);
+    cv::bitwise_and(freespace_buffer_, not_barrels_, freespace_buffer_);
   }
 }
 
