@@ -3,7 +3,14 @@
 <launch>
   <node name="barrel_seg" pkg="igvc_perception" type="barrel_seg" output="screen">
     <param name="clusterTolerance" type="double" value="0.3" />
-    <param name="minClusterSize" type="int" value="100" />
+    <param name="minClusterSize" type="int" value="50" />
     <param name="maxClusterSize" type="int" value="500" />
+    <param name="cylinderMinRad" type="double" value="0.22" />
+    <param name="cylinderMaxRad" type="double" value="0.4" />
+    <param name="cylinderDistThres" type="double" value="0.1" />
+    <param name="cylinderNormalDistWeight" type="double" value="0.1" />
+    <param name="showCyl" type="bool" value="true" />
+    <param name="showClus" type="bool" value="true" />
+    <param name="showInlier" type="bool" value="false" />
   </node>
 </launch>
