@@ -45,4 +45,4 @@ private:
 };
 }  // namespace pointcloud_filter
 
-#endif  //SRC_ACTUAL_BARREL_SEGMENTATION_H
+#endif  // SRC_ACTUAL_BARREL_SEGMENTATION_H
