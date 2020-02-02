@@ -119,7 +119,7 @@ private:
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
 
-  cv::Mat findBarrel(const cv::Mat&, int rows, int cols, bool debug);
+  cv::Mat findBarrel(const cv::Mat& inMat, int rows, int cols, bool debug);
 
   void projectImage(const cv::Mat& raw_mat, const cv::Mat& segmented_mat, const cv::Mat& barrel_mat,
                     const geometry_msgs::TransformStamped& camera_to_odom, size_t camera_idx);

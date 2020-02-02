@@ -200,20 +200,35 @@ cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols, bool deb
 {
   // Gaussian Blur
   cv::Mat blur;
-  cv::GaussianBlur(inMat, blur, cv::Size(11, 11), 0, 0);
+  int blurSize = 11;
+  cv::GaussianBlur(inMat, blur, cv::Size(blurSize, blurSize), 0, 0);
+
+  // to HSV
   cv::Mat hsv_frame;
   cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
-  cv::inRange(hsv_frame, cv::Scalar(0, 0, 0), cv::Scalar(35, 255, 255), hsv_frame);
+
+  // HSV Threshold
+  cv::Scalar min = cv::Scalar(0, 0, 0);
+  cv::Scalar max = cv::Scalar(35, 255, 255);
+  cv::inRange(hsv_frame, min, max, hsv_frame);
+
   // open and closing
   cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
   cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-  hsv_frame.setTo(100, hsv_frame);
-  // if set to debug, will run
+
+  // setting the value to 100 to differential from the lines
+  int barrelValue = 100;
+  hsv_frame.setTo(barrelValue, hsv_frame);
+
+  // resizing to be the same as the segmented mat
   cv::resize(hsv_frame, hsv_frame, cv::Size(rows, cols));
+
+  // if set to debug, will run
   if (debug)
   {
     debugBarrel(hsv_frame);
   }
+
   return hsv_frame;
 }
 void LineLayer::debugBarrel(const cv::Mat &inMat)
