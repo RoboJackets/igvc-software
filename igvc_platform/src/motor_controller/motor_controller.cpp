@@ -59,7 +59,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   mc_updater_.setHardwareID("Motor Controller");
   mc_updater_.add("MC Diagnostic", this, &MotorController::mc_diagnostic);
   battery_updater_.setHardwareID("Battery Controller");
-  battery_updater_.add("Battery Diagnostic", this, &MotorController::mc_diagnostic);
+  battery_updater_.add("Battery Diagnostic", this, &MotorController::battery_diagnostic);
 
   // communication frequency
   assertions::getParam(pNh, std::string("frequency"), frequency_);
@@ -87,16 +87,25 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 
 void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
-    if((ros::Time::now() - last_motors_message_).toSec() > 10){
-        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "");
+    double delta_t = (ros::Time::now() - last_motors_message_).toSec();
+    if (delta_t > watchdog_delay_)
+    {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No input for " + std::to_string(delta_t) + " second(s)");
+    } else {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
     }
 }
 
 void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
-    if((ros::Time::now() - last_motors_message_).toSec() > 1){
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Motor Controller ");
+    if (battery_avg_ < min_battery_voltage_){
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Battery voltage dangerously low");
+    } else if (battery_avg_ < (min_battery_voltage_ + 0.5)){
+        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Battery voltage low");
+    } else {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Battery voltage okay");
     }
+    stat.add("battery voltage", battery_avg_);
 }
 
 void MotorController::setPID()
