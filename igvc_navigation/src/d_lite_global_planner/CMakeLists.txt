@@ -1,0 +1,3 @@
+add_library(d_lite_global_planner_lib d_lite_global_planner.cpp d_lite_global_planner.h d_lite_main.cpp)
+add_executable(d_lite_global d_lite_main.cpp)
+target_link_libraries(d_lite_global d_lite_global_planner_lib ${catkin_LIBRARIES})
