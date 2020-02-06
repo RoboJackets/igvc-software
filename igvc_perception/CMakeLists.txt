@@ -178,7 +178,5 @@ if (CATKIN_ENABLE_TESTING)
     add_subdirectory(src/tests)
 endif ()
 
-add_subdirectory(src/filter_lidar)
-add_subdirectory(src/projection)
 add_subdirectory(src/pointcloud_filter)
 
