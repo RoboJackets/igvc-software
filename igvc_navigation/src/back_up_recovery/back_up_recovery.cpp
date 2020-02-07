@@ -28,11 +28,11 @@ void BackUpRecovery::initialize(std::string name, tf2_ros::Buffer *, costmap_2d:
     ros::NodeHandle private_nh("~");
 
     assertions::getParam(private_nh, "/move_base_flex/back_up_recovery/velocity", velocity_);
-    assertions::getParam(private_nh,"/move_base_flex/back_up_recovery/frequency", frequency_);
-    assertions::getParam(private_nh,"/move_base_flex/back_up_recovery/threshold_distance",
-                        threshold_distance_);  // distance robot backs up before exiting back up behavior
-    assertions::getParam(private_nh,"/move_base_flex/back_up_recovery/obstacle_distance",
-                        obstacle_distance_);  // closest the robot will get to an obstacle from behind
+    assertions::getParam(private_nh, "/move_base_flex/back_up_recovery/frequency", frequency_);
+    assertions::getParam(private_nh, "/move_base_flex/back_up_recovery/threshold_distance",
+                         threshold_distance_);  // distance robot backs up before exiting back up behavior
+    assertions::getParam(private_nh, "/move_base_flex/back_up_recovery/obstacle_distance",
+                         obstacle_distance_);  // closest the robot will get to an obstacle from behind
 
     world_model_ = std::make_unique<base_local_planner::CostmapModel>(*local_costmap_->getCostmap());
 
