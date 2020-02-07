@@ -45,6 +45,8 @@ private:
   double velocity_, frequency_, threshold_distance_, obstacle_distance_;
   std::unique_ptr<costmap_2d::Costmap2DROS> local_costmap_;
   std::unique_ptr<base_local_planner::CostmapModel> world_model_;
+
+  bool nextStepValid(geometry_msgs::Point current_position, double yaw);
 };
 
 }  // namespace back_up_recovery

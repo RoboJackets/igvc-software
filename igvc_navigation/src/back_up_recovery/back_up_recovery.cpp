@@ -73,10 +73,7 @@ void BackUpRecovery::runBehavior()
   double current_yaw = tf2::getYaw(global_pose.pose.orientation);
   geometry_msgs::Point current_position = global_pose.pose.position;
   geometry_msgs::Point start_position = current_position;
-  double x = current_position.x - std::cos(current_yaw) * obstacle_distance_;
-  double y = current_position.y - std::sin(current_yaw) * obstacle_distance_;
-  double footprint_cost = world_model_->footprintCost(x, y, current_yaw, local_costmap_->getRobotFootprint(), 0.0, 0.0);
-  bool next_step_valid = footprint_cost >= 0.0;
+  bool next_step_valid = nextStepValid(current_position, current_yaw);
 
   geometry_msgs::Twist vel_msg;
   vel_msg.linear.x = -velocity_;
@@ -86,11 +83,6 @@ void BackUpRecovery::runBehavior()
   {
     local_costmap_->getRobotPose(global_pose);
     current_position = global_pose.pose.position;
-    x = current_position.x - std::cos(current_yaw) * obstacle_distance_;
-    y = current_position.y - std::sin(current_yaw) * obstacle_distance_;
-    footprint_cost = world_model_->footprintCost(x, y, current_yaw, local_costmap_->getRobotFootprint(), 0.0, 0.0);
-    next_step_valid = footprint_cost >= 0.0;
-
     vel_pub.publish(vel_msg);
     r.sleep();
   }
@@ -98,4 +90,13 @@ void BackUpRecovery::runBehavior()
   vel_msg.linear.x = 0;
   vel_pub.publish(vel_msg);
 }
+
+bool BackUpRecovery::nextStepValid(geometry_msgs::Point position, double yaw)
+{
+  double x = position.x - std::cos(yaw) * obstacle_distance_;
+  double y = position.y - std::sin(yaw) * obstacle_distance_;
+  double footprint_cost = world_model_->footprintCost(x, y, yaw, local_costmap_->getRobotFootprint(), 0.0, 0.0);
+  return footprint_cost >= 0.0;
+}
+
 }  // namespace back_up_recovery
