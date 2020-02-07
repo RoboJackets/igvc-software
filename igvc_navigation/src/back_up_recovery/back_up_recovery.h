@@ -6,7 +6,6 @@
 #include <tf2_ros/buffer.h>
 #include <base_local_planner/costmap_model.h>
 #include <string>
-
 namespace back_up_recovery
 {
 /**
@@ -42,10 +41,10 @@ public:
   ~BackUpRecovery() override;
 
 private:
-  costmap_2d::Costmap2DROS* local_costmap_;
   bool initialized_;
   double velocity_, frequency_, threshold_distance_, obstacle_distance_;
-  base_local_planner::CostmapModel* world_model_;
+  std::unique_ptr<costmap_2d::Costmap2DROS> local_costmap_;
+  std::unique_ptr<base_local_planner::CostmapModel> world_model_;
 };
 
 }  // namespace back_up_recovery

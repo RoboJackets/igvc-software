@@ -4,14 +4,16 @@
 #include <geometry_msgs/Twist.h>
 #include <algorithm>
 #include <igvc_utils/NodeUtils.hpp>
+#include <memory>
 #include <tf2/utils.h>
+#include <parameter_assertions/assertions.h>
 
 // register this planner as a RecoveryBehavior plugin
 PLUGINLIB_EXPORT_CLASS(back_up_recovery::BackUpRecovery, nav_core::RecoveryBehavior);
 
 namespace back_up_recovery
 {
-BackUpRecovery::BackUpRecovery() : local_costmap_(nullptr), initialized_(false), world_model_(nullptr)
+BackUpRecovery::BackUpRecovery() : initialized_(false), world_model_(nullptr)
 {
 }
 
@@ -20,19 +22,19 @@ void BackUpRecovery::initialize(std::string name, tf2_ros::Buffer *, costmap_2d:
 {
   if (!initialized_)
   {
-    local_costmap_ = local_costmap;
+    local_costmap_ = std::unique_ptr<costmap_2d::Costmap2DROS>(local_costmap);
 
     // get some parameters from the parameter server
     ros::NodeHandle private_nh("~");
 
-    private_nh.getParam("/move_base_flex/back_up_recovery/velocity", velocity_);
-    private_nh.getParam("/move_base_flex/back_up_recovery/frequency", frequency_);
-    private_nh.getParam("/move_base_flex/back_up_recovery/threshold_distance",
+    assertions::getParam(private_nh, "/move_base_flex/back_up_recovery/velocity", velocity_);
+    assertions::getParam(private_nh,"/move_base_flex/back_up_recovery/frequency", frequency_);
+    assertions::getParam(private_nh,"/move_base_flex/back_up_recovery/threshold_distance",
                         threshold_distance_);  // distance robot backs up before exiting back up behavior
-    private_nh.getParam("/move_base_flex/back_up_recovery/obstacle_distance",
+    assertions::getParam(private_nh,"/move_base_flex/back_up_recovery/obstacle_distance",
                         obstacle_distance_);  // closest the robot will get to an obstacle from behind
 
-    world_model_ = new base_local_planner::CostmapModel(*local_costmap_->getCostmap());
+    world_model_ = std::make_unique<base_local_planner::CostmapModel>(*local_costmap_->getCostmap());
 
     initialized_ = true;
   }
@@ -44,7 +46,6 @@ void BackUpRecovery::initialize(std::string name, tf2_ros::Buffer *, costmap_2d:
 
 BackUpRecovery::~BackUpRecovery()
 {
-  delete world_model_;
 }
 
 void BackUpRecovery::runBehavior()
