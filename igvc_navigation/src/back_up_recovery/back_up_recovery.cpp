@@ -83,6 +83,7 @@ void BackUpRecovery::runBehavior()
   {
     local_costmap_->getRobotPose(global_pose);
     current_position = global_pose.pose.position;
+    next_step_valid = nextStepValid(current_position, current_yaw);
     vel_pub.publish(vel_msg);
     r.sleep();
   }
