@@ -52,9 +52,9 @@ void YostLabDriver::imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &
     stat.add("imu_temp", sensor_temp_);
     double roll, pitch, yaw;
     tf::Matrix3x3(this->last_quat_).getRPY(roll, pitch, yaw);
-    stat.add("roll", roll);
-    stat.add("pitch", pitch);
-    stat.add("yaw", yaw);
+    stat.add("roll", roll * 180.0 / M_PI);
+    stat.add("pitch", pitch * 180.0 / M_PI);
+    stat.add("yaw", yaw * 180.0 / M_PI);
 }
 
 const std::string YostLabDriver::getEulerDecomp()
