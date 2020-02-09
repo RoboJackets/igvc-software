@@ -16,6 +16,6 @@
           name="diagnostic_aggregator" >
         <!-- Load the file you made above -->
         <rosparam command="load"
-                  file="$(find igvc_platform)/config/analyzers.yaml" />
+                  file="$(find igvc_platform)/config/imu_analyzer.yaml" />
     </node>
 </launch>

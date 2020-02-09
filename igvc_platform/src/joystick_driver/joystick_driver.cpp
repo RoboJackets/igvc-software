@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
 
     updater.setHardwareID("Joystick");
-    updater.add("diagnostic", joystick_diagnostic);
+    updater.add("Joystick Diagnostic", joystick_diagnostic);
 
     ros::spin();
     delete nhp;

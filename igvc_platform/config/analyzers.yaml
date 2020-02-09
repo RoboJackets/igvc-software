@@ -1,7 +1,21 @@
 analyzers:
-    sensors:
-        type: diagnostic_aggregator/GenericAnalyzer
-        path: IMU
-        startswith: 'imu'
-        num_items: 1
-        discard_stale: true
+  sensors:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: IMU
+    startswith: 'imu'
+    num_items: 2
+  motors:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: Motors
+    contains: 'MC'
+    num_items: 1
+  battery:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: Battery
+    contains: 'Battery'
+    num_items: 1
+  controls:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: Joystick
+    contains: 'Joystick'
+    num_items: 1
