@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="tf" type="static_transform_publisher" name="elevation_mapping_center_broadcaster" args="2 0 0 0 0 0 0 base_footprint elevation_mapping_center 100"/>
+</launch>
