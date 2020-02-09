@@ -87,13 +87,8 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 
 void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
-    double delta_t = (ros::Time::now() - last_motors_message_).toSec();
-    if (delta_t > watchdog_delay_)
-    {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No input for " + std::to_string(delta_t) + " second(s)");
-    } else {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
-    }
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
+    stat.add("mc publishing freq", std::to_string(mc_hertz_) + " Hz" );
 }
 
 void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
@@ -285,8 +280,7 @@ void MotorController::recieveResponse()
   }
 
   publishResponse(response);
-
-  ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << 1 / response.dt_sec << "hz.");
+  mc_hertz_ = 1 / response.dt_sec;
 }
 
 void MotorController::publishResponse(const ResponseMessage& response)

@@ -51,6 +51,7 @@ private:
   // diagnostics
   diagnostic_updater::Updater mc_updater_;
   diagnostic_updater::Updater battery_updater_;
+  double mc_hertz_ = 0;
 
     /**
     updates the motor controller diagnostics

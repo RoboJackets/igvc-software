@@ -87,13 +87,14 @@ private:
   // Diagnostic_updator
   diagnostic_updater::Updater updater;
 
-  std::string software_version;
-  std::string calibration_mode;
-  std::string mi_mode;
-  std::string axis_direction;
-  double sensor_temp;
-  double quaternion_length;
-  ros::Time lastUpdateTime;
+  std::string software_version_;
+  std::string calibration_mode_;
+  std::string mi_mode_;
+  std::string axis_direction_;
+  double sensor_temp_;
+  double quaternion_length_;
+  ros::Time lastUpdateTime_;
+  tf::Quaternion last_quat_;
 
   // Constants
   const double GRAVITY = 9.80665;

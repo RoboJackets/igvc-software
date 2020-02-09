@@ -1,5 +1,5 @@
 analyzers:
-  sensors:
+  imu:
     type: diagnostic_aggregator/GenericAnalyzer
     path: IMU
     startswith: 'imu'
@@ -18,4 +18,9 @@ analyzers:
     type: diagnostic_aggregator/GenericAnalyzer
     path: Joystick
     contains: 'Joystick'
+    num_items: 1
+  lidar:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: Lidar
+    contains: 'lidar'
     num_items: 1

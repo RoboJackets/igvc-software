@@ -34,21 +34,27 @@ const std::string YostLabDriver::getSoftwareVersion() {
 
 void YostLabDriver::imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
-    if(sensor_temp > 185){
+    if(sensor_temp_ > 185){
         stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "IMU temp too high");
-    } else if (sensor_temp < -40){
+    } else if (sensor_temp_ < -40){
         stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "IMU temp too low");
-    } else if ((ros::Time::now()-lastUpdateTime).toSec() > 1) {
+    } else if ((ros::Time::now()-lastUpdateTime_).toSec() > 1) {
         stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "IMU not updating");
-    } else if (quaternion_length < 0.98 || quaternion_length > 1.02) {
+    } else if (quaternion_length_ < 0.98 || quaternion_length_ > 1.02) {
         stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "IMU quaternion isn't normalized");
     } else {
         stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "IMU Online");
     }
-    stat.add("software_version", software_version);
-    stat.add("calibration_mode", calibration_mode);
-    stat.add("mi_mode", mi_mode);
-    stat.add("axis_direction", axis_direction);
+    stat.add("software_version", software_version_);
+    stat.add("calibration_mode", calibration_mode_);
+    stat.add("mi_mode", mi_mode_);
+    stat.add("axis_direction", axis_direction_);
+    stat.add("imu_temp", sensor_temp_);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(this->last_quat_).getRPY(roll, pitch, yaw);
+    stat.add("roll", roll);
+    stat.add("pitch", pitch);
+    stat.add("yaw", yaw);
 }
 
 const std::string YostLabDriver::getEulerDecomp()
@@ -163,11 +169,11 @@ void YostLabDriver::run()
     ros::Duration(0.02).sleep();
 
     // print/debug statements
-    software_version = this->getSoftwareVersion();
-    axis_direction = this->getAxisDirection();
+    software_version_ = this->getSoftwareVersion();
+    axis_direction_ = this->getAxisDirection();
     std::string euler = this->getEulerDecomp();
-    calibration_mode = this->getCalibMode();
-    mi_mode = this->getMIMode();
+    calibration_mode_ = this->getCalibMode();
+    mi_mode_ = this->getMIMode();
 
       // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
     this->startGyroCalibration();
@@ -215,7 +221,7 @@ void YostLabDriver::run()
 
               // construct quaternion with (x,y,z,w)
               tf::Quaternion quat{parsed_val_[0], parsed_val_[1], parsed_val_[2], parsed_val_[3]};
-              this->quaternion_length = tf::length(quat);
+              this->quaternion_length_ = tf::length(quat);
               quat = rot * quat;
 
               // Filtered orientation estimate
@@ -240,13 +246,11 @@ void YostLabDriver::run()
               imu_msg_.linear_acceleration.z = linear_accel_raw[2];
               imu_msg_.linear_acceleration_covariance = {.1, 0, 0, 0, .1, 0, 0, 0, .1};
 
-              sensor_temp = parsed_val_[10];
+              sensor_temp_ = parsed_val_[10];
 
               this->imu_pub_.publish(imu_msg_);
-              lastUpdateTime = ros::Time::now();
-
-              double roll, pitch, yaw;
-              tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+              this->lastUpdateTime_ = ros::Time::now();
+              this->last_quat_ = quat;
           } else {
               ROS_WARN_STREAM("Incomplete message from IMU. Throwing it away.");
           }

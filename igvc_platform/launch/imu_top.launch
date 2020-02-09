@@ -6,16 +6,11 @@
     <!-- Top IMU -->
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
         <!--value="/dev/imu_top"-->
-        <param name="SERIAL_PORT" type="string" value="/dev/ttyACM0" />
+        <param name="SERIAL_PORT" type="string" value="/dev/imu_top" />
 
         <param name="frame_id" type="string" value="magnetometer"/>
         <param name="orientation_rotation" value="1.570" />
         <remap from="imu" to="magnetometer" />
     </node>
-    <node pkg="diagnostic_aggregator" type="aggregator_node"
-          name="diagnostic_aggregator" >
-        <!-- Load the file you made above -->
-        <rosparam command="load"
-                  file="$(find igvc_platform)/config/imu_analyzer.yaml" />
-    </node>
+    <include file="$(find igvc_platform)/launch/quaternion_to_rpy.launch" />
 </launch>
