@@ -85,22 +85,27 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
   last_motors_message_ = ros::Time::now();
 }
 
-void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
-    stat.add("mc publishing freq", std::to_string(mc_hertz_) + " Hz" );
+  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
+  stat.add("mc publishing freq", std::to_string(mc_hertz_) + " Hz");
 }
 
-void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
-    if (battery_avg_ < min_battery_voltage_){
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Battery voltage dangerously low");
-    } else if (battery_avg_ < (min_battery_voltage_ + 0.5)){
-        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Battery voltage low");
-    } else {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Battery voltage okay");
-    }
-    stat.add("battery voltage", battery_avg_);
+  if (battery_avg_ < min_battery_voltage_)
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Battery voltage dangerously low");
+  }
+  else if (battery_avg_ < (min_battery_voltage_ + 0.5))
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Battery voltage low");
+  }
+  else
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Battery voltage okay");
+  }
+  stat.add("battery voltage", battery_avg_);
 }
 
 void MotorController::setPID()
@@ -172,8 +177,10 @@ void MotorController::setPID()
     if (n == 0)
     {
       ROS_ERROR_STREAM("Connection closed by server");
-      mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "Failed to send PID. Connection Closed by server.");
-      battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "Failed to send PID. Lost battery tracking.");
+      mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "Failed to send PID. Connection Closed by "
+                                                                      "server.");
+      battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "Failed to send PID. Lost battery "
+                                                                           "tracking.");
       ros::shutdown();
     }
 
@@ -191,7 +198,8 @@ void MotorController::setPID()
     {
       ROS_ERROR_STREAM("Decoding Failed: " << PB_GET_ERROR(&istream));
       mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID decoding failed. Shutting Down.");
-      battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID decoding failed. Lost battery tracking.");
+      battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID decoding failed. Lost battery "
+                                                                           "tracking.");
       ros::shutdown();
     }
 

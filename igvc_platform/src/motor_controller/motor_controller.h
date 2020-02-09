@@ -53,18 +53,18 @@ private:
   diagnostic_updater::Updater battery_updater_;
   double mc_hertz_ = 0;
 
-    /**
-    updates the motor controller diagnostics
+  /**
+  updates the motor controller diagnostics
 
-    @param[in] Diagnostics Status Wrapper
-    */
-    void mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
-    /**
-    updates the battery diagnostics
+  @param[in] Diagnostics Status Wrapper
+  */
+  void mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
+  /**
+  updates the battery diagnostics
 
-    @param[in] Diagnostics Status Wrapper
-    */
-    void battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+  @param[in] Diagnostics Status Wrapper
+  */
+  void battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
   /**
     get current motor command from the /motors topic
 

@@ -36,7 +36,7 @@ public:
   //!
   //! \brief imu_diagnostic runs diagnostics
   //!
-  void imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+  void imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
   //!
   //! \brief getAxisDirection
   //! \return returns axis directions
