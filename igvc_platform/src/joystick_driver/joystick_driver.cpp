@@ -4,11 +4,13 @@
 #include <ros/subscriber.h>
 #include <sensor_msgs/Joy.h>
 #include <diagnostic_updater/diagnostic_updater.h>
+
+#include <memory>
 #include <diagnostic_updater/publisher.h>
 
 ros::Publisher cmd_pub;
 ros::NodeHandle* nhp;
-diagnostic_updater::Updater updater;
+std::unique_ptr<diagnostic_updater::Updater> updater_ptr;
 
 void joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
@@ -45,7 +47,7 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
   nhp->param(std::string("leftInverted"), leftInverted, false);
   nhp->param(std::string("rightInverted"), rightInverted, false);
 
-  updater.update();
+  updater_ptr->update();
 
   igvc_msgs::velocity_pair cmd;
   cmd.left_velocity = msg->axes[leftJoyAxis] * maxVel * (leftInverted ? -1.0 : 1.0);
@@ -65,8 +67,9 @@ int main(int argc, char** argv)
 
   ros::Subscriber joy_sub = nh.subscribe("/joy", 1, joyCallback);
 
-  updater.setHardwareID("Joystick");
-  updater.add("Joystick Diagnostic", joystick_diagnostic);
+  updater_ptr = std::make_unique<diagnostic_updater::Updater>();
+  updater_ptr->setHardwareID("Joystick");
+  updater_ptr->add("Joystick Diagnostic", joystick_diagnostic);
 
   ros::spin();
   delete nhp;
