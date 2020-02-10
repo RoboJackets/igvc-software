@@ -29,7 +29,6 @@ NavigationServer::NavigationServer()
 
 void NavigationServer::cancel()
 {
-
   ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server: cancel method called!");
   current_state_ = CANCELED;
 
