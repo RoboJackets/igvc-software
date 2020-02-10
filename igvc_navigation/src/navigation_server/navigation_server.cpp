@@ -29,6 +29,8 @@ NavigationServer::NavigationServer()
 
 void NavigationServer::cancel()
 {
+
+  ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server: cancel method called!");
   current_state_ = CANCELED;
 
   if (!action_client_get_path_.getState().isDone())
@@ -88,19 +90,6 @@ void NavigationServer::start(GoalHandle goal_handle)
 
   start_time_ = ros::Time::now();
   runGetPath();
-  processLoop();
-}
-
-void NavigationServer::processLoop()
-{
-  while (ros::ok() && current_state_ != CANCELED && current_state_ != FAILED && current_state_ != SUCCEEDED)
-  {
-    if (current_state_ == EXE_PATH && ros::Time::now() > time_of_last_get_path + time_between_get_path)
-    {
-      runGetPath();
-      time_of_last_get_path = ros::Time::now();
-    }
-  }
 }
 
 void NavigationServer::runGetPath()
@@ -128,7 +117,6 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
         // change the orientation of the last pose to that of the pose before it
         path.poses[size - 1].pose.orientation = path.poses[size - 2].pose.orientation;
       }
-      time_of_last_get_path = ros::Time::now();
 
       if (recovery_trigger_ == GET_PATH)
       {
@@ -258,6 +246,12 @@ void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackCons
   current_goal_handle_.publishFeedback(move_base_feedback_);
 
   checkForOscillation(feedback->current_pose);
+
+  if (current_state_ == EXE_PATH && ros::Time::now() > time_of_last_get_path_ + time_between_get_path_)
+  {
+    runGetPath();
+    time_of_last_get_path_ = ros::Time::now();
+  }
 }
 
 void NavigationServer::checkForOscillation(const geometry_msgs::PoseStamped &robot_pose)
