@@ -1,0 +1,5 @@
+<launch>
+    <arg name="folder_path" default="$(find igvc_sandbox)/waypoints"/>
+    <arg name="file_name"/>
+    <param name="/waypoint_file_path" value="$(arg folder_path)/$(arg file_name)"/>
+</launch>
