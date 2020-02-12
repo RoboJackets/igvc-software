@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include "camera_config.h"
 #include "map_config.h"
+#include "barrel_config.h"
 
 PLUGINLIB_EXPORT_CLASS(line_layer::LineLayer, costmap_2d::Layer)
 
@@ -121,6 +122,7 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
                                     const sensor_msgs::CameraInfoConstPtr &segmented_info, size_t camera_index)
 {
   current_ = true;
+
   ensurePinholeModelInitialized(*segmented_info, camera_index);
   if (cached_rays_[camera_index].empty())
   {
@@ -128,11 +130,11 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   }
 
   geometry_msgs::TransformStamped camera_to_odom =
-      getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
+          getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
 
   cv::Mat segmented_mat = convertToMat(segmented_image, true);
   cv::Mat raw_mat = convertToMat(raw_image, false);
-  cv::Mat barrel_mat = LineLayer::findBarrel(raw_mat, segmented_mat.rows, segmented_mat.cols, true);
+  cv::Mat barrel_mat = LineLayer::findBarrel(raw_mat, segmented_mat.rows, segmented_mat.cols,  config_.barrelConfig);
 
   projectImage(raw_mat, segmented_mat, barrel_mat, camera_to_odom, camera_index);
   cleanupProjections();
@@ -184,6 +186,9 @@ geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::strin
 
 cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const
 {
+    if (image == nullptr){
+        ROS_ERROR("ERROR: NullPtr in convertToMat");
+    }
   cv_bridge::CvImageConstPtr cv_bridge_image;
   if (isToMono)
   {
@@ -191,25 +196,24 @@ cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool is
   }
   else
   {
-    cv_bridge::toCvShare(image, "bgr8");
+    cv_bridge_image = cv_bridge::toCvShare(image, "bgr8");
   }
   return cv_bridge_image->image;
 }
 
-cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols, bool debug)
+cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols,  const BarrelConfig &config)
 {
   // Gaussian Blur
   cv::Mat blur;
-  int blurSize = 11;
-  cv::GaussianBlur(inMat, blur, cv::Size(blurSize, blurSize), 0, 0);
+  cv::GaussianBlur(inMat, blur, cv::Size(config.blur_size, config.blur_size), 0, 0);
 
   // to HSV
   cv::Mat hsv_frame;
   cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
 
   // HSV Threshold
-  cv::Scalar min = cv::Scalar(0, 0, 0);
-  cv::Scalar max = cv::Scalar(35, 255, 255);
+  cv::Scalar min = cv::Scalar(config.min_h, config.min_s,config.min_v);
+  cv::Scalar max = cv::Scalar(config.max_h, config.max_s, config.max_v);
   cv::inRange(hsv_frame, min, max, hsv_frame);
 
   // open and closing
@@ -217,20 +221,23 @@ cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols, bool deb
   cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 
   // setting the value to 100 to differential from the lines
-  int barrelValue = 100;
-  hsv_frame.setTo(barrelValue, hsv_frame);
+
+  hsv_frame.setTo(config.barrel_value, hsv_frame);
 
   // resizing to be the same as the segmented mat
   cv::resize(hsv_frame, hsv_frame, cv::Size(rows, cols));
 
   // if set to debug, will run
-  if (debug)
+  if (config.debug)
   {
     debugBarrel(hsv_frame);
   }
 
   return hsv_frame;
 }
+
+
+
 void LineLayer::debugBarrel(const cv::Mat &inMat)
 {
   // cycles through each 3 frames(left, center, and right) :/

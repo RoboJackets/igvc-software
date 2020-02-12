@@ -7,6 +7,7 @@ LineLayerConfig::LineLayerConfig(const ros::NodeHandle &parent_nh)
   , map{ nh }
   , cameras{ { nh, "/cam/center" }, { nh, "/cam/left" }, { nh, "/cam/right" } }
   , projection{ nh, map.resolution }
+  , barrelConfig{nh}
 {
 }
 }  // namespace line_layer

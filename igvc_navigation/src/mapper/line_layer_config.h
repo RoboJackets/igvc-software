@@ -5,6 +5,7 @@
 #include "camera_config.h"
 #include "map_config.h"
 #include "projection_config.h"
+#include "barrel_config.h"
 
 namespace line_layer
 {
@@ -18,7 +19,10 @@ public:
   map::MapConfig map;
   std::vector<CameraConfig> cameras;
   ProjectionConfig projection;
+  BarrelConfig barrelConfig;
+
 };
+
 }  // namespace line_layer
 
 #endif  // SRC_LINE_LAYER_CONFIG_H
