@@ -16,10 +16,10 @@
 #include <pcl_ros/point_cloud.h>
 #include <grid_map_ros/grid_map_ros.hpp>
 
+#include "barrel_config.h"
 #include "eigen_hash.h"
 #include "gridmap_layer.h"
 #include "line_layer_config.h"
-#include "barrel_config.h"
 
 namespace line_layer
 {
@@ -120,14 +120,12 @@ private:
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
 
-
-
   void projectImage(const cv::Mat& raw_mat, const cv::Mat& segmented_mat, const cv::Mat& barrel_mat,
                     const geometry_msgs::TransformStamped& camera_to_odom, size_t camera_idx);
 
   void debugBarrel(const cv::Mat& inMat);
 
-  cv::Mat findBarrel(const cv::Mat &inMat, int rows, int cols, const BarrelConfig &config);
+  cv::Mat findBarrel(const cv::Mat& inMat, int rows, int cols, const BarrelConfig& config);
 };
 }  // namespace line_layer
 

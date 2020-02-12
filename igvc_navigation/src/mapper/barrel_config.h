@@ -9,27 +9,26 @@
 
 namespace line_layer
 {
-class BarrelConfig{
+class BarrelConfig
+{
 public:
+  BarrelConfig(const ros::NodeHandle& parent_nh);
 
-    BarrelConfig(const ros::NodeHandle& parent_nh);
+  const ros::NodeHandle parent_nh;
 
-    const ros::NodeHandle parent_nh;
+  int blur_size;
 
-    int blur_size;
+  int min_h;
+  int min_s;
+  int min_v;
 
-    int min_h;
-    int min_s;
-    int min_v;
+  int max_h;
+  int max_s;
+  int max_v;
 
-    int max_h;
-    int max_s;
-    int max_v;
+  int barrel_value;
 
-    int barrel_value;
-
-    bool debug;
-
+  bool debug;
 };
-}
-#endif //SRC_BARREL_CONFIG_H
+}  // namespace line_layer
+#endif  // SRC_BARREL_CONFIG_H

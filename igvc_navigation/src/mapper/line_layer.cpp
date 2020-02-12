@@ -8,9 +8,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 #include <unordered_set>
+#include "barrel_config.h"
 #include "camera_config.h"
 #include "map_config.h"
-#include "barrel_config.h"
 
 PLUGINLIB_EXPORT_CLASS(line_layer::LineLayer, costmap_2d::Layer)
 
@@ -130,11 +130,11 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   }
 
   geometry_msgs::TransformStamped camera_to_odom =
-          getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
+      getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
 
   cv::Mat segmented_mat = convertToMat(segmented_image, true);
   cv::Mat raw_mat = convertToMat(raw_image, false);
-  cv::Mat barrel_mat = LineLayer::findBarrel(raw_mat, segmented_mat.rows, segmented_mat.cols,  config_.barrelConfig);
+  cv::Mat barrel_mat = LineLayer::findBarrel(raw_mat, segmented_mat.rows, segmented_mat.cols, config_.barrelConfig);
 
   projectImage(raw_mat, segmented_mat, barrel_mat, camera_to_odom, camera_index);
   cleanupProjections();
@@ -186,9 +186,10 @@ geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::strin
 
 cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const
 {
-    if (image == nullptr){
-        ROS_ERROR("ERROR: NullPtr in convertToMat");
-    }
+  if (image == nullptr)
+  {
+    ROS_ERROR("ERROR: NullPtr in convertToMat");
+  }
   cv_bridge::CvImageConstPtr cv_bridge_image;
   if (isToMono)
   {
@@ -201,7 +202,7 @@ cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool is
   return cv_bridge_image->image;
 }
 
-cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols,  const BarrelConfig &config)
+cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols, const BarrelConfig &config)
 {
   // Gaussian Blur
   cv::Mat blur;
@@ -212,7 +213,7 @@ cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols,  const B
   cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
 
   // HSV Threshold
-  cv::Scalar min = cv::Scalar(config.min_h, config.min_s,config.min_v);
+  cv::Scalar min = cv::Scalar(config.min_h, config.min_s, config.min_v);
   cv::Scalar max = cv::Scalar(config.max_h, config.max_s, config.max_v);
   cv::inRange(hsv_frame, min, max, hsv_frame);
 
@@ -235,8 +236,6 @@ cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols,  const B
 
   return hsv_frame;
 }
-
-
 
 void LineLayer::debugBarrel(const cv::Mat &inMat)
 {
