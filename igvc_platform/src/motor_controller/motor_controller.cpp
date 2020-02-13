@@ -97,7 +97,7 @@ void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWra
   {
     stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Battery voltage dangerously low");
   }
-  else if (battery_avg_ < (min_battery_voltage_ + 0.5))
+  else if (battery_avg_ < (min_battery_voltage_ + 0.25))
   {
     stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Battery voltage low");
   }
