@@ -64,8 +64,8 @@ private:
 
   ros::Time start_time_;
 
-  ros::Time time_of_last_get_path;
-  ros::Duration time_between_get_path = ros::Duration(0.5);
+  ros::Time time_of_last_get_path_;
+  ros::Duration time_between_get_path_ = ros::Duration(0.5);
 
   igvc_msgs::NavigateWaypointFeedback move_base_feedback_;
   geometry_msgs::PoseStamped previous_oscillation_pose_;
@@ -77,8 +77,6 @@ private:
   void start(GoalHandle goal_handle);
 
   void cancel();
-
-  void processLoop();
 
   void runGetPath();
 
