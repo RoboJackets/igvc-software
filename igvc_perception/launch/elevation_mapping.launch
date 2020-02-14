@@ -1,3 +1,9 @@
 <launch>
     <node pkg="tf" type="static_transform_publisher" name="elevation_mapping_center_broadcaster" args="2 0 0 0 0 0 0 base_footprint elevation_mapping_center 100"/>
+
+    <node pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen">
+        <rosparam command="load" file="$(find igvc_perception)/config/elevation_mapping.yaml"/>
+    </node>
+
+    <include file="$(find igvc_perception)/launch/elevation_map_visualization.launch"/>
 </launch>

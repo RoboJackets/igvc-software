@@ -179,4 +179,4 @@ if (CATKIN_ENABLE_TESTING)
 endif ()
 
 add_subdirectory(src/pointcloud_filter)
-
+add_subdirectory(src/robot_pose_type_converter)
