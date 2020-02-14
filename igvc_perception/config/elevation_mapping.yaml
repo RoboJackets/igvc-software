@@ -2,7 +2,7 @@
 point_cloud_topic: "/lidar/filtered"
 map_frame_id: "odom"
 robot_base_frame_id: "base_footprint"
-robot_pose_with_covariance_topic: "/odometry/filtered"
+robot_pose_with_covariance_topic: "/odometry/pose_with_cov_stamped"
 robot_pose_cache_size: 200
 track_point_frame_id: "elevation_mapping_center"
 track_point_x: 0.0
@@ -14,11 +14,12 @@ length_in_x: 3.5
 length_in_y: 3.5
 position_x: 0.0
 position_y: 0.0
-resolution: 0.01
+resolution: 0.04
 min_variance: 0.000009
 max_variance: 0.01
 mahalanobis_distance_threshold: 2.5
 multi_height_noise: 0.0000009
+fused_map_publishing_rate: 0.5
 
 # SENSOR PARAMETERS
 sensor_processor/type: laser

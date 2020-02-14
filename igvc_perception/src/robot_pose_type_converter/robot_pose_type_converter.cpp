@@ -18,6 +18,6 @@ void RobotPoseTypeConveter::poseCallback(const nav_msgs::Odometry& odometry)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "robot_pose_type_converter");
-  RobotPoseTypeConveter rptc();
+  RobotPoseTypeConveter rptc = RobotPoseTypeConveter();
   ros::spin();
 }
