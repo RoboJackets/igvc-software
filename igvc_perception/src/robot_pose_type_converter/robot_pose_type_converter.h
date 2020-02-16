@@ -11,9 +11,9 @@ public:
   RobotPoseTypeConveter();
 
 private:
-  ros::NodeHandle private_nh;
-  ros::Publisher pose_publisher;
-  ros::Subscriber pose_subscriber;
+  ros::NodeHandle private_nh_;
+  ros::Publisher pose_publisher_;
+  ros::Subscriber pose_subscriber_;
 
   void poseCallback(const nav_msgs::Odometry& odometry);
 };

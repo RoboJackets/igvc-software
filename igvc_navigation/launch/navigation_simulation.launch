@@ -23,4 +23,7 @@
 
     <!-- elevation mapping -->
     <include file="$(find igvc_perception)/launch/elevation_mapping.launch" />
+
+    <!-- traversability filter -->
+    <include file="$(find igvc_perception)/launch/traversability_filter.launch"/>
 </launch>

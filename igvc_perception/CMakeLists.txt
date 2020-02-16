@@ -23,6 +23,9 @@ find_package(catkin REQUIRED COMPONENTS
     igvc_utils
     velodyne_pointcloud
     parameter_assertions
+    grid_map_core
+    grid_map_ros
+    grid_map_msgs
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -180,3 +183,4 @@ endif ()
 
 add_subdirectory(src/pointcloud_filter)
 add_subdirectory(src/robot_pose_type_converter)
+add_subdirectory(src/traversability_filter)

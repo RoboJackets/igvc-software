@@ -10,8 +10,8 @@ track_point_y: 0.0
 track_point_z: 0.0
 
 # MAP PARAMETERS
-length_in_x: 3.5
-length_in_y: 3.5
+length_in_x: 6.0
+length_in_y: 6.0
 position_x: 0.0
 position_y: 0.0
 resolution: 0.04
