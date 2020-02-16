@@ -166,6 +166,8 @@ void NavigationClient::sendWaypoints(const std::vector<geometry_msgs::PointStamp
   for (const geometry_msgs::PointStamped& waypoint : waypoints)
   {
     sendGoal(waypoint, true);
+    //TODO: Include
+    
   }
 }
 

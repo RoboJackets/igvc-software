@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
              std_msgs
              sensor_msgs
              geometry_msgs
+             nav_msgs
              actionlib_msgs
              )
 
@@ -30,6 +31,13 @@ add_action_files(
     NavigateWaypoint.action
 )
 
+# Generate services in the "srv" folder
+add_service_files(
+    DIRECTORY srv
+    FILES
+    fake_cone.srv
+)
+
 # Generate added messages and services with any dependencies listed here
 generate_messages(
     DEPENDENCIES
@@ -37,9 +45,10 @@ generate_messages(
     sensor_msgs
     geometry_msgs
     actionlib_msgs
+    nav_msgs
 )
 
 catkin_package(
-    CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs actionlib_msgs message_runtime
+    CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs nav_msgs actionlib_msgs message_runtime
 )
 
