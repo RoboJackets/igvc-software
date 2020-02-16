@@ -26,7 +26,10 @@ namespace fake_cone{
         std::vector<geometry_msgs::Point> filterOccupied(nav_msgs::OccupancyGrid &localCostMap, std::vector<geometry_msgs::Point> input);
         geometry_msgs::Point convert1DIndexTo2D(nav_msgs::OccupancyGrid &localMap, int index);
         int convert2DIndexTo1D(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
+
+    protected:
     };
+
 }
 
 

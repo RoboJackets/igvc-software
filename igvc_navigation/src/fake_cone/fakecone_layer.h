@@ -8,8 +8,9 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include "gridmap_layer.h"
+#include "../mapper/gridmap_layer.h"
 #include "fakecone_layer_config.h"
+#include <grid_map_ros/grid_map_ros.hpp>
 
 namespace fakecone_layer {
     class FakeconeLayer : public gridmap_layer::GridmapLayer {
@@ -25,6 +26,9 @@ namespace fakecone_layer {
         void updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y, double *max_x,
                           double *max_y) override;
 
+        void markHit(const grid_map::Index &index);
+        void insertLine(std::vector<geometry_msgs::Point> line);
+
     private:
         static constexpr auto logodds_layer = "logodds";
         static constexpr auto probability_layer = "probability";
@@ -34,11 +38,8 @@ namespace fakecone_layer {
         grid_map::Matrix *layer_{};
         //TODO: solve constructor issue with provided parameter
         FakeconeLayerConfig config_;
-        cv::Mat line_buffer_;
-        cv::Mat freespace_buffer_;
-        cv::Mat not_lines_;
 
-        //TODO: figure out what is Eigen:Vecotor3d - cached_rays_
+        //TODO: figure out what is Eigen:Vecotor3d - cached_ray
         ros::Publisher gridmap_pub_;
         ros::Publisher costmap_pub_;
         std::vector<int8_t> cost_translation_table_;
@@ -57,11 +58,6 @@ namespace fakecone_layer {
         void debugPublishMap();
         void publishCostmap();
         void initCostTranslationTable();
-
-        //TODO: Replace with own implementation
-        void markHit(const grid_map::Index, double distance);
-
-        void markEmpty(const grid_map::Index, double distance);
     };
 }
 

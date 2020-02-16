@@ -2,7 +2,7 @@
 #define SRC_FAKECONE_LAYER_CONFIG_H
 
 #include <ros/ros.h>
-#include "map_config.h"
+#include "../mapper/map_config.h"
 
 namespace fakecone_layer
 {

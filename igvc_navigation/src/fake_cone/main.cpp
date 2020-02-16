@@ -5,7 +5,11 @@
 #include "fake_cone.h"
 #include <igvc_msgs/fake_cone.h>
 #include <geometry_msgs/Point.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 
+ros::NodeHandle nh;
+ros::Publisher endPointPublisher;
 
 bool scanAndGenerate(igvc_msgs::fake_coneRequest& req,
                     igvc_msgs::fake_coneResponse& res) {
@@ -22,11 +26,26 @@ bool scanAndGenerate(igvc_msgs::fake_coneRequest& req,
     geometry_msgs::Point rightEndPoint = fakeConeService.findEndpoint(rightLine, rightContact, req.currentPos);
 
     std::vector<geometry_msgs::Point> fakeConeLine = fakeConeService.connectEndpoints(leftEndPoint, rightEndPoint);
+    pcl::PointCloud<pcl::PointXY> fakeConeCloud;
+
+    fakeConeCloud.resize(req.costMap.info.width * req.costMap.info.height);
+    for(geometry_msgs::Point point : fakeConeLine) {
+        pcl::PointXY index;
+        index.x = point.x;
+        index.y = point.y;
+
+        fakeConeCloud.push_back(index);
+    }
+
+    //Publishing the debug message for the calculated line for rviz
+    sensor_msgs::PointCloud2 lineDebug;
+    pcl::toROSMsg(fakeConeCloud, lineDebug);
+    endPointPublisher = nh.advertise<sensor_msgs::PointCloud2>("fakecone/cone", 1);
+    endPointPublisher.publish(lineDebug);
 }
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "fake_cone_service");
-    ros::NodeHandle nh;
     ros::ServiceServer service = nh.advertiseService("fake_cone_service", scanAndGenerate);
     ros::spin();
 }
