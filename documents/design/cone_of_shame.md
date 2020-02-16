@@ -43,13 +43,12 @@ In last year's IGVC competition, Jessie turned 180 degrees before starting trave
     - contains useful functions such as:
         - void GridLayer::updateCosts - update the cost in the master grid map according to the value in this layer
         - void GridLayer::updateBounds - expand the cost map layer to include new cells that the robot is in
-
+        
 ## Overall Scope
 
 ### Affected Packages
 
 - igvc_navigation/src/mapper
-
 
 ### Schedule
 
