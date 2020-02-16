@@ -9,7 +9,7 @@
 
 
     <!-- Launch action server -->
-   <include file="$(find igvc_navigation)/launch/action_server.launch" />
+    <!--<include file="$(find igvc_navigation)/launch/action_server.launch" /> -->
 
     <!-- Launch navigation server -->
     <include file="$(find igvc_navigation)/launch/navigation_server.launch"/>
