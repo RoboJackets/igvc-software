@@ -43,7 +43,9 @@
   <depend>camera_info_manager</depend>
   <depend>std_msgs</depend>
   <depend>igvc_msgs</depend>
-  <depend>grid_map</depend>
+  <depend>grid_map_core</depend>
+  <depend>grid_map_ros</depend>
+  <depend>grid_map_msgs</depend>
 
   <build_depend>image_transport</build_depend>
   <build_depend>cv_bridge</build_depend>
