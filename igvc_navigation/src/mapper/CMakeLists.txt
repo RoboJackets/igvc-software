@@ -38,6 +38,13 @@ add_library(line_layer
 add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(line_layer ${catkin_LIBRARIES})
 
+add_library(traversability_layer
+        traversability_layer.cpp traversability_layer.h
+        traversability_layer_config.cpp traversability_layer_config.h
+        map_config.cpp map_config.h
+        gridmap_layer.cpp gridmap_layer.h
+        )
+
 add_library(unrolling_layer
         unrolling_layer.cpp unrolling_layer.h
         unrolling_layer_config.cpp unrolling_layer.h
@@ -51,7 +58,7 @@ if (OpenMP_FOUND)
 endif ()
 
 install(
-    TARGETS mapper lidar_layer
+    TARGETS mapper lidar_layer line_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

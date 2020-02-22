@@ -6,7 +6,7 @@ TraversabilityFilter::TraversabilityFilter() : filter_chain_("grid_map::GridMap"
   private_nh_ = ros::NodeHandle("~");
   elevation_map_sub_ = private_nh_.subscribe("/elevation_mapping/elevation_map_raw", 1,
                                              &TraversabilityFilter::elevationMapCallback, this);
-  traversability_map_pub_ = private_nh_.advertise<grid_map_msgs::GridMap>("/traversability_map", 1);
+  traversability_map_pub_ = private_nh_.advertise<grid_map_msgs::GridMap>("/traversability/gridmap", 1);
 
   // setup filter chain
   if (!filter_chain_.configure("/traversability_filter/traversability_map_filters", private_nh_))

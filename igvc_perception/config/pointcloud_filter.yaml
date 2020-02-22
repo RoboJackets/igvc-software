@@ -4,6 +4,7 @@ pointcloud_filter:
         transformed: "lidar/transformed"
         occupied: "lidar/occupied"
         free: "lidar/free"
+        filtered: "lidar/filtered"
     back_filter:
         start_angle: -2.0
         end_angle: 2.0

@@ -31,7 +31,7 @@ void PointcloudFilter::setupPubSub()
   occupied_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topic_occupied, 1);
   free_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topic_free, 1);
 
-  filtered_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("lidar/filtered", 1);
+  filtered_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topc_free, 1);
 }
 
 void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointcloud)
