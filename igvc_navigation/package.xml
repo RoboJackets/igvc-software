@@ -57,8 +57,6 @@
   <build_depend>pcl_ros</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>igvc_utils</build_depend>
-  <build_depend>octomap</build_depend>
-  <build_depend>octomap_ros</build_depend>
   <build_depend>grid_map</build_depend>
 
   <!-- Run dependencies -->
