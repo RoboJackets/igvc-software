@@ -48,7 +48,7 @@ class Visualizer(object):
 
     @staticmethod
     def imagenet_normalization(image):  # type: (np.ndarray) -> torch.FloatTensor
-        IMAGE_SIZE = 320
+        IMAGE_SIZE = 400
         transformations = albu.Compose([albu.Resize(IMAGE_SIZE, IMAGE_SIZE, p=1), albu.Normalize(), ToTensor()])
         sample = transformations(image=image)
         return sample["image"]
