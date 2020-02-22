@@ -1,6 +1,6 @@
 #include "navigation_server.h"
 #include <parameter_assertions/assertions.h>
-#include <mbf_utility/navigation_utility.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 NavigationServer::NavigationServer()
   : current_state_(NONE)
@@ -124,6 +124,13 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
         recovery_trigger_ = NONE;
       }
 
+      if (recovery_trigger_ == EXE_PATH)
+      {
+        ROS_WARN_NAMED("nav_server", "nav_server recovered from path execution failure.");
+        current_recovery_behavior_ = recovery_behaviors_.begin();
+        recovery_trigger_ = NONE;
+      }
+
       ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server sending path to 'exe_path'");
       runExePath(path);
       break;
@@ -166,13 +173,16 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
 
 void NavigationServer::runExePath(nav_msgs::Path path)
 {
-  current_state_ = EXE_PATH;
-  mbf_msgs::ExePathGoal exe_path_goal;
-  exe_path_goal.controller = exe_path_controller_;
-  exe_path_goal.path = std::move(path);
-  action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2),
-                                   NavigationServer::actionExePathActive,
-                                   boost::bind(&NavigationServer::actionExePathFeedback, this, _1));
+  if (current_state_ != RECOVERY)
+  {
+    current_state_ = EXE_PATH;
+    mbf_msgs::ExePathGoal exe_path_goal;
+    exe_path_goal.controller = exe_path_controller_;
+    exe_path_goal.path = std::move(path);
+    action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2),
+                                     NavigationServer::actionExePathActive,
+                                     boost::bind(&NavigationServer::actionExePathFeedback, this, _1));
+  }
 }
 
 void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState &state,
@@ -260,7 +270,8 @@ void NavigationServer::checkForOscillation(const geometry_msgs::PoseStamped &rob
   if (!oscillation_timeout_.isZero() && ros::Time::now() > start_time_ + oscillation_wait_time_)
   {
     // check if robot has moved more than oscillation distance
-    double distance = mbf_utility::distance(robot_pose, previous_oscillation_pose_);
+    double distance = igvc::get_distance(robot_pose.pose.position, previous_oscillation_pose_.pose.position);
+
     ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server: Distance from previous pose: " << distance);
     if (distance >= oscillation_distance_)
     {
@@ -325,8 +336,8 @@ bool NavigationServer::attemptRecovery()
 
   mbf_msgs::RecoveryGoal recovery_goal;
   recovery_goal.behavior = *current_recovery_behavior_;
-  action_client_recovery_.sendGoal(recovery_goal, boost::bind(&NavigationServer::actionRecoveryDone, this, _1, _2));
   current_state_ = RECOVERY;
+  action_client_recovery_.sendGoal(recovery_goal, boost::bind(&NavigationServer::actionRecoveryDone, this, _1, _2));
   return true;
 }
 
@@ -342,13 +353,13 @@ void NavigationServer::actionRecoveryDone(const actionlib::SimpleClientGoalState
   switch (state.state_)
   {
     case actionlib::SimpleClientGoalState::SUCCEEDED:
-      ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server: Execution of the recovery behavior '"
-                                               << *current_recovery_behavior_ << "' succeeded!");
+      ROS_INFO_STREAM_NAMED("nav_server", "nav_server: Execution of the recovery behavior '"
+                                              << *current_recovery_behavior_ << "' succeeded!");
       current_recovery_behavior_++;
       runGetPath();
       break;
     case actionlib::SimpleClientGoalState::ABORTED:
-      ROS_DEBUG_STREAM_NAMED("nav_server", "Recovery behavior aborted!");
+      ROS_WARN_STREAM_NAMED("nav_server", "Recovery behavior aborted!");
       runNextRecoveryBehavior(navigate_waypoint_result);
       break;
     case actionlib::SimpleClientGoalState::PREEMPTED:

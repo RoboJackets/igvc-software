@@ -54,7 +54,7 @@ private:
   ActionClientRecovery action_client_recovery_;
 
   std::vector<std::string> recovery_behaviors_;
-  std::vector<std::string> default_recovery_behaviors_;
+  std::vector<std::string> default_recovery_behaviors_ = { "back_up_recovery" };
   std::vector<std::string>::iterator current_recovery_behavior_;
 
   mbf_msgs::GetPathGoal get_path_goal_;
