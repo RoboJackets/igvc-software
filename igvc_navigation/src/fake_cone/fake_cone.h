@@ -13,11 +13,13 @@ namespace fake_cone{
     class FakeConeService{
     public:
         //Function definition
+        FakeConeService();
         double calculateRCoefficient(nav_msgs::OccupancyGrid &localMap,  std::vector<geometry_msgs::Point> linePoints);
         std::vector<geometry_msgs::Point> linearProbe(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point point);
         geometry_msgs::Point findLine(nav_msgs::OccupancyGrid &localCostMap, geometry_msgs::Point current_pos, bool to_left);
         geometry_msgs::Point findEndpoint(std::vector<geometry_msgs::Point> line, geometry_msgs::Point point_on_line, geometry_msgs::Point current_pos);
         std::vector<geometry_msgs::Point> connectEndpoints(geometry_msgs::Point left, geometry_msgs::Point right);
+        nav_msgs::OccupancyGrid convertCharMap(unsigned char* charMap);
 
     private:
         //Node handle definition

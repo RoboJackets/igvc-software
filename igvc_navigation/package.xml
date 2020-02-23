@@ -77,5 +77,7 @@
   <!-- costmap2d layer pluginlib stuff -->
   <export>
     <costmap_2d plugin="${prefix}/src/mapper/costmap_plugins.xml" />
+    <costmap_2d plugin="${prefix}/src/fake_cone/costmap_plugins.xml" />
   </export>
+
 </package>

@@ -4,10 +4,12 @@
 #include <robot_localization/navsat_conversions.h>
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/StringUtils.hpp>
+#include <igvc_msgs/fake_cone.h>
 
 NavigationClient::NavigationClient()
 {
   ros::NodeHandle private_nh("~");
+  fake_cone_service = nh_.serviceClient<igvc_msgs::fake_cone>("fake_cone_service");
 
   assertions::getParam(private_nh, "read_from_file", reading_from_file_);
   if (reading_from_file_)
@@ -167,7 +169,9 @@ void NavigationClient::sendWaypoints(const std::vector<geometry_msgs::PointStamp
   {
     sendGoal(waypoint, true);
     //TODO: Include
-    
+    igvc_msgs::fake_coneRequest fake_cone_request;
+    igvc_msgs::fake_coneResponse fake_cone_response;
+    fake_cone_service.call(fake_cone_request, fake_cone_response);
   }
 }
 

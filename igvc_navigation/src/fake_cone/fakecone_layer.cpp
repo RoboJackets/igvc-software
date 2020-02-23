@@ -3,18 +3,31 @@
 #include "fakecone_layer.h"
 #include "../mapper/map_config.h"
 #include <algorithm>
+#include <pcl_conversions/pcl_conversions.h>
+#include <igvc_msgs/fake_cone.h>
+#include <costmap_2d/costmap_layer.h>
+#include <tf2_ros/transform_listener.h>
 
 PLUGINLIB_EXPORT_CLASS(fakecone_layer::FakeconeLayer, costmap_2d::Layer)
 
 namespace fakecone_layer
 {
+    fake_cone::FakeConeService fakeConeService;
+
     FakeconeLayer::FakeconeLayer() : GridmapLayer({logodds_layer, probability_layer}), private_nh_{"~"}, config_{private_nh_}
     {
         initGridmap();
         initPubSub();
+
+        ros::NodeHandle nh;
+        endPointPublisher = nh.advertise<sensor_msgs::PointCloud2>("fakecone_cone", 1);
+
+        ros::ServiceServer service = nh.advertiseService("fake_cone_service", &FakeconeLayer::scanAndGenerate, this);
+        ROS_INFO("Ready to accept input");
     }
 
-    void FakeconeLayer::initGridmap() {
+    void FakeconeLayer::initGridmap()
+    {
         map_.setFrameId(config_.map.frame_id);
         grid_map::Length dimensions{config_.map.length_x, config_.map.length_y};
         map_.setGeometry(dimensions, config_.map.resolution);
@@ -44,7 +57,7 @@ namespace fakecone_layer
             publishCostmap();
         }
         resetDirty();
-        
+
         uchar *master_array = master_grid.getCharMap();
         uchar *line_array = costmap_2d_.getCharMap();
         unsigned int span = master_grid.getSizeInCellsX();
@@ -98,7 +111,6 @@ namespace fakecone_layer
     void FakeconeLayer::updateStaticWindow()
     {
         size_t num_cells = map_.getSize().prod();
-
         uchar *char_map = costmap_2d_.getCharMap();
 
         auto optional_it = getDirtyIterator();
@@ -130,8 +142,10 @@ namespace fakecone_layer
         (*layer_)(index[0], index[1]) = config_.map.max_occupancy;
     }
 
-    void FakeconeLayer::insertLine(std::vector<geometry_msgs::Point> line) {
-        for (geometry_msgs::Point point : line) {
+    void FakeconeLayer::insertLine(std::vector<geometry_msgs::Point> line)
+    {
+        for (geometry_msgs::Point point : line)
+        {
             grid_map::Index index;
             grid_map::Position pos{point.x, point.y};
 
@@ -174,5 +188,74 @@ namespace fakecone_layer
         }
 
         costmap_pub_.publish(msg);
+    }
+
+    bool FakeconeLayer::scanAndGenerate(igvc_msgs::fake_coneRequest &req,
+            igvc_msgs::fake_coneResponse &res) {
+
+        //NOTE: the robot will always be at the center of the map for a rolling window
+        std::vector<boost::shared_ptr<costmap_2d::Layer>>* plugins = layered_costmap_->getPlugins();
+        unsigned char* grid;
+
+        for (std::vector<boost::shared_ptr<costmap_2d::Layer> >::iterator pluginp = plugins->begin(); pluginp != plugins->end(); ++pluginp) {
+
+            boost::shared_ptr<costmap_2d::Layer> plugin = *pluginp;
+
+            if(plugin->getName().find("line_layer")!=std::string::npos) {
+                boost::shared_ptr<costmap_2d::CostmapLayer> costmap;
+                costmap = boost::static_pointer_cast<costmap_2d::CostmapLayer>(plugin);
+                grid = costmap->getCharMap();
+            }
+        }
+
+        nav_msgs::OccupancyGrid costMapGrid = fakeConeService.convertCharMap(grid);
+
+        tf2_ros::Buffer tfBuffer;
+        tf2_ros::TransformListener tfListener(tfBuffer);
+
+        geometry_msgs::TransformStamped transformStamped;
+        try
+        {
+            transformStamped = tfBuffer.lookupTransform("odom", "imu",
+            ros::Time(0));
+        }
+        catch (tf2::TransformException &ex)
+        {
+            ROS_WARN("%s",ex.what());
+            ros::Duration(1.0).sleep();
+        }
+        
+        geometry_msgs::Point currentPos;
+        currentPos.x = transformStamped.transform.translation.x;
+        currentPos.y = transformStamped.transform.translation.y;
+
+        geometry_msgs::Point leftContact = fakeConeService.findLine(costMapGrid, currentPos, true);
+        geometry_msgs::Point rightContact = fakeConeService.findLine(costMapGrid, currentPos, false);
+
+        std::vector<geometry_msgs::Point> leftLine = fakeConeService.linearProbe(costMapGrid, leftContact);
+        std::vector<geometry_msgs::Point> rightLine = fakeConeService.linearProbe(costMapGrid, rightContact);
+
+        geometry_msgs::Point leftEndPoint = fakeConeService.findEndpoint(leftLine, leftContact, currentPos);
+        geometry_msgs::Point rightEndPoint = fakeConeService.findEndpoint(rightLine, rightContact, currentPos);
+
+        std::vector<geometry_msgs::Point> fakeConeLine = fakeConeService.connectEndpoints(leftEndPoint, rightEndPoint);
+        pcl::PointCloud<pcl::PointXY> fakeConeCloud;
+
+        fakeConeCloud.resize(costMapGrid.info.width * costMapGrid.info.height);
+        for(geometry_msgs::Point point : fakeConeLine) {
+            pcl::PointXY index;
+            index.x = point.x;
+            index.y = point.y;
+
+            fakeConeCloud.push_back(index);
+        }
+
+        //Publishing the debug message for the calculated line for rviz
+        sensor_msgs::PointCloud2 lineDebug;
+        pcl::toROSMsg(fakeConeCloud, lineDebug);
+        endPointPublisher.publish(lineDebug);
+
+        //TODO: dummy return
+        return true;
     }
 }

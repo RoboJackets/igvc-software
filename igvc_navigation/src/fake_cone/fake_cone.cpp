@@ -12,6 +12,9 @@ double COEFFICIENT_THRESHOLD = 0.8;
 
 namespace fake_cone
 {
+    FakeConeService::FakeConeService(){
+    }
+
     bool FakeConeService::equals(geometry_msgs::Point a, geometry_msgs::Point b) {
         return a.x == b.x && a.y == b.y;
     }
@@ -211,5 +214,14 @@ namespace fake_cone
         }
 
         return lowest_point;
+    }
+
+    nav_msgs::OccupancyGrid FakeConeService::convertCharMap(unsigned char* charMap) {
+        nav_msgs::OccupancyGrid grid;
+        for (int i = 0; i < sizeof(charMap); i++) {
+            grid.data[i] = charMap[i];
+        }
+
+        return grid;
     }
 }

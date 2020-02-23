@@ -21,8 +21,6 @@ add_library(lidar_layer
     lidar_layer.cpp lidar_layer.h
     lidar_layer_config.cpp lidar_layer_config.h
     map_config.cpp map_config.h
-        ../fake_cone/fakecone_layer.cpp ../fake_cone/fakecone_layer.h
-        ../fake_cone/fakecone_layer_config.cpp ../fake_cone/fakecone_layer_config.h
     lidar_config.cpp lidar_config.h eigen_hash.h
     gridmap_layer.cpp gridmap_layer.h
     )
@@ -32,8 +30,6 @@ target_link_libraries(lidar_layer ${catkin_LIBRARIES})
 add_library(line_layer
     line_layer.cpp line_layer.h
     line_layer_config.cpp line_layer_config.h
-        ../fake_cone/fakecone_layer.cpp ../fake_cone/fakecone_layer.h
-        ../fake_cone/fakecone_layer_config.cpp ../fake_cone/fakecone_layer_config.h
     map_config.cpp map_config.h
     camera_config.cpp camera_config.h
     projection_config.cpp projection_config.h

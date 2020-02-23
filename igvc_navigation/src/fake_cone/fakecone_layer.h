@@ -10,7 +10,11 @@
 #include <pcl/point_types.h>
 #include "../mapper/gridmap_layer.h"
 #include "fakecone_layer_config.h"
+#include "fake_cone.h"
 #include <grid_map_ros/grid_map_ros.hpp>
+#include <igvc_msgs/fake_cone.h>
+#include <igvc_msgs/fake_coneRequest.h>
+#include <igvc_msgs/fake_coneResponse.h>
 
 namespace fakecone_layer {
     class FakeconeLayer : public gridmap_layer::GridmapLayer {
@@ -28,19 +32,21 @@ namespace fakecone_layer {
 
         void markHit(const grid_map::Index &index);
         void insertLine(std::vector<geometry_msgs::Point> line);
+        bool scanAndGenerate(igvc_msgs::fake_coneRequest &req,
+                             igvc_msgs::fake_coneResponse &res);
 
     private:
         static constexpr auto logodds_layer = "logodds";
         static constexpr auto probability_layer = "probability";
+        // This generate the fakeConeService
+        fake_cone::FakeConeService fakeConeService;
+        ros::Publisher endPointPublisher;
 
         ros::NodeHandle nh_;
         ros::NodeHandle private_nh_;
         grid_map::Matrix *layer_{};
-        //TODO: solve constructor issue with provided parameter
         FakeconeLayerConfig config_;
 
-        //TODO: figure out what is Eigen:Vecotor3d - cached_ray
-        ros::Publisher gridmap_pub_;
         ros::Publisher costmap_pub_;
         std::vector<int8_t> cost_translation_table_;
 
@@ -48,14 +54,9 @@ namespace fakecone_layer {
 
         void initGridmap();
         void initPubSub();
-
         void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
-
-        void updateProbabilityLayer();
         void transferToCostmap();
-        void updateRollingWindow();
         void updateStaticWindow();
-        void debugPublishMap();
         void publishCostmap();
         void initCostTranslationTable();
     };

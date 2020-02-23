@@ -1,5 +1,3 @@
-Header header
-nav_msgs/OccupancyGrid costMap
-geometry_msgs/Point currentPos
+
 ---
 bool success

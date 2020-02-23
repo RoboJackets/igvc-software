@@ -1,0 +1,7 @@
+<class_libraries>
+    <library path="lib/libfakecone_layer">
+        <class type="fakecone_layer::FakeconeLayer" base_class_type="costmap_2d::Layer">
+            <description>The fake cone layer to create a fake cone behind the robot.</description>
+        </class>
+    </library>
+</class_libraries>

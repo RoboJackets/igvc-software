@@ -5,6 +5,7 @@ global_costmap:
         - {name: unrolling_layer,       type: "unrolling_layer::UnrollingLayer"}
 #        - {name: static_layer,       type: "costmap_2d::StaticLayer"}
         - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
+        - {name: fakecone_layer,        type: "fakecone_layer::FakeconeLayer"}
     publish_frequency: 5.0
     footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
     width: 200

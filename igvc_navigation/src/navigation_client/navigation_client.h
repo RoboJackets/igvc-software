@@ -34,6 +34,9 @@ private:
   // action lib client
   MoveBaseClient client = MoveBaseClient("/move_to_waypoint", true);
 
+  //Fakecone
+  ros::ServiceClient fake_cone_service;
+
   // params
   bool reading_from_file_;          // true if reading from waypoint file, false if from rviz
   std::string waypoint_file_path_;  // path to waypoint file

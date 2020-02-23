@@ -107,3 +107,16 @@ line_layer:
         length_y: 30
         line_closing_kernel_size: 5
         freespace_closing_kernel_size: 5
+fakecone_layer:
+    map:
+        frame_id: "odom"
+        resolution: 0.1
+        length_x: 200
+        length_y: 200
+        occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
+        costmap_topic: "/mapper/debug/fakecone/costmap"
+        debug:
+            map_topic: "/mapper/debug/fakecone/gridmap"
+            enabled: false
