@@ -50,13 +50,15 @@ private:
     gtsam::Values initEstimate, result;
     gtsam::NonlinearFactorGraph graph;
     gtsam::Pose3 previousPose;
-    unsigned long pose_index_;
+    unsigned long curr_index_;
+    unsigned long last_imu_index_;
     double BIAS_NOISE_CONST;
     gtsam::ISAM2 isam;
     const double KGRAVITY = 9.81;
     gtsam::PreintegratedImuMeasurements accum;
     ros::Time lastImuMeasurement;
-    bool imu_received_;
+    bool imu_connected_;
+    bool imu_update_available_;
 };
 
 #endif //SRC_SLAM_H

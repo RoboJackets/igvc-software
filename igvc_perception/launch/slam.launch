@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-    <node name="slam" pkg="igvc_perception" type="slam" launch-prefix="gdb -ex run --args" output="screen" >
+    <node name="slam" pkg="igvc_perception" type="slam" output="screen" >
         <param name="biasNoiseConst" value="0.001"/>
     </node>
 </launch>

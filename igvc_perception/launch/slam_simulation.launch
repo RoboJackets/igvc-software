@@ -1,0 +1,5 @@
+<launch>
+    <include file="$(find igvc_gazebo)/launch/qualification.launch" />
+    <include file="$(find igvc_navigation)/launch/localization.launch" />
+    <include file="$(find igvc_perception)/launch/slam.launch" />
+</launch>
