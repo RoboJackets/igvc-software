@@ -19,12 +19,12 @@ pointcloud_filter:
         start_angle: -2.0
         end_angle: 2.0
     fast_segment_filter:
-        ground_topic: "/ground"
-        nonground_topic: "/nonground"
+        ground_topic: "/ground"         # Extra topic to publish ground points to
+        nonground_topic: "/nonground"   # Extra topic to publish nonground points to (also published to occupied topic above)
         num_segments: 360               # Number of pie slices to break the world into
-        error_t: .1                     # Threshold on the error for line models. Higher threshold means longer lines with more points, smller means shorter lines with less points
+        error_t: .1                     # Threshold on the error for line models (meters^2). Higher threshold means longer lines with more points, smller means shorter lines with less points
         slope_t: .6                     # Threshold on slope for defining if a line is ground or not
-        dist_t: .3                      # Threshold on height of a line. If all points in a line are below this, then the line is ground
+        dist_t: .3                      # Threshold on height of a line (meters). If all points in a line are below this, then the line is ground
         debug_viz: true                 # If true, debug visualization is published to /pointcloud_filter_node/pointcloud_filter/Lines_array
     frames:
         base_footprint: "base_footprint"
