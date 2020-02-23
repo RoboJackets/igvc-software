@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
+<!--  Launching josh's pointcloud filter  -->
+  <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
+<!--  Launching Node  -->
   <node name="barrel_seg" pkg="igvc_perception" type="barrel_seg" output="screen">
     <param name="clusterTolerance" type="double" value="0.3" />
     <param name="minClusterSize" type="int" value="50" />
