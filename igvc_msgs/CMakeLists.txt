@@ -22,6 +22,7 @@ add_message_files(
     igvc_path.msg
     trajectory_point.msg
     trajectory.msg
+    barrels.msg
 )
 
 add_action_files(
