@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<launch>
+    <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
+    <arg name="world_name" default="$(find igvc_description)/urdf/worlds/qualification.world"/>
+    <arg name="waypoint_folder_path" default="$(find igvc_gazebo)/config"/>
+    <arg name="waypoint_file_name" default="waypoints_qual_0.csv"/>
+    <arg name="cmd_timeout" default="0.5"/>
+    <!-- accelerate lidar with GPU -->
+    <arg name="gpu" default="false"/>
+
+    <!-- Vehicle pose -->
+    <arg name="x" default="-30"/>
+    <arg name="y" default="27"/>
+    <arg name="z" default="0.1525"/>
+    <arg name="roll" default="0.0"/>
+    <arg name="pitch" default="0.0"/>
+    <arg name="yaw" default="0"/>
+
+    <param name="/use_sim_time" value="true"/>
+
+    <include file="$(find igvc_navigation)/launch/set_waypoint_file_path.launch">
+        <arg name="folder_path" value="$(arg waypoint_folder_path)"/>
+        <arg name="file_name" value="$(arg waypoint_file_name)"/>
+    </include>
+
+    <!-- Create the world. -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <include file="$(find igvc_description)/launch/spawn_jessii.launch">
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+        <arg name="roll" value="$(arg roll)"/>
+        <arg name="pitch" value="$(arg pitch)"/>
+        <arg name="yaw" value="$(arg yaw)"/>
+
+        <!-- accelerate lidar with GPU -->
+        <arg name="gpu" value="$(arg gpu)"/>
+    </include>
+    <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
+    <!--  <include file="$(find igvc_perception)/launch/projection.launch" />-->
+
+    <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
+
+    <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen">
+        <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>
+        <param name="ground_truth_pub_topic" value="/ground_truth"/>
+    </node>
+
+    <node pkg="igvc_utils" type="quaternion_to_rpy" name="ground_truth_to_rpy" respawn="true" output="screen">
+        <param name="topics/quaternion" value="/ground_truth"/>
+        <param name="topics/rpy" value="/ground_truth_rpy"/>
+        <param name="message_type" value="odometry"/>
+    </node>
+
+    <!-- Publish segmented camera images -->
+<!--    <include file="$(find igvc_gazebo)/launch/sim_detector.launch" />-->
+
+    <include file="$(find igvc_utils)/launch/imu_to_rpy.launch" />
+
+</launch>
