@@ -1,0 +1,14 @@
+<launch>
+    <node name="cnn" pkg="igvc_perception" type="nn_viz.py" output="screen" />
+
+    <!-- These sizes must match the model input dimensions. -->
+    <param name="image_resize_width" value="400" />
+    <param name="image_resize_height" value="400" />
+
+    <param name="model_path" value="$(find igvc_sandbox)/models/IGVCModel_135.pt" />
+
+    <param name="force_cpu" value="false" /> <!-- Use cpu instead of GPU (will run very slowly). -->
+
+    <param name="output_topic" value="nn_viz/output" />
+    <param name="input_topic" value="/usb_cam_center/image_raw/compressed" />
+</launch>

@@ -1,21 +1,3 @@
-# Mapper Library
-add_library(mapper_lib
-    ros_mapper.cpp
-    octomapper.cpp
-    octomapper.h
-    ros_mapper.h
-    map_utils.cpp
-    map_utils.h
-    mapper.cpp
-    mapper.h)
-add_dependencies(mapper_lib ${catkin_EXPORTED_TARGETS})
-target_link_libraries(mapper_lib ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
-
-# Old interface, where mapper is an independent node
-add_executable(mapper mapper_node.cpp)
-add_dependencies(mapper ${catkin_EXPORTED_TARGETS})
-target_link_libraries(mapper ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES} mapper_lib)
-
 # Final part of refactor:
 add_library(lidar_layer
     lidar_layer.cpp lidar_layer.h
@@ -44,13 +26,8 @@ add_library(unrolling_layer
 add_dependencies(unrolling_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(unrolling_layer ${catkin_LIBRARIES})
 
-find_package(OpenMP)
-if (OpenMP_FOUND)
-    target_link_libraries(mapper ${OpenMP_CXX_LIBRARIES})
-endif ()
-
 install(
-    TARGETS mapper lidar_layer
+    TARGETS lidar_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
