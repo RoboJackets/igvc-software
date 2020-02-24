@@ -1,4 +1,4 @@
-traversability_map_filters:
+slope_map_filters:
 
     - name: buffer_normalizer
       type: gridMapFilters/BufferNormalizerFilter
@@ -36,26 +36,3 @@ traversability_map_filters:
       params:
           output_layer: slope
           expression: acos(normal_vectors_z)
-
-    # Compute traversability as function of slope
-    - name: traversability
-      type: gridMapFilters/MathExpressionFilter
-      params:
-          output_layer: traversability
-          expression: 1.0 - ((slope-0.1) / 0.4)
-
-    # Set lower threshold on traversability.
-    - name: traversability_lower_threshold
-      type: gridMapFilters/ThresholdFilter
-      params:
-          layer: traversability
-          lower_threshold: 0.0
-          set_to: 0.0
-
-    # Set upper threshold on traversability.
-    - name: traversability_upper_threshold
-      type: gridMapFilters/ThresholdFilter
-      params:
-          layer: traversability
-          upper_threshold: 1.0
-          set_to: 1.0 # Other uses: .nan, .inf

@@ -21,6 +21,7 @@ public:
   std::string costmap_topic;
 
   double occupied_threshold;
+  double slope_threshold;
 
   struct
   {

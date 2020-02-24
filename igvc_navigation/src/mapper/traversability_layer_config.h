@@ -14,6 +14,8 @@ public:
   ros::NodeHandle nh;
 
   map::MapConfig map;
+
+  double logodd_increment;
 };
 }  // namespace traversability_layer
 

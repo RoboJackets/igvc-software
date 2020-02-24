@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="igvc_perception" type="traversability_filter" name="traversability_filter" output="screen">
-        <rosparam command="load" file="$(find igvc_perception)/config/traversability_filter.yaml"/>
-    </node>
-</launch>

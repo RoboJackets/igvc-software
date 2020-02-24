@@ -35,7 +35,7 @@ add_dependencies(unrolling_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(unrolling_layer ${catkin_LIBRARIES})
 
 install(
-    TARGETS mapper lidar_layer line_layer
+    TARGETS lidar_layer line_layer traversability_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

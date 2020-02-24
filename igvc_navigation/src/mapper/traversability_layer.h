@@ -23,13 +23,10 @@ public:
                     double* max_y) override;
 
 private:
-  static constexpr auto logodds_layer = "logodds";
-  static constexpr auto probability_layer = "probability";
   ros::NodeHandle private_nh_;
-  grid_map::Matrix* layer_{};
   TraversabilityLayerConfig config_;
 
-  ros::Subscriber traversability_sub_;
+  ros::Subscriber slope_sub_;
   ros::Publisher costmap_pub_;
 
   costmap_2d::Costmap2D costmap_2d_{};
@@ -37,10 +34,11 @@ private:
   void initGridmap();
   void initPubSub();
 
-  void traversabilityMapCallback(grid_map_msgs::GridMap traversability_map);
+  void slopeMapCallback(const grid_map_msgs::GridMap& slope_map_msg);
 
   void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
-  void transferTraversabilityToCostmap();
+
+  void transferToCostmap();
 };
 }  // namespace traversability_layer
 

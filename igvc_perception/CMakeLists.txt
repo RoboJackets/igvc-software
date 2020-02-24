@@ -183,4 +183,4 @@ endif ()
 
 add_subdirectory(src/pointcloud_filter)
 add_subdirectory(src/robot_pose_type_converter)
-add_subdirectory(src/traversability_filter)
+add_subdirectory(src/slope_filter)

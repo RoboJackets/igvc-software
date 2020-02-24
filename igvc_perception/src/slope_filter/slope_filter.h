@@ -1,5 +1,5 @@
-#ifndef SRC_TRAVERSABILITY_FILTER_H
-#define SRC_TRAVERSABILITY_FILTER_H
+#ifndef SRC_SLOPE_FILTER_H
+#define SRC_SLOPE_FILTER_H
 
 #include <ros/ros.h>
 #include <filters/filter_chain.h>
@@ -20,4 +20,4 @@ private:
   void elevationMapCallback(const grid_map_msgs::GridMap& message);
 };
 
-#endif  // SRC_TRAVERSABILITY_FILTER_H
+#endif  // SRC_SLOPE_FILTER_H
