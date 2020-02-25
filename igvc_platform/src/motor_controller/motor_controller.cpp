@@ -1,3 +1,4 @@
+#include <igvc_msgs/motor_control.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64.h>
 
@@ -23,6 +24,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   enc_pub_ = nh_.advertise<igvc_msgs::velocity_pair>("/encoders", 1000);
   enabled_pub_ = nh_.advertise<std_msgs::Bool>("/robot_enabled", 1);
   battery_pub_ = nh_.advertise<std_msgs::Float64>("/battery", 1);
+  motor_output_pub_ = nh_.advertise<igvc_msgs::motor_control>("/motor_output", 10);
 
   // get server ip address and port number from the launch file
   assertions::getParam(pNh, std::string("ip_addr"), ip_addr_);
@@ -277,6 +279,14 @@ void MotorController::publishResponse(const ResponseMessage& response)
   enc_msg.duration = response.dt_sec;
   enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
   enc_pub_.publish(enc_msg);
+
+  // Publish motor output
+  igvc_msgs::motor_control motor_control;
+  motor_control.left = static_cast<uint8_t>(response.left_output);
+  motor_control.right = static_cast<uint8_t>(response.right_output);
+  motor_control.duration = ros::Duration(response.dt_sec);
+  motor_control.header.stamp = ros::Time::now() - motor_control.duration;
+  motor_output_pub_.publish(motor_control);
 }
 
 int main(int argc, char** argv)
