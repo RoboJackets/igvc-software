@@ -2,7 +2,6 @@
 #define SRC_LINE_LAYER_CONFIG_H
 
 #include <ros/ros.h>
-#include "barrel_config.h"
 #include "camera_config.h"
 #include "map_config.h"
 #include "projection_config.h"
@@ -19,9 +18,7 @@ public:
   map::MapConfig map;
   std::vector<CameraConfig> cameras;
   ProjectionConfig projection;
-  BarrelConfig barrelConfig;
 };
-
 }  // namespace line_layer
 
 #endif  // SRC_LINE_LAYER_CONFIG_H
