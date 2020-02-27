@@ -13,7 +13,6 @@ FastSegmentFilterConfig::FastSegmentFilterConfig(const ros::NodeHandle& nh)
   assertions::getParam(child_nh, "num_segments", num_segments);
   assertions::getParam(child_nh, "error_t", error_t);
   assertions::getParam(child_nh, "slope_t", slope_t);
-  assertions::getParam(child_nh, "intercept_z_t", intercept_z_t);
   assertions::getParam(child_nh, "dist_t", dist_t);
   assertions::getParam(child_nh, "debug_viz", debug_viz);
 }

@@ -10,7 +10,6 @@ struct FastSegmentFilterConfig
   int num_segments;
   double error_t;
   double slope_t;
-  double intercept_z_t;
   double dist_t;
   std::string ground_topic;
   std::string nonground_topic;
