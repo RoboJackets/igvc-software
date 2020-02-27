@@ -5,8 +5,10 @@
 #include <pluginlib/class_list_macros.h>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
+#include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 #include <unordered_set>
+#include "barrel_config.h"
 #include "camera_config.h"
 #include "map_config.h"
 
@@ -20,12 +22,13 @@ LineLayer::LineLayer()
   , config_{ private_nh_ }
   , line_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , freespace_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , barrel_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , not_lines_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , not_barrels_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
 {
   initGridmap();
   initPubSub();
-  costmap_2d_ = { static_cast<unsigned int>(map_.getSize()[0]), static_cast<unsigned int>(map_.getSize()[1]),
-                  map_.getResolution(), map_.getPosition()[0], map_.getPosition()[1] };
+
   pinhole_models_ = std::vector<image_geometry::PinholeCameraModel>(config_.cameras.size());
   cached_rays_ = std::vector<std::vector<Eigen::Vector3d>>(config_.cameras.size());
 }
@@ -50,6 +53,7 @@ void LineLayer::initPubSub()
     gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
   }
   costmap_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(config_.map.costmap_topic, 1);
+  barrel_pub_ = nh_.advertise<sensor_msgs::Image>("pauls_stuff/barrel", 1);
 
   for (size_t i = 0; i < config_.cameras.size(); i++)
   {
@@ -80,19 +84,18 @@ void LineLayer::initPubSub()
 
 void LineLayer::onInitialize()
 {
+  GridmapLayer::onInitialize();
 }
 
 void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
+  matchCostmapDims(master_grid);
   transferToCostmap();
-  publishCostmap();
   if (config_.map.debug.enabled)
   {
     updateProbabilityLayer();
-  }
-  if (config_.map.debug.enabled)
-  {
     debugPublishMap();
+    publishCostmap();
   }
   resetDirty();
 
@@ -119,6 +122,7 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
                                     const sensor_msgs::CameraInfoConstPtr &segmented_info, size_t camera_index)
 {
   current_ = true;
+
   ensurePinholeModelInitialized(*segmented_info, camera_index);
   if (cached_rays_[camera_index].empty())
   {
@@ -128,9 +132,11 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   geometry_msgs::TransformStamped camera_to_odom =
       getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
 
-  cv::Mat segmented_mat = convertToMat(segmented_image);
+  cv::Mat segmented_mat = convertToMat(segmented_image, true);
+  cv::Mat raw_mat = convertToMat(raw_image, false);
+  cv::Mat barrel_mat = LineLayer::findBarrel(raw_mat, segmented_mat.rows, segmented_mat.cols, config_.barrelConfig);
 
-  projectImage(segmented_mat, camera_to_odom, camera_index);
+  projectImage(raw_mat, segmented_mat, barrel_mat, camera_to_odom, camera_index);
   cleanupProjections();
   insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
 
@@ -178,17 +184,73 @@ geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::strin
   return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
 }
 
-cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const
+cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image, bool isToMono) const
 {
-  cv_bridge::CvImageConstPtr cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
+  if (image == nullptr)
+  {
+    ROS_ERROR("ERROR: NullPtr in convertToMat");
+  }
+  cv_bridge::CvImageConstPtr cv_bridge_image;
+  if (isToMono)
+  {
+    cv_bridge_image = cv_bridge::toCvShare(image, "mono8");
+  }
+  else
+  {
+    cv_bridge_image = cv_bridge::toCvShare(image, "bgr8");
+  }
   return cv_bridge_image->image;
 }
 
-void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom,
-                             size_t camera_idx)
+cv::Mat LineLayer::findBarrel(const cv::Mat &inMat, int rows, int cols, const BarrelConfig &config)
+{
+  // Gaussian Blur
+  cv::Mat blur;
+  cv::GaussianBlur(inMat, blur, cv::Size(config.blur_size, config.blur_size), 0, 0);
+
+  // to HSV
+  cv::Mat hsv_frame;
+  cv::cvtColor(blur, hsv_frame, cv::COLOR_BGR2HSV);
+
+  // HSV Threshold
+  cv::Scalar min = cv::Scalar(config.min_h, config.min_s, config.min_v);
+  cv::Scalar max = cv::Scalar(config.max_h, config.max_s, config.max_v);
+  cv::inRange(hsv_frame, min, max, hsv_frame);
+
+  // open and closing
+  cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+  cv::morphologyEx(hsv_frame, hsv_frame, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+  // setting the value to 100 to differential from the lines
+
+  hsv_frame.setTo(config.barrel_value, hsv_frame);
+
+  // resizing to be the same as the segmented mat
+  cv::resize(hsv_frame, hsv_frame, cv::Size(rows, cols));
+
+  // if set to debug, will run
+  if (config.debug)
+  {
+    debugBarrel(hsv_frame);
+  }
+
+  return hsv_frame;
+}
+
+void LineLayer::debugBarrel(const cv::Mat &inMat)
+{
+  // cycles through each 3 frames(left, center, and right) :/
+  cv_bridge::CvImage cv_image;
+  cv_image.image = inMat;
+  cv_image.encoding = "mono8";
+  barrel_pub_.publish(cv_image.toImageMsg());
+}
+void LineLayer::projectImage(const cv::Mat &raw_mat, const cv::Mat &segmented_mat, const cv::Mat &barrel_mat,
+                             const geometry_msgs::TransformStamped &camera_to_odom, size_t camera_idx)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
   freespace_buffer_.setTo(cv::Scalar(0.0));
+  barrel_buffer_.setTo(cv::Scalar(0.0));
   cv::Rect buffer_rect({}, line_buffer_.size());
 
   int rows = segmented_mat.rows;
@@ -203,13 +265,14 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
   map_.getIndex({ translate_vector.x, translate_vector.y }, camera_index);
 
   constexpr uchar true_val = 255U;
-
+  constexpr uchar true_barrel = 100U;
+  // Start
   for (int i = 0; i < rows; i++)
   {
     const auto *row_ptr = segmented_mat.ptr<uchar>(i);
+    const auto *barrel_row_ptr = barrel_mat.ptr<uchar>(i);
     for (int j = 0; j < cols; j++)
     {
-      // TODO: Mask using barrels
       const int ray_idx = i * cols + j;
       Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
 
@@ -217,10 +280,17 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
 
       bool is_line = row_ptr[j] == true_val;
+      bool is_barrel = barrel_row_ptr[j] == true_barrel;
+
       grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
+
       if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
-        if (is_line)
+        if (is_barrel)
+        {
+          barrel_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
+        }
+        else if (is_line)
         {
           line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
           //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
@@ -267,6 +337,24 @@ void LineLayer::markHit(const grid_map::Index &index, double distance, const Cam
   (*layer_)(index[0], index[1]) = std::min((*layer_)(index[0], index[1]) + probability, config_.map.max_occupancy);
 }
 
+void LineLayer::matchCostmapDims(const costmap_2d::Costmap2D &master_grid)
+{
+  unsigned int cells_x = master_grid.getSizeInCellsX();
+  unsigned int cells_y = master_grid.getSizeInCellsY();
+  double resolution = master_grid.getResolution();
+  bool different_dims = costmap_2d_.getSizeInCellsX() != cells_x || costmap_2d_.getSizeInCellsY() != cells_y ||
+                        costmap_2d_.getResolution() != resolution;
+
+  double origin_x = master_grid.getOriginX();
+  double origin_y = master_grid.getOriginY();
+
+  if (different_dims)
+  {
+    costmap_2d_.resizeMap(cells_x, cells_y, resolution, origin_x, origin_y);
+  }
+  costmap_2d_.updateOrigin(origin_x, origin_y);
+}
+
 void LineLayer::updateProbabilityLayer()
 {
   auto optional_it = getDirtyIterator();
@@ -282,6 +370,81 @@ void LineLayer::updateProbabilityLayer()
 }
 
 void LineLayer::transferToCostmap()
+{
+  if (rolling_window_)
+  {
+    updateRollingWindow();
+  }
+  else
+  {
+    updateStaticWindow();
+  }
+}
+
+void LineLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
+                             double *max_x, double *max_y)
+{
+  GridmapLayer::updateBounds(robot_x, robot_y, robot_yaw, min_x, min_y, max_x, max_y);
+
+  if (rolling_window_)
+  {
+    costmap_2d_.updateOrigin(robot_x - costmap_2d_.getSizeInMetersX() / 2,
+                             robot_y - costmap_2d_.getSizeInMetersY() / 2);
+  }
+}
+
+void LineLayer::updateRollingWindow()
+{
+  // Rolling window, so we need to move everything
+
+  // Convert from costmap_2d_ coordinate frame to gridmap coordinate frame
+  const size_t cells_x = costmap_2d_.getSizeInCellsX();
+  const size_t cells_y = costmap_2d_.getSizeInCellsY();
+  const double resolution = costmap_2d_.getResolution();
+  grid_map::Position costmap_br_corner{ costmap_2d_.getOriginX(), costmap_2d_.getOriginY() };
+  grid_map::Position costmap_tl_corner =
+      costmap_br_corner + grid_map::Position{ costmap_2d_.getSizeInMetersX(), costmap_2d_.getSizeInMetersY() };
+  grid_map::Index start_index;
+  map_.getIndex(costmap_tl_corner, start_index);
+
+  grid_map::Index submap_buffer_size{ costmap_2d_.getSizeInCellsX(), costmap_2d_.getSizeInCellsY() };
+
+  uchar *char_map = costmap_2d_.getCharMap();
+
+  size_t x_idx = cells_x - 1;
+  size_t y_idx = cells_y - 1;
+
+  // This goes top -> down, left -> right
+  // but costmap_2d_ indicies go down -> up, left -> right
+  for (grid_map::SubmapIterator it{ map_, start_index, submap_buffer_size }; !it.isPastEnd(); ++it)
+  {
+    const auto &log_odds = (*layer_)((*it)[0], (*it)[1]);
+    float probability = probability_utils::fromLogOdds(log_odds);
+
+    const size_t linear_idx = x_idx + y_idx * cells_x;
+
+    if (probability > config_.map.occupied_threshold)
+    {
+      char_map[linear_idx] = costmap_2d::LETHAL_OBSTACLE;
+    }
+    else
+    {
+      char_map[linear_idx] = costmap_2d::FREE_SPACE;
+    }
+
+    if (y_idx == 0)
+    {
+      y_idx = cells_y - 1;
+      x_idx--;
+    }
+    else
+    {
+      y_idx--;
+    }
+  }
+}
+
+void LineLayer::updateStaticWindow()
 {
   size_t num_cells = map_.getSize().prod();
 
@@ -338,6 +501,9 @@ void LineLayer::cleanupProjections()
   {
     cv::bitwise_not(line_buffer_, not_lines_);
     cv::bitwise_and(freespace_buffer_, not_lines_, freespace_buffer_);
+
+    cv::bitwise_not(barrel_buffer_, not_barrels_);
+    cv::bitwise_and(freespace_buffer_, not_barrels_, freespace_buffer_);
   }
 }
 
@@ -374,8 +540,12 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         map_.getPosition(map_index, position);
         const auto dx = position[0] - camera_x;
         const auto dy = position[1] - camera_y;
-        double distance = dx * dx + dy * dy;
-        markHit(map_index, distance, config);
+        double squared_distance = dx * dx + dy * dy;
+
+        if (squared_distance < config.max_squared_distance)
+        {
+          markHit(map_index, squared_distance, config);
+        }
       }
     }
   }
@@ -396,9 +566,13 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         map_.getPosition(map_index, position);
         const auto dx = position[0] - camera_x;
         const auto dy = position[1] - camera_y;
-        const double distance = dx * dx + dy * dy;
+        const double squared_distance = dx * dx + dy * dy;
         const double angle = angles::normalize_angle(camera_heading - std::atan2(dy, dx));
-        markEmpty(map_index, distance, angle, config);
+
+        if (squared_distance < config.max_squared_distance)
+        {
+          markEmpty(map_index, squared_distance, angle, config);
+        }
       }
     }
   }

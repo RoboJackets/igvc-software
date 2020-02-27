@@ -1,0 +1,9 @@
+<launch>
+    <node name="navigation_server" pkg="igvc_navigation" type="navigation_server" output="screen">
+        <param name="recovery_enabled" value="true"/>
+        <param name="oscillation_timeout" value="10"/> <!-- Determines how much time between oscillation checks -->
+        <param name="oscillation_distance" value="0.2"/><!-- Determines the distance the robot must travel to not be 'oscillating` -->
+        <param name="oscillation_wait_time" value="60"/><!-- Determines how long the program waits to start checking for oscillation at the start -->
+        <!-- "Oscillation" in this sense means that the stop is either not moving or moving back and forth such as to not move-->
+    </node>
+</launch>

@@ -1,6 +1,8 @@
 #ifndef SRC_PROBABILITY_UTILS_H
 #define SRC_PROBABILITY_UTILS_H
 
+#include <cmath>
+
 namespace probability_utils
 {
 template <typename T>

@@ -35,6 +35,8 @@ find_package(catkin REQUIRED COMPONENTS
              grid_map_octomap
              grid_map_rviz_plugin
              grid_map_visualization
+             base_local_planner
+             pluginlib
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -207,7 +209,6 @@ add_dependencies(GraphSearch ${catkin_EXPORTED_TARGETS})
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
-add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
 
 add_subdirectory(src/mapper)
@@ -217,10 +218,11 @@ add_subdirectory(src/path_follower)
 add_subdirectory(src/trajectory_follower)
 add_subdirectory(src/trajectory_planner)
 
-add_subdirectory(src/d_lite_planner)
-add_subdirectory(src/field_d_planner)
 
 add_subdirectory(src/back_circle)
 
-add_subdirectory(src/action_server)
 add_subdirectory(src/differential_drive)
+
+add_subdirectory(src/back_up_recovery)
+add_subdirectory(src/navigation_client)
+add_subdirectory(src/navigation_server)
