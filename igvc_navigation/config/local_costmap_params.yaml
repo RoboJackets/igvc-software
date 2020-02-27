@@ -122,3 +122,4 @@ traversability_layer:
             map_topic: "/mapper/debug/lidar/gridmap"
             enabled: false
     logodd_increment: 2.19
+    slope_threshold: 0.45

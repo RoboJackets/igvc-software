@@ -70,6 +70,7 @@ void TraversabilityLayer::updateBounds(double robot_x, double robot_y, double ro
 
 void TraversabilityLayer::slopeMapCallback(const grid_map_msgs::GridMap &slope_map_msg)
 {
+  current_ = true;
   grid_map::GridMap slope_map;
   grid_map::GridMapRosConverter::fromMessage(slope_map_msg, slope_map);
 
@@ -79,10 +80,9 @@ void TraversabilityLayer::slopeMapCallback(const grid_map_msgs::GridMap &slope_m
     slope_map.getPosition((*it), pos);
     if (map_.isInside(pos))
     {
-      touch(*it);
       float slope = slope_map.get("slope")((*it)[0], (*it)[1]);
       float *logodd = &map_.atPosition("logodds", pos);
-      if (slope > config_.map.slope_threshold)
+      if (slope > config_.slope_threshold)
       {
         *logodd = std::min(*logodd - config_.logodd_increment, config_.map.min_occupancy);
       }
@@ -114,31 +114,49 @@ void TraversabilityLayer::matchCostmapDims(const costmap_2d::Costmap2D &master_g
 
 void TraversabilityLayer::transferToCostmap()
 {
-  size_t num_cells = map_.getSize().prod();
+  const size_t cells_x = costmap_2d_.getSizeInCellsX();
+  const size_t cells_y = costmap_2d_.getSizeInCellsY();
+
+  grid_map::Position costmap_br_corner{ costmap_2d_.getOriginX(), costmap_2d_.getOriginY() };
+  grid_map::Position costmap_tl_corner =
+      costmap_br_corner + grid_map::Position{ costmap_2d_.getSizeInMetersX(), costmap_2d_.getSizeInMetersY() };
+  grid_map::Index start_index;
+  map_.getIndex(costmap_tl_corner, start_index);
+
+  grid_map::Index submap_buffer_size{ costmap_2d_.getSizeInCellsX(), costmap_2d_.getSizeInCellsY() };
 
   uchar *char_map = costmap_2d_.getCharMap();
 
-  auto optional_it = getDirtyIterator();
+  size_t x_idx = cells_x - 1;
+  size_t y_idx = cells_y - 1;
 
-  if (!optional_it)
-  {
-    return;
-  }
-
-  for (auto it = *optional_it; !it.isPastEnd(); ++it)
+  // This goes top -> down, left -> right
+  // but costmap_2d_ indicies go down -> up, left -> right
+  for (grid_map::SubmapIterator it{ map_, start_index, submap_buffer_size }; !it.isPastEnd(); ++it)
   {
     const auto &log_odds = map_.get("logodds")((*it)[0], (*it)[1]);
     float probability = probability_utils::fromLogOdds(log_odds);
-    size_t linear_index = grid_map::getLinearIndexFromIndex(*it, map_.getSize(), false);
+
+    const size_t linear_idx = x_idx + y_idx * cells_x;
 
     if (probability > config_.map.occupied_threshold)
     {
-      char_map[num_cells - linear_index - 1] = costmap_2d::LETHAL_OBSTACLE;
+      char_map[linear_idx] = costmap_2d::LETHAL_OBSTACLE;
     }
     else
     {
-      char_map[num_cells - linear_index - 1] = costmap_2d::FREE_SPACE;
+      char_map[linear_idx] = costmap_2d::FREE_SPACE;
+    }
+
+    if (y_idx == 0)
+    {
+      y_idx = cells_y - 1;
+      x_idx--;
+    }
+    else
+    {
+      y_idx--;
     }
   }
-}
+}  // namespace traversability_layer
 }  // namespace traversability_layer

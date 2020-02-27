@@ -19,7 +19,7 @@ min_variance: 0.000009
 max_variance: 0.01
 mahalanobis_distance_threshold: 2.5
 multi_height_noise: 0.0000009
-fused_map_publishing_rate: 0.5
+fused_map_publishing_rate: 0
 
 # SENSOR PARAMETERS
 sensor_processor/type: laser

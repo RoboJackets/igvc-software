@@ -26,6 +26,8 @@ add_library(traversability_layer
         map_config.cpp map_config.h
         gridmap_layer.cpp gridmap_layer.h
         )
+add_dependencies(traversability_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(traversability_layer ${catkin_LIBRARIES})
 
 add_library(unrolling_layer
         unrolling_layer.cpp unrolling_layer.h

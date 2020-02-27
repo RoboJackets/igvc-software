@@ -16,6 +16,7 @@ public:
   map::MapConfig map;
 
   double logodd_increment;
+  double slope_threshold;
 };
 }  // namespace traversability_layer
 
