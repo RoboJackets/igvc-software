@@ -27,3 +27,6 @@ install(
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+add_executable(barrel_seg actual_barrel_segmentation/actual_barrel_segmentation.cpp)
+target_link_libraries(barrel_seg ${catkin_LIBRARIES} ${PCL_LIBRARIES})
