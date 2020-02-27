@@ -107,3 +107,13 @@ line_layer:
         length_y: 30
         line_closing_kernel_size: 5
         freespace_closing_kernel_size: 5
+    barrel:
+        blur_size: 13
+        barrel_value: 100
+        min_h: 0
+        min_s: 15
+        min_v: 0
+        max_h: 35
+        max_s: 255
+        max_v: 255
+        debug: true
