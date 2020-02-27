@@ -5,23 +5,39 @@ using gtsam::symbol_shorthand::V;
 using gtsam::symbol_shorthand::X;
 using gtsam::symbol_shorthand::B;
 
-//Initializes the factor graph and the node
+/**
+ * Initializes the factor graph and all the subscribers and publishers
+ */
 Slam::Slam() : pnh_{ "~" } {
-    odom_sub_ = pnh_.subscribe("/wheel_odometry", 1, &Slam::OdomCallback, this);
-    imu_sub_ = pnh_.subscribe("/imu", 1, &Slam::ImuCallback, this);
+    odom_sub_ = pnh_.subscribe("/wheel_odometry", 10, &Slam::OdomCallback, this);
+    imu_sub_ = pnh_.subscribe("/imu", 100, &Slam::ImuCallback, this);
+    gps_sub_ = pnh_.subscribe("/odometry/gps", 1, &Slam::GpsCallback, this);
     location_pub = pnh_.advertise<nav_msgs::Odometry>("/slam/position", 1);
 
     curr_index_ = 0;
     last_imu_index_ = 0;
     imu_connected_ = false;
     imu_update_available_ = false;
-    BIAS_NOISE_CONST = pnh_.param("biasNoiseConst", 0.001);
 
+    InitializeNoiseMatrices();
     InitializeImuParams();
     InitializePriors();
 }
 
-//The ImuCallback adds IMU measurements to the accumulator when it recieves an IMU measurement
+/**
+ * The GpsCallback adds GPS measurements to the factor graph
+ * @param msg An odometery message derived from GPS measurements (published by navsat_transform_node)
+ */
+void Slam::GpsCallback(const nav_msgs::Odometry &msg){
+    gtsam::Point3 currPoint = Conversion::getPoint3FromOdom(msg);
+    gtsam::GPSFactor gpsFactor(X(curr_index_), currPoint, gps_noise_);
+    graph.add(gpsFactor);
+}
+
+/**
+ * The ImuCallback adds IMU measurements to the accumulator when it receives an IMU measurement
+ * @param msg An imu sensor message (published by yostlab_driver_node)
+ */
 void Slam::ImuCallback(const sensor_msgs::Imu &msg){
     //ROS_INFO_STREAM("Imu called!");
     ros::Time currTime = ros::Time::now();
@@ -39,26 +55,27 @@ void Slam::ImuCallback(const sensor_msgs::Imu &msg){
     lastImuMeasurement = currTime;
 }
 
-//The OdomCallback adds an Odometry measurement and adds an integrated IMU factor to the factor graph
+/**
+ * The OdomCallback adds an Odometry measurement and adds an integrated IMU factor to the factor graph
+ * @param msg An odom message published by motor_controller_node
+ */
 void Slam::OdomCallback(const nav_msgs::Odometry &msg){
     if (imu_connected_) {
         // Handle the odometry
         gtsam::Pose3 currPose = Conversion::getPose3FromOdom(msg);
         gtsam::Pose3 odometry = previousPose.between(currPose);
-        noiseDiagonal::shared_ptr odometryNoise = noiseDiagonal::Sigmas((gtsam::Vector(6)
-                << Vec3::Constant(0.1), Vec3::Constant(0.3)).finished());
-        graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose3>>(X(curr_index_), X(curr_index_ + 1), odometry, odometryNoise);
+        graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose3>>(X(curr_index_), X(curr_index_ + 1), odometry,
+                odometry_noise_);
         auto newPoseEstimate = result.at<gtsam::Pose3>(X(curr_index_)); //gtsam::Pose3 newPoseEstimate
         newPoseEstimate = odometry * newPoseEstimate;
         initEstimate.insert(X(curr_index_ + 1), newPoseEstimate);
 
         if (imu_update_available_) {
             // Add bias factor
-            auto cov = noiseDiagonal::Variances(gtsam::Vector6::Constant(BIAS_NOISE_CONST));
             auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(B(last_imu_index_),
                                                                                                   B(curr_index_ + 1),
                                                                                                   gtsam::imuBias::ConstantBias(),
-                                                                                                  cov);
+                                                                                                  bias_noise_);
             graph.add(factor);
             initEstimate.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
 
@@ -80,7 +97,9 @@ void Slam::OdomCallback(const nav_msgs::Odometry &msg){
     }
 }
 
-//Triggers ISAM2 to optimize the current graph and publish the current estimated pose
+/**
+ * Triggers ISAM2 to optimize the current graph and publish the current estimated pose
+ */
 void Slam::Optimize() {
     static int iteration = 0;
     if(last_imu_index_ == curr_index_){
@@ -100,7 +119,9 @@ void Slam::Optimize() {
     location_pub.publish(Conversion::getOdomFromPose3(currPose));
 }
 
-//Sets the IMU Params
+/**
+ * Sets the IMU Params
+ */
 void Slam::InitializeImuParams() {
     // Should be replaced with actual imu measurements. Values should come from the launch file.
     auto params = gtsam::PreintegrationParams::MakeSharedU(KGRAVITY);
@@ -112,7 +133,9 @@ void Slam::InitializeImuParams() {
     accum = gtsam::PreintegratedImuMeasurements(params);
 }
 
-//Adds initial values of variables in the factor graph.
+/**
+ * Adds initial values of variables in the factor graph.
+ */
 void Slam::InitializePriors(){
     // Adding Initial Position (Pose + Covariance Matrix)
     gtsam::Pose3 priorPose;
@@ -136,4 +159,19 @@ void Slam::InitializePriors(){
 
     Optimize();
     ROS_INFO_STREAM("Priors Initialized.");
+}
+
+/**
+ * Initializes the shared noise matrices from parameters in the launch file
+ */
+void Slam::InitializeNoiseMatrices(){
+    double bias_noise = pnh_.param("biasNoiseConst", 0.03);
+    double gps_xy_noise = pnh_.param("gpsXYNoiseConstant", 0.15);
+    double gps_z_noise = pnh_.param("gpsZNoiseConstant", 0.15);
+    double odom_pos_noise = pnh_.param("odomPosNoiseConstant", 0.1);
+    double odom_orient_noise = pnh_.param("odomOrientNoiseConstant", 0.3);
+    gps_noise_ = noiseDiagonal::Sigmas(Vec3(gps_xy_noise, gps_xy_noise, gps_z_noise));
+    odometry_noise_ = noiseDiagonal::Sigmas((gtsam::Vector(6) << Vec3::Constant(odom_pos_noise),
+            Vec3::Constant(odom_orient_noise)).finished());
+    bias_noise_ = noiseDiagonal::Sigmas(gtsam::Vector6::Constant(bias_noise));
 }

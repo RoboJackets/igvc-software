@@ -10,6 +10,7 @@
 class Conversion {
 public:
     static gtsam::Pose3 getPose3FromOdom(const nav_msgs::Odometry &msg);
+    static gtsam::Point3 getPoint3FromOdom(const nav_msgs::Odometry &msg);
     static nav_msgs::Odometry getOdomFromPose3(const gtsam::Pose3 &pos);
 };
 

@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
 
 <launch>
-    <node name="slam" pkg="igvc_perception" type="slam" output="screen" >
-        <param name="biasNoiseConst" value="0.001"/>
-    </node>
+    <node name="slam" pkg="igvc_perception" type="slam" output="screen" />
 </launch>

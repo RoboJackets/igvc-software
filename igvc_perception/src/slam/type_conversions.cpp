@@ -25,3 +25,11 @@ nav_msgs::Odometry Conversion::getOdomFromPose3(const gtsam::Pose3 &pos){
     msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(r.x(), r.y(), r.z());
     return msg;
 }
+
+gtsam::Point3 Conversion::getPoint3FromOdom(const nav_msgs::Odometry &msg){
+    return gtsam::Point3(
+            msg.pose.pose.position.x,
+            msg.pose.pose.position.y,
+            msg.pose.pose.position.z
+            );
+}
