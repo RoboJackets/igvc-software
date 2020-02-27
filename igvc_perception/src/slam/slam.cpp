@@ -71,22 +71,26 @@ void Slam::OdomCallback(const nav_msgs::Odometry &msg){
         initEstimate.insert(X(curr_index_ + 1), newPoseEstimate);
 
         if (imu_update_available_) {
-            // Add bias factor
-            auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(B(last_imu_index_),
-                                                                                                  B(curr_index_ + 1),
-                                                                                                  gtsam::imuBias::ConstantBias(),
-                                                                                                  bias_noise_);
-            graph.add(factor);
-            initEstimate.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
+            if (accum.preintMeasCov().trace() != 0) {
+                // Add bias factor
+                auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(
+                        B(last_imu_index_),
+                        B(curr_index_ + 1),
+                        gtsam::imuBias::ConstantBias(),
+                        bias_noise_);
+                graph.add(factor);
+                initEstimate.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
 
-            // Add imu factor
-            gtsam::ImuFactor imufac(X(last_imu_index_), V(last_imu_index_), X(curr_index_ + 1),
-                                    V(curr_index_ + 1), B(curr_index_ + 1), accum);
-            graph.add(imufac);
-            Vec3 lastVel = result.at<gtsam::Vector3>(V(last_imu_index_));
-            lastVel += accum.deltaVij();
-            last_imu_index_ = curr_index_ + 1;
-            initEstimate.insert(V(last_imu_index_), lastVel);
+                // Add imu factor
+                gtsam::ImuFactor imufac(X(last_imu_index_), V(last_imu_index_), X(curr_index_ + 1),
+                                        V(curr_index_ + 1), B(curr_index_ + 1), accum);
+
+                graph.add(imufac);
+                Vec3 lastVel = result.at<gtsam::Vector3>(V(last_imu_index_));
+                lastVel += accum.deltaVij();
+                last_imu_index_ = curr_index_ + 1;
+                initEstimate.insert(V(last_imu_index_), lastVel);
+            }
             accum.resetIntegration();
         }
 
@@ -109,7 +113,7 @@ void Slam::Optimize() {
         ROS_WARN_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
         << " curr_index: " << curr_index_ << " last_imu_index: " << last_imu_index_);
     }
-//    graph.print();
+    //graph.print();
     isam.update(graph, initEstimate);
     result = isam.calculateEstimate();
     graph.resize(0);
