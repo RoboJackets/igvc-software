@@ -117,9 +117,9 @@ traversability_layer:
         occupied_threshold: 0.5
         max_occupancy: 0.99
         min_occupancy: 0.01
-        costmap_topic: "/mapper/debug/lidar/costmap"
+        costmap_topic: "/slope/costmap"
         debug:
-            map_topic: "/mapper/debug/lidar/gridmap"
+            map_topic: "/slope/debug" # not actually used
             enabled: false
     logodd_increment: 2.19
     slope_threshold: 0.45

@@ -39,6 +39,8 @@ private:
   void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
 
   void transferToCostmap();
+
+  void publishCostMap();
 };
 }  // namespace traversability_layer
 

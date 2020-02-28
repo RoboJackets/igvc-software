@@ -3,7 +3,7 @@
 
 namespace traversability_layer
 {
-TraversabilityLayerConfig::TraversabilityLayerConfig(const ros::NodeHandle& parent_nh)
+TraversabilityLayerConfig::TraversabilityLayerConfig(const ros::NodeHandle &parent_nh)
   : nh(parent_nh, "traversability_layer"), map(nh)
 {
   assertions::getParam(nh, "logodd_increment", logodd_increment);
