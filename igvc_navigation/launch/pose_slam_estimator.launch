@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+    <!-- Planner -->
+    <node name="pose_slam_estimator" pkg="igvc_navigation" type="pose_slam_estimator" output="screen" >
+    </node>
+</launch>
