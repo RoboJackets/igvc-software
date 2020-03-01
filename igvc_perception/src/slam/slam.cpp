@@ -39,7 +39,6 @@ void Slam::GpsCallback(const nav_msgs::Odometry &msg){
  * @param msg An imu sensor message (published by yostlab_driver_node)
  */
 void Slam::ImuCallback(const sensor_msgs::Imu &msg){
-    //ROS_INFO_STREAM("Imu called!");
     ros::Time currTime = ros::Time::now();
     Vec3 measuredAcc = Vec3(msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z);
     Vec3 measuredOmega = Vec3(msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z);
