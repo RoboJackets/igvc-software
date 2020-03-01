@@ -5,7 +5,19 @@ MAINTAINER Matthew Barulic matthew.barulic@gmail.com
 ENV DEBIAN_FRONTEND noninteractive
 
 # setup apt tools and other goodies we want
-RUN apt-get update --fix-missing && apt-get -y install apt-utils git software-properties-common ssh python-pip && apt-get clean
+RUN apt-get update --fix-missing \
+    && apt-get -y install apt-utils git software-properties-common ssh python-pip libeigen3-dev \
+    && apt-get clean
+
+# Install kindr from source
+RUN git clone https://github.com/ANYbotics/kindr \
+    && cd kindr \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make install \
+    && cd ../../ \
+    && rm -rf kindr
 
 # Initialize catkin workspace
 RUN mkdir -p ~/catkin_ws
