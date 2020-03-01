@@ -4,7 +4,8 @@
 #include "math.h"
 #include <Eigen/Dense>
 
-namespace geodetic_converter {
+namespace geodetic_converter
+{
 // Geodetic system parameters
 static double kSemimajorAxis = 6378137;
 static double kSemiminorAxis = 6356752.3142;
@@ -14,8 +15,7 @@ static double kFlattening = 1 / 298.257223563;
 
 class GeodeticConverter
 {
- public:
-
+public:
   GeodeticConverter()
   {
     haveReference_ = false;
@@ -58,8 +58,8 @@ class GeodeticConverter
     haveReference_ = true;
   }
 
-  void geodetic2Ecef(const double latitude, const double longitude, const double altitude, double* x,
-                     double* y, double* z)
+  void geodetic2Ecef(const double latitude, const double longitude, const double altitude, double* x, double* y,
+                     double* z)
   {
     // Convert geodetic coordinates to ECEF.
     // http://code.google.com/p/pysatel/source/browse/trunk/coord.py?r=22
@@ -71,8 +71,8 @@ class GeodeticConverter
     *z = (kSemimajorAxis / xi * (1 - kFirstEccentricitySquared) + altitude) * sin(lat_rad);
   }
 
-  void ecef2Geodetic(const double x, const double y, const double z, double* latitude,
-                     double* longitude, double* altitude)
+  void ecef2Geodetic(const double x, const double y, const double z, double* latitude, double* longitude,
+                     double* altitude)
   {
     // Convert ECEF coordinates to geodetic coordinates.
     // J. Zhu, "Conversion of Earth-centered Earth-fixed coordinates
@@ -87,21 +87,18 @@ class GeodeticConverter
     double S = cbrt(1 + C + sqrt(C * C + 2 * C));
     double P = F / (3 * pow((S + 1 / S + 1), 2) * G * G);
     double Q = sqrt(1 + 2 * kFirstEccentricitySquared * kFirstEccentricitySquared * P);
-    double r_0 = -(P * kFirstEccentricitySquared * r) / (1 + Q)
-        + sqrt(
-            0.5 * kSemimajorAxis * kSemimajorAxis * (1 + 1.0 / Q)
-                - P * (1 - kFirstEccentricitySquared) * z * z / (Q * (1 + Q)) - 0.5 * P * r * r);
+    double r_0 = -(P * kFirstEccentricitySquared * r) / (1 + Q) +
+                 sqrt(0.5 * kSemimajorAxis * kSemimajorAxis * (1 + 1.0 / Q) -
+                      P * (1 - kFirstEccentricitySquared) * z * z / (Q * (1 + Q)) - 0.5 * P * r * r);
     double U = sqrt(pow((r - kFirstEccentricitySquared * r_0), 2) + z * z);
-    double V = sqrt(
-        pow((r - kFirstEccentricitySquared * r_0), 2) + (1 - kFirstEccentricitySquared) * z * z);
+    double V = sqrt(pow((r - kFirstEccentricitySquared * r_0), 2) + (1 - kFirstEccentricitySquared) * z * z);
     double Z_0 = kSemiminorAxis * kSemiminorAxis * z / (kSemimajorAxis * V);
     *altitude = U * (1 - kSemiminorAxis * kSemiminorAxis / (kSemimajorAxis * V));
     *latitude = rad2Deg(atan((z + kSecondEccentricitySquared * Z_0) / r));
     *longitude = rad2Deg(atan2(y, x));
   }
 
-  void ecef2Ned(const double x, const double y, const double z, double* north, double* east,
-                double* down)
+  void ecef2Ned(const double x, const double y, const double z, double* north, double* east, double* down)
   {
     // Converts ECEF coordinate position into local-tangent-plane NED.
     // Coordinates relative to given ECEF coordinate frame.
@@ -116,8 +113,7 @@ class GeodeticConverter
     *down = -ret(2);
   }
 
-  void ned2Ecef(const double north, const double east, const double down, double* x, double* y,
-                double* z)
+  void ned2Ecef(const double north, const double east, const double down, double* x, double* y, double* z)
   {
     // NED (north/east/down) to ECEF coordinates
     Eigen::Vector3d ned, ret;
@@ -130,8 +126,8 @@ class GeodeticConverter
     *z = ret(2) + initial_ecef_z_;
   }
 
-  void geodetic2Ned(const double latitude, const double longitude, const double altitude,
-                    double* north, double* east, double* down)
+  void geodetic2Ned(const double latitude, const double longitude, const double altitude, double* north, double* east,
+                    double* down)
   {
     // Geodetic position to local NED frame
     double x, y, z;
@@ -139,8 +135,8 @@ class GeodeticConverter
     ecef2Ned(x, y, z, north, east, down);
   }
 
-  void ned2Geodetic(const double north, const double east, const double down, double* latitude,
-                    double* longitude, double* altitude)
+  void ned2Geodetic(const double north, const double east, const double down, double* latitude, double* longitude,
+                    double* altitude)
   {
     // Local NED position to geodetic coordinates
     double x, y, z;
@@ -148,8 +144,8 @@ class GeodeticConverter
     ecef2Geodetic(x, y, z, latitude, longitude, altitude);
   }
 
-  void geodetic2Enu(const double latitude, const double longitude, const double altitude,
-                    double* east, double* north, double* up)
+  void geodetic2Enu(const double latitude, const double longitude, const double altitude, double* east, double* north,
+                    double* up)
   {
     // Geodetic position to local ENU frame
     double x, y, z;
@@ -163,8 +159,8 @@ class GeodeticConverter
     *up = -aux_down;
   }
 
-  void enu2Geodetic(const double east, const double north, const double up, double* latitude,
-                    double* longitude, double* altitude)
+  void enu2Geodetic(const double east, const double north, const double up, double* latitude, double* longitude,
+                    double* altitude)
   {
     // Local ENU position to geodetic coordinates
 
@@ -176,7 +172,7 @@ class GeodeticConverter
     ecef2Geodetic(x, y, z, latitude, longitude, altitude);
   }
 
- private:
+private:
   inline Eigen::Matrix3d nRe(const double lat_radians, const double lon_radians)
   {
     const double sLat = sin(lat_radians);
@@ -198,14 +194,12 @@ class GeodeticConverter
     return ret;
   }
 
-  inline
-  double rad2Deg(const double radians)
+  inline double rad2Deg(const double radians)
   {
     return (radians / M_PI) * 180.0;
   }
 
-  inline
-  double deg2Rad(const double degrees)
+  inline double deg2Rad(const double degrees)
   {
     return (degrees / 180.0) * M_PI;
   }
@@ -223,7 +217,7 @@ class GeodeticConverter
 
   bool haveReference_;
 
-}; // class GeodeticConverter
-}; // namespace geodetic_conv
+};  // class GeodeticConverter
+};  // namespace geodetic_converter
 
-#endif // GEODETIC_CONVERTER_H_
+#endif  // GEODETIC_CONVERTER_H_
