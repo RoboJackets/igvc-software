@@ -110,7 +110,6 @@ jobs:
           fi
         done
   clang-tidy:
-    working_directory: ~/catkin_ws/src/igvc-software
     <<: *dir
     <<: *image
     steps:
