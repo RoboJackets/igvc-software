@@ -1,9 +1,9 @@
-#include <igvc_rviz_plugins/example_panel.h>
+#include <igvc_rviz_plugins_old/example_panel.h>
 #include <pluginlib/class_list_macros.h>
 #include <QVBoxLayout>
 
 /*
- * Just as in the header, everything needs to happen in the igvc_rviz_plugins namespace.
+ * Just as in the header, everything needs to happen in the igvc_rviz_plugins_old namespace.
  */
 namespace igvc_rviz_plugins
 {

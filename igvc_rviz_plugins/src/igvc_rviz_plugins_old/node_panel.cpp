@@ -12,7 +12,7 @@
 #include <QDir>
 #include <QStringList>
 
-#include <igvc_rviz_plugins/node_panel.h>
+#include <igvc_rviz_plugins_old/node_panel.h>
 
 namespace rviz_plugins
 {

@@ -12,7 +12,7 @@
 #include <QDir>
 #include <QStringList>
 
-#include <igvc_rviz_plugins/num_button.h>
+#include <igvc_rviz_plugins_old/num_button.h>
 
 namespace rviz_plugins
 {

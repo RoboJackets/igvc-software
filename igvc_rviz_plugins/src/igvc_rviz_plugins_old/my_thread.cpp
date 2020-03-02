@@ -1,4 +1,4 @@
-#include <igvc_rviz_plugins/my_thread.h>
+#include <igvc_rviz_plugins_old/my_thread.h>
 
 #include <cstdio>
 #include <iostream>
