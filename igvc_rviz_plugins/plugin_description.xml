@@ -1,96 +1,104 @@
 <library path="lib/libigvc_rviz_plugins">
-    <class name="igvc_rviz_plugins/BatPanel"
-           type="igvc_rviz_plugins::bat_panel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description of bat panel.
-        </description>
-    </class>
+  <class name="igvc_rviz_plugins/Imu"
+         type="igvc_rviz_plugins::ImuDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      Displays direction and scale of accelerations from sensor_msgs/Imu messages.
+    </description>
+    <message_type>sensor_msgs/Imu</message_type>
+  </class>
+<!--    <class name="igvc_rviz_plugins/BatPanel"-->
+<!--           type="igvc_rviz_plugins::bat_panel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description of bat panel.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/EStopPanel"
-           type="igvc_rviz_plugins::eStop_panel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description of estop_panel.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/EStopPanel"-->
+<!--           type="igvc_rviz_plugins::eStop_panel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description of estop_panel.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugin/ExamplePanel"
-           type="igvc_rviz_plugins::ExamplePanel"
-           base_class_type="rviz::Panel">
-        <description>
-            Example panel for getting started
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugin/ExamplePanel"-->
+<!--           type="igvc_rviz_plugins::ExamplePanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--            Example panel for getting started-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/LaunchPanel"
-           type="igvc_rviz_plugins::LaunchPanel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description for LaunhcPanel.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/LaunchPanel"-->
+<!--           type="igvc_rviz_plugins::LaunchPanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description for LaunhcPanel.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/MyThread"
-           type="igvc_rviz_plugins::MyThread"
-           base_class_type="rviz::Panel">
-        <description>
-            Need description for MyThread..
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/MyThread"-->
+<!--           type="igvc_rviz_plugins::MyThread"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--            Need description for MyThread..-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/NodePanel"
-           type="igvc_rviz_plugins::NodePanel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description of NodePanel.
-        </description>
-    </class>
-    <class name="igvc_rviz_plugins/NumButton"
-           type="igvc_rviz_plugins::NumButton"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description of NumButton.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/NodePanel"-->
+<!--           type="igvc_rviz_plugins::NodePanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description of NodePanel.-->
+<!--        </description>-->
+<!--    </class>-->
+<!--    <class name="igvc_rviz_plugins/NumButton"-->
+<!--           type="igvc_rviz_plugins::NumButton"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description of NumButton.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/SensorPanel"
-           type="igvc_rviz_plugins::SensorPanel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description of SensorPanel.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/SensorPanel"-->
+<!--           type="igvc_rviz_plugins::SensorPanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description of SensorPanel.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/Speedometer"
-           type="igvc_rviz_plugins::Speedometer"
-           base_class_type="rviz::Panel">
-        <description>
-           Panel to display robot's speed.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/Speedometer"-->
+<!--           type="igvc_rviz_plugins::Speedometer"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Panel to display robot's speed.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/SpeedPanel"
-           type="igvc_rviz_plugins::SpeedPanel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description for SpeedPanel.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/SpeedPanel"-->
+<!--           type="igvc_rviz_plugins::SpeedPanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description for SpeedPanel.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/TimePanel"
-           type="igvc_rviz_plugins::TimePanel"
-           base_class_type="rviz::Panel">
-        <description>
-           Need description for TimePanel.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/TimePanel"-->
+<!--           type="igvc_rviz_plugins::TimePanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Need description for TimePanel.-->
+<!--        </description>-->
+<!--    </class>-->
 
-    <class name="igvc_rviz_plugins/WaypointPanel"
-           type="igvc_rviz_plugins::WaypointPanel"
-           base_class_type="rviz::Panel">
-        <description>
-           Panel to show the direction and distance to waypoint.
-        </description>
-    </class>
+<!--    <class name="igvc_rviz_plugins/WaypointPanel"-->
+<!--           type="igvc_rviz_plugins::WaypointPanel"-->
+<!--           base_class_type="rviz::Panel">-->
+<!--        <description>-->
+<!--           Panel to show the direction and distance to waypoint.-->
+<!--        </description>-->
+<!--    </class>-->
 </library>
