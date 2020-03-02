@@ -29,6 +29,13 @@ add_library(traversability_layer
 add_dependencies(traversability_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(traversability_layer ${catkin_LIBRARIES})
 
+add_library(rolling_layer
+        rolling_layer.cpp rolling_layer.h
+        rolling_layer_config.cpp rolling_layer_config.h
+        )
+add_dependencies(rolling_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rolling_layer ${catkin_LIBRARIES})
+
 add_library(unrolling_layer
         unrolling_layer.cpp unrolling_layer.h
         unrolling_layer_config.cpp unrolling_layer.h

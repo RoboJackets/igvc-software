@@ -2,8 +2,8 @@ global_costmap:
     global_frame: odom
     robot_base_frame: base_link
     plugins:
-        - {name: unrolling_layer,       type: "unrolling_layer::UnrollingLayer"}
-#        - {name: static_layer,       type: "costmap_2d::StaticLayer"}
+        - {name: traversability_layer, type: "traversability_layer::TraversabilityLayer"}
+        - {name: line_layer,     type: "line_layer::LineLayer"}
         - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
     footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
@@ -16,10 +16,85 @@ global_costmap:
     unknown_cost_value: 30
     rolling_window: false
     resolution: 0.1
-    static_layer:
-        map_topic: "/move_base_flex/local_costmap/costmap"
-        subscribe_to_updates: true
     inflation_layer:
         inflation_radius: 5.0
-unrolling_layer:
-    topic: "/move_base_flex/local_costmap/costmap"
+line_layer:
+    map:
+        frame_id: "odom"
+        resolution: 0.1
+        length_x: 200
+        length_y: 200
+        occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
+        debug:
+            map_topic: "/mapper/debug/lines/gridmap"
+            enabled: false
+    /cam/center:
+        topics:
+            raw_image_ns: "/raw"
+            raw_image: "/image"
+            segmented_image_ns: "/segmented"
+            segmented_image: "/image"
+        max_distance: 10
+        probabilities:
+            miss: 0.7
+            hit: 0.7
+            miss_exponential_coeff: 0.1
+            miss_angle_exponential_coeff: 5
+            hit_exponential_coeff: 0.1
+        debug:
+            line_topic: "/line_layer/debug/center/line"
+            nonline_topic: "/line_layer/debug/center/nonline"
+    /cam/left:
+        topics:
+            raw_image_ns: "/raw"
+            raw_image: "/image"
+            segmented_image_ns: "/segmented"
+            segmented_image: "/image"
+        max_distance: 10
+        probabilities:
+            miss: 0.7
+            hit: 0.7
+            miss_exponential_coeff: 0.05
+            miss_angle_exponential_coeff: 5
+            hit_exponential_coeff: 0.05
+        debug:
+            line_topic: "/line_layer/debug/left/line"
+            nonline_topic: "/line_layer/debug/left/nonline"
+    /cam/right:
+        topics:
+            raw_image_ns: "/raw"
+            raw_image: "/image"
+            segmented_image_ns: "/segmented"
+            segmented_image: "/image"
+        max_distance: 10
+        probabilities:
+            miss: 0.7
+            hit: 0.7
+            miss_exponential_coeff: 0.05
+            miss_angle_exponential_coeff: 5
+            hit_exponential_coeff: 0.05
+        debug:
+            line_topic: "/line_layer/debug/right/line"
+            nonline_topic: "/line_layer/debug/right/nonline"
+    projection:
+        length_x: 30
+        length_y: 30
+        line_closing_kernel_size: 5
+        freespace_closing_kernel_size: 5
+traversability_layer:
+    map:
+        frame_id: "odom"
+        resolution: 0.1
+        length_x: 200
+        length_y: 200
+        occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
+        costmap_topic: "/slope/costmap"
+        debug:
+            map_topic: "/slope/debug" # not actually used
+            enabled: false
+    logodd_increment: 2.19
+    slope_threshold: 0.45
