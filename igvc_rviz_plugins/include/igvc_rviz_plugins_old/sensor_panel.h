@@ -16,7 +16,7 @@
 #define INTERVAL 250  // in milliseconds
 
 /*
- * All of our panels need to be under the igvc_rviz_plugins namespace.
+ * All of our panels need to be under the igvc_rviz_plugins_old namespace.
  */
 namespace igvc_rviz_plugins
 {

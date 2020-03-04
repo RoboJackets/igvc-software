@@ -4,7 +4,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-#include <igvc_rviz_plugins/eStop_panel.h>
+#include <igvc_rviz_plugins_old/eStop_panel.h>
 
 namespace rviz_plugins
 {

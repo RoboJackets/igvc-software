@@ -13,7 +13,7 @@
 #include <QDir>
 #include <QStringList>
 
-#include <igvc_rviz_plugins/launch_panel.h>
+#include <igvc_rviz_plugins_old/launch_panel.h>
 
 namespace rviz_plugins
 {
