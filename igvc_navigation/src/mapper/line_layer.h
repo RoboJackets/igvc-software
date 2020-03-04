@@ -16,7 +16,6 @@
 #include <pcl_ros/point_cloud.h>
 #include <grid_map_ros/grid_map_ros.hpp>
 
-#include "barrel_config.h"
 #include "eigen_hash.h"
 #include "gridmap_layer.h"
 #include "line_layer_config.h"
@@ -55,16 +54,13 @@ private:
   LineLayerConfig config_;
   cv::Mat line_buffer_;       // cv::Mat centered at current position for use as a "buffer" for lines
   cv::Mat freespace_buffer_;  // cv::Mat centered at current position for use as a "buffer" for freespace
-  cv::Mat barrel_buffer_;
-  cv::Mat not_lines_;  // not line_buffer_
-  cv::Mat not_barrels_;
+  cv::Mat not_lines_;         // not line_buffer_
 
   std::vector<image_geometry::PinholeCameraModel> pinhole_models_;
   std::vector<std::vector<Eigen::Vector3d>> cached_rays_;
 
   ros::Publisher gridmap_pub_;
   ros::Publisher costmap_pub_;
-  ros::Publisher barrel_pub_;
   std::vector<int8_t> cost_translation_table_;
   struct DebugPublishers
   {
@@ -98,8 +94,10 @@ private:
   void calculateCachedRays(const sensor_msgs::CameraInfo& info, size_t camera_index);
 
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
-  cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image, bool isToMono) const;
+  cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image) const;
 
+  void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom,
+                    size_t camera_idx);
   void cleanupProjections();
   void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
   void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
@@ -119,13 +117,6 @@ private:
 
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
-
-  void projectImage(const cv::Mat& raw_mat, const cv::Mat& segmented_mat, const cv::Mat& barrel_mat,
-                    const geometry_msgs::TransformStamped& camera_to_odom, size_t camera_idx);
-
-  void debugBarrel(const cv::Mat& inMat);
-
-  cv::Mat findBarrel(const cv::Mat& inMat, int rows, int cols, const BarrelConfig& config);
 };
 }  // namespace line_layer
 
