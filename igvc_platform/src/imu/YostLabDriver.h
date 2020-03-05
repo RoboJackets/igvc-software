@@ -1,6 +1,7 @@
 #pragma once
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 #include "SerialInterface.h"
 
 #include <tf/tf.h>
@@ -71,6 +72,9 @@ private:
   // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
   bool commit_settings_;
 
+  // whether gyroscope should be calibrated on startup
+  bool calibrate_gyro_;
+
   // IMU orientation correction.
   std::vector<double> imu_orientation_correction_;
 
@@ -83,6 +87,7 @@ private:
   ros::NodeHandle yostlab_priv_nh_;
   ros::NodeHandle yostlab_nh_;
   ros::Publisher imu_pub_;
+  ros::Publisher magnet_pub_;
 
   // Diagnostic_updator
   diagnostic_updater::Updater updater;
@@ -98,6 +103,7 @@ private:
 
   // Constants
   const double GRAVITY = 9.80665;
+  const double GAUSSTOTESLA = 1e-4;
 
   static constexpr auto SET_GYRO_ENABLED = ":107,1\n";           // enable gyroscope readings as inputs to
                                                                  // the orientation estimation
@@ -124,7 +130,7 @@ private:
   Slot #3: corrected acceleration vector [3x float]
   Slot #[4-8]: No Command
   */
-  static constexpr auto SET_STREAMING_SLOTS = ":80,6,38,39,44,255,255,255,255\n";
+  static constexpr auto SET_STREAMING_SLOTS = ":80,6,38,39,40,44,255,255,255\n";
 
   static constexpr auto BEGIN_GYRO_AUTO_CALIB = ":165\n";  // Performs auto-gyroscope calibration. Sensor should
                                                            // remain still while samples are taken.

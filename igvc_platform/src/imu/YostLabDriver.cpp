@@ -6,6 +6,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
 {
   this->SerialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
+  this->magnet_pub_ = this->yostlab_nh_.advertise<sensor_msgs::MagneticField>("/imu_mag",10);
   this->updater.setHardwareIDf("IMU: %s", this->getSerialPort().c_str());
   this->updater.add("IMU Diagnostic", this, &YostLabDriver::imu_diagnostic);
 
@@ -13,6 +14,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
   assertions::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
                     std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
   assertions::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
+  assertions::param(yostlab_priv_nh_, "calibrate_gyro", calibrate_gyro_, false);
   assertions::getParam(this->yostlab_priv_nh_, "frame_id", this->frame_id_);
 }
 
@@ -159,6 +161,9 @@ const std::string YostLabDriver::getMIMode()
   this->SerialWriteString(GET_MI_MODE_ENABLED);
   const std::string buf = this->SerialReadLine();
   const std::string ret_buf = [&]() {
+    // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
+    // Actually no please don't.
+    //this->startGyroCalibration();
     if (buf == "0\r\n")
       return "Disabled";
     else if (buf == "1\r\n")
@@ -189,7 +194,9 @@ void YostLabDriver::run()
   mi_mode_ = this->getMIMode();
 
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
-  this->startGyroCalibration();
+  if(calibrate_gyro_) {
+    this->startGyroCalibration();
+  }
 
   // commit settings and start streaming!
   this->flush();
@@ -200,7 +207,9 @@ void YostLabDriver::run()
 
   int line_num_ = 0;
   sensor_msgs::Imu imu_msg_;
+  sensor_msgs::MagneticField magnet_msg_;
   imu_msg_.header.seq = 0;
+  magnet_msg_.header.seq = 0;
   std::vector<double> parsed_val_;
 
   // orientation correction matrices in 3x3 row-major format and quaternion
@@ -227,18 +236,22 @@ void YostLabDriver::run()
 
       if (terms_count == 1)
       {
-        if (line_num_ == 4)
+        if (line_num_ == 5)
         {
           imu_msg_.header.stamp = ros::Time::now();
           imu_msg_.header.seq++;
           imu_msg_.header.frame_id = frame_id_;
+
+          magnet_msg_.header.stamp = ros::Time::now();
+          magnet_msg_.header.seq++;
+          magnet_msg_.header.frame_id = frame_id_;
 
           // construct quaternion with (x,y,z,w)
           tf::Quaternion quat{ parsed_val_[0], parsed_val_[1], parsed_val_[2], parsed_val_[3] };
           this->quaternion_length_ = tf::length(quat);
           quat = rot * quat;
 
-          // Filtered orientation estimate
+          // Filtered orientation estimate"
           tf::quaternionTFToMsg(quat, imu_msg_.orientation);
           imu_msg_.orientation_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
@@ -250,6 +263,10 @@ void YostLabDriver::run()
           Eigen::Vector3d linear_accel_raw(parsed_val_[7], parsed_val_[8], parsed_val_[9]);
           linear_accel_raw = correction_mat * linear_accel_raw * GRAVITY;
 
+          // Corrected magnetometer
+          Eigen::Vector3d compass_raw(parsed_val_[10], parsed_val_[11], parsed_val_[12]);
+          compass_raw = correction_mat * compass_raw * GAUSSTOTESLA;
+
           imu_msg_.angular_velocity.x = angular_vel_raw[0];
           imu_msg_.angular_velocity.y = angular_vel_raw[1];
           imu_msg_.angular_velocity.z = angular_vel_raw[2];
@@ -260,9 +277,15 @@ void YostLabDriver::run()
           imu_msg_.linear_acceleration.z = linear_accel_raw[2];
           imu_msg_.linear_acceleration_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
-          sensor_temp_ = parsed_val_[10];
+          magnet_msg_.magnetic_field.x = compass_raw[0];
+          magnet_msg_.magnetic_field.y = compass_raw[1];
+          magnet_msg_.magnetic_field.z = compass_raw[2];
+          magnet_msg_.magnetic_field_covariance = { 1e-5, 0, 0, 0, 1e-5, 0, 0, 0, 1e-5 };
+
+          sensor_temp_ = parsed_val_[13];
 
           this->imu_pub_.publish(imu_msg_);
+          this->magnet_pub_.publish(magnet_msg_);
           this->lastUpdateTime_ = ros::Time::now();
           this->last_quat_ = quat;
         }
