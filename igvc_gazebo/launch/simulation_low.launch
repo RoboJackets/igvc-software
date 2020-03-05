@@ -45,8 +45,6 @@
         <!-- accelerate lidar with GPU -->
         <arg name="gpu" value="$(arg gpu)"/>
     </include>
-    <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
-    <!--  <include file="$(find igvc_perception)/launch/projection.launch" />-->
 
     <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
 
