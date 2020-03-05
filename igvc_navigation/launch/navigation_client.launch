@@ -1,6 +1,6 @@
 <launch>
-    <arg name="reading_from_file" default="false"/>
+    <arg name="read_from_file" default="true"/>
     <node name="navigation_client" pkg="igvc_navigation" type="navigation_client" output="screen">
-        <param name="reading_from_file" value="$(arg reading_from_file)"/>
+        <param name="read_from_file" value="$(arg read_from_file)"/>
     </node>
 </launch>
