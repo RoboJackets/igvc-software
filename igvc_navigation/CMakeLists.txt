@@ -19,7 +19,6 @@ find_package(catkin REQUIRED COMPONENTS
              pcl_ros
              pcl_conversions
              igvc_utils
-             octomap_ros
              tf_conversions
              robot_localization
              parameter_assertions
