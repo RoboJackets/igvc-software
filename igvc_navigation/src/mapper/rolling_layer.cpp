@@ -11,6 +11,7 @@ RollingLayer::RollingLayer() : private_nh_("~"), config_(private_nh_)
 
 void RollingLayer::onInitialize()
 {
+  matchSize();
   initPubSub();
   current_ = true;
 }
@@ -26,7 +27,6 @@ void RollingLayer::updateBounds(double robot_x, double robot_y, double robot_yaw
 
 void RollingLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-    ROS_INFO_STREAM("LOCAL UPDATE COSTS");
   uint8_t *master_array = master_grid.getCharMap();
   uint8_t *line_array = getCharMap();
   unsigned int span = master_grid.getSizeInCellsX();

@@ -36,7 +36,6 @@ void TraversabilityLayer::onInitialize()
 
 void TraversabilityLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-    ROS_INFO_STREAM("GLOBAL UPDATE COSTS");
   matchCostmapDims(master_grid);
   transferToCostmap();
   resetDirty();
