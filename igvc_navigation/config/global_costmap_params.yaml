@@ -27,6 +27,7 @@ line_layer:
         occupied_threshold: 0.5
         max_occupancy: 0.99
         min_occupancy: 0.01
+        costmap_topic: "/line_layer/costmap"
         debug:
             map_topic: "/mapper/debug/lines/gridmap"
             enabled: false

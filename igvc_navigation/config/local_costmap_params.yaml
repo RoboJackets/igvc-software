@@ -15,3 +15,5 @@ local_costmap:
     static_map: false
     rolling_window: true
     resolution: 0.1
+rolling_layer:
+    topic: "/move_base_flex/global_costmap/costmap"

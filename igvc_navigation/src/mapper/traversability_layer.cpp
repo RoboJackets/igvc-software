@@ -36,6 +36,7 @@ void TraversabilityLayer::onInitialize()
 
 void TraversabilityLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
+    ROS_INFO_STREAM("GLOBAL UPDATE COSTS");
   matchCostmapDims(master_grid);
   transferToCostmap();
   resetDirty();
@@ -116,11 +117,11 @@ void TraversabilityLayer::transferToCostmap()
 {
   if (rolling_window_)
   {
-    transferToCostmapRolling();
+      updateRollingWindow();
   }
   else
   {
-    transferToCostmapStatic();
+      updateStaticWindow();
   }
   publishCostMap();
 }
@@ -170,7 +171,7 @@ void TraversabilityLayer::publishCostMap()
   costmap_pub_.publish(msg);
 }
 
-void TraversabilityLayer::transferToCostmapStatic()
+void TraversabilityLayer::updateStaticWindow()
 {
   size_t num_cells = map_.getSize().prod();
 
@@ -194,7 +195,7 @@ void TraversabilityLayer::transferToCostmapStatic()
   publishCostMap();
 }
 
-void TraversabilityLayer::transferToCostmapRolling()
+void TraversabilityLayer::updateRollingWindow()
 {
   const size_t cells_x = costmap_2d_.getSizeInCellsX();
   const size_t cells_y = costmap_2d_.getSizeInCellsY();

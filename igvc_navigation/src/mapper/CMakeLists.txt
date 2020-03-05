@@ -1,4 +1,3 @@
-# Final part of refactor:
 add_library(lidar_layer
     lidar_layer.cpp lidar_layer.h
     lidar_layer_config.cpp lidar_layer_config.h
@@ -44,7 +43,7 @@ add_dependencies(unrolling_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(unrolling_layer ${catkin_LIBRARIES})
 
 install(
-    TARGETS lidar_layer line_layer traversability_layer
+    TARGETS line_layer traversability_layer rolling_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

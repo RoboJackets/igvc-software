@@ -40,8 +40,8 @@ private:
 
   void transferToCostmap();
 
-  void transferToCostmapStatic();
-  void transferToCostmapRolling();
+  void updateStaticWindow();
+  void updateRollingWindow();
 
   void publishCostMap();
 };
