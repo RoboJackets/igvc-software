@@ -33,4 +33,11 @@
       </description>
     </class>
   </library>
+  <library path="lib/librolling_layer">
+    <class type="rolling_layer::RollingLayer" base_class_type="costmap_2d::Layer">
+      <description>
+        Layer that transfers data from global costmap to local costmap.
+      </description>
+    </class>
+  </library>
 </class_libraries>

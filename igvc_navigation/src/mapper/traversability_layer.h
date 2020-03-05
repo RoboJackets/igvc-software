@@ -40,6 +40,9 @@ private:
 
   void transferToCostmap();
 
+  void transferToCostmapStatic();
+  void transferToCostmapRolling();
+
   void publishCostMap();
 };
 }  // namespace traversability_layer

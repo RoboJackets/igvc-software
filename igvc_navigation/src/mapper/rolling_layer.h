@@ -23,12 +23,10 @@ private:
   void initPubSub();
 
   void costmapCallback(const nav_msgs::OccupancyGridConstPtr& map);
-  void costmapUpdateCallback(const map_msgs::OccupancyGridUpdateConstPtr& map_update);
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
   ros::Subscriber costmap_sub_;
-  ros::Subscriber costmap_update_sub_;
 
   RollingLayerConfig config_;
 };
