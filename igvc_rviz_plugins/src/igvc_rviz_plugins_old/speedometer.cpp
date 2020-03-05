@@ -1,4 +1,4 @@
-#include <igvc_rviz_plugins/speedometer.h>
+#include <igvc_rviz_plugins_old/speedometer.h>
 #include <QPainter>
 #include <QTime>
 #include <QTimer>

@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 
-#include <igvc_rviz_plugins/waypoint_panel.h>
+#include <igvc_rviz_plugins_old/waypoint_panel.h>
 #include <pluginlib/class_list_macros.h>
 #include <tf/LinearMath/Matrix3x3.h>
 #include <QVBoxLayout>
