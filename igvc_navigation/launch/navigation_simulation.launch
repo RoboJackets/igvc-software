@@ -1,14 +1,18 @@
 <launch>
-    <arg name="reading_from_file" default="false"/>
+    <arg name="read_from_file" default="true"/>
+
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
 
     <!-- Launch navigation (simulation version) -->
     <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
 
+    <!-- Launch navigation server -->
+    <include file="$(find igvc_navigation)/launch/navigation_server.launch"/>
+
     <!-- Launch navigation client -->
     <include file="$(find igvc_navigation)/launch/navigation_client.launch">
-        <arg name="reading_from_file" value="$(arg reading_from_file)"/>
+        <arg name="read_from_file" value="$(arg read_from_file)"/>
     </include>
 
     <!-- Launch differential drive controller -->
