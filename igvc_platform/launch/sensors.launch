@@ -22,10 +22,14 @@
     <include file="$(find igvc_platform)/launch/velodyne_lidar.launch" />
 
     <!-- Bottom IMU -->
-    <include file="$(find igvc_platform)/launch/imu_bottom.launch" />
+    <include file="$(find igvc_platform)/launch/imu_bottom.launch" >
+        <arg name="calibrate_imu" value="false"/>
+    </include>
 
     <!-- Top IMU -->
-    <include file="$(find igvc_platform)/launch/imu_top.launch" />
+    <include file="$(find igvc_platform)/launch/imu_top.launch" >
+        <arg name="calibrate_imu" value="false"/>
+    </include>
 
     <!-- System Stats -->
     <include file="$(find igvc_utils)/launch/system_stats.launch" />
