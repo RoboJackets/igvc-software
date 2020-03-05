@@ -9,13 +9,12 @@ using gtsam::symbol_shorthand::B;
  * Initializes the factor graph and all the subscribers and publishers
  */
 Slam::Slam() : pnh_{ "~" } {
-    odom_sub_ = pnh_.subscribe("/wheel_odometry", 10, &Slam::OdomCallback, this);
+//    odom_sub_ = pnh_.subscribe("/wheel_odometry", 10, &Slam::OdomCallback, this);
     imu_sub_ = pnh_.subscribe("/imu", 100, &Slam::ImuCallback, this);
     gps_sub_ = pnh_.subscribe("/odometry/gps", 1, &Slam::GpsCallback, this);
     location_pub = pnh_.advertise<nav_msgs::Odometry>("/slam/position", 1);
 
     curr_index_ = 0;
-    last_imu_index_ = 0;
     imu_connected_ = false;
     imu_update_available_ = false;
 
@@ -32,6 +31,12 @@ void Slam::GpsCallback(const nav_msgs::Odometry &msg){
     gtsam::Point3 currPoint = Conversion::getPoint3FromOdom(msg);
     gtsam::GPSFactor gpsFactor(X(curr_index_), currPoint, gps_noise_);
     graph.add(gpsFactor);
+
+    if (imu_update_available_) {
+        IntegrateAndAddIMUFactor();
+    }
+
+    imu_update_available_ = false;
 }
 
 /**
@@ -58,46 +63,57 @@ void Slam::ImuCallback(const sensor_msgs::Imu &msg){
  * The OdomCallback adds an Odometry measurement and adds an integrated IMU factor to the factor graph
  * @param msg An odom message published by motor_controller_node
  */
-void Slam::OdomCallback(const nav_msgs::Odometry &msg){
-    if (imu_connected_) {
-        // Handle the odometry
-        gtsam::Pose3 currPose = Conversion::getPose3FromOdom(msg);
-        gtsam::Pose3 odometry = previousPose.between(currPose);
-        graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose3>>(X(curr_index_), X(curr_index_ + 1), odometry,
-                odometry_noise_);
+//void Slam::OdomCallback(const nav_msgs::Odometry &msg){
+//    if (imu_connected_) {
+//        // Handle the odometry
+//        gtsam::Pose3 currPose = Conversion::getPose3FromOdom(msg);
+//        gtsam::Pose3 odometry = previousPose.between(currPose);
+//        graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose3>>(X(curr_index_), X(curr_index_ + 1), odometry,
+//                odometry_noise_);
+//        auto newPoseEstimate = result.at<gtsam::Pose3>(X(curr_index_)); //gtsam::Pose3 newPoseEstimate
+//        newPoseEstimate = odometry * newPoseEstimate;
+//        initEstimate.insert(X(curr_index_ + 1), newPoseEstimate);
+//
+//        if (imu_update_available_) {
+//            IntegrateAndAddIMUFactor();
+//        }
+//
+//        curr_index_++;
+//        previousPose = currPose;
+//        Optimize();
+//        imu_update_available_ = false;
+//    }
+//}
+
+/**
+ * If there are IMU measurements in the acumulator, this adds them as a single factor to the factor graph.
+ */
+void Slam::IntegrateAndAddIMUFactor(){
+    if (accum.preintMeasCov().trace() != 0) {
+        // Add bias factor
+        auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(
+                B(curr_index_),
+                B(curr_index_ + 1),
+                gtsam::imuBias::ConstantBias(),
+                bias_noise_);
+        graph.add(factor);
+        initEstimate.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
+
+        // Add imu factor
+        gtsam::ImuFactor imufac(X(curr_index_), V(curr_index_), X(curr_index_ + 1),
+                                V(curr_index_ + 1), B(curr_index_ + 1), accum);
+
+        graph.add(imufac);
         auto newPoseEstimate = result.at<gtsam::Pose3>(X(curr_index_)); //gtsam::Pose3 newPoseEstimate
-        newPoseEstimate = odometry * newPoseEstimate;
+        newPoseEstimate = gtsam::Pose3(accum.deltaRij()*newPoseEstimate.rotation(), accum.deltaPij()+newPoseEstimate.translation());
         initEstimate.insert(X(curr_index_ + 1), newPoseEstimate);
-
-        if (imu_update_available_) {
-            if (accum.preintMeasCov().trace() != 0) {
-                // Add bias factor
-                auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(
-                        B(last_imu_index_),
-                        B(curr_index_ + 1),
-                        gtsam::imuBias::ConstantBias(),
-                        bias_noise_);
-                graph.add(factor);
-                initEstimate.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
-
-                // Add imu factor
-                gtsam::ImuFactor imufac(X(last_imu_index_), V(last_imu_index_), X(curr_index_ + 1),
-                                        V(curr_index_ + 1), B(curr_index_ + 1), accum);
-
-                graph.add(imufac);
-                Vec3 lastVel = result.at<gtsam::Vector3>(V(last_imu_index_));
-                lastVel += accum.deltaVij();
-                last_imu_index_ = curr_index_ + 1;
-                initEstimate.insert(V(last_imu_index_), lastVel);
-            }
-            accum.resetIntegration();
-        }
-
+        Vec3 lastVel = result.at<gtsam::Vector3>(V(curr_index_));
+        lastVel += accum.deltaVij();
+        initEstimate.insert(V(curr_index_ + 1), lastVel);
         curr_index_++;
-        previousPose = currPose;
         Optimize();
-        imu_update_available_ = false;
     }
+    accum.resetIntegration();
 }
 
 /**
@@ -105,13 +121,8 @@ void Slam::OdomCallback(const nav_msgs::Odometry &msg){
  */
 void Slam::Optimize() {
     static int iteration = 0;
-    if(last_imu_index_ == curr_index_){
-        ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
-        << " curr_index: " << curr_index_ << " last_imu_index: " << last_imu_index_);
-    } else {
-        ROS_WARN_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
-        << " curr_index: " << curr_index_ << " last_imu_index: " << last_imu_index_);
-    }
+    ROS_WARN_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
+    << " curr_index: " << curr_index_);
     //graph.print();
     isam.update(graph, initEstimate);
     result = isam.calculateEstimate();

@@ -38,7 +38,8 @@ private:
 
     void GpsCallback(const nav_msgs::Odometry &msg);
     void ImuCallback(const sensor_msgs::Imu &msg);
-    void OdomCallback(const nav_msgs::Odometry &msg);
+//    void OdomCallback(const nav_msgs::Odometry &msg);
+    void IntegrateAndAddIMUFactor();
     void Optimize();
     void InitializeImuParams();
     void InitializePriors();
@@ -52,7 +53,7 @@ private:
     gtsam::Values initEstimate, result;
     gtsam::NonlinearFactorGraph graph;
     gtsam::Pose3 previousPose;
-    unsigned long curr_index_, last_imu_index_;
+    unsigned long curr_index_;
     noiseDiagonal::shared_ptr odometry_noise_, gps_noise_, bias_noise_;
     gtsam::ISAM2 isam;
     const double KGRAVITY = 9.81;
