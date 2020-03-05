@@ -1,4 +1,6 @@
-# Documentation Regarding our IMU:
+# IMU Documentation
+
+**Author: Tan Gemicioglu & Andrew Yarovoi**
 
 Most of the information concerning the IMU can be found in [YostLabs' User Manual](https://yostlabs.com/wp/wp-content/uploads/pdf/3-Space-Sensor-Users-Manual-USBWT.pdf).
 
