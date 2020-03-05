@@ -73,7 +73,7 @@ private:
   bool commit_settings_;
 
   // whether gyroscope should be calibrated on startup
-  bool calibrate_gyro_;
+  bool calibrate_imu_;
 
   // IMU orientation correction.
   std::vector<double> imu_orientation_correction_;

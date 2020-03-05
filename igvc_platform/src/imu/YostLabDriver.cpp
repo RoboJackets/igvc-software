@@ -14,7 +14,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
   assertions::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
                     std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
   assertions::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
-  assertions::param(yostlab_priv_nh_, "calibrate_gyro", calibrate_gyro_, false);
+  assertions::param(yostlab_priv_nh_, "calibrate_imu", calibrate_imu_, false);
   assertions::getParam(this->yostlab_priv_nh_, "frame_id", this->frame_id_);
 }
 
@@ -194,7 +194,7 @@ void YostLabDriver::run()
   mi_mode_ = this->getMIMode();
 
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
-  if (calibrate_gyro_)
+  if (calibrate_imu_)
   {
     this->startGyroCalibration();
   }
