@@ -6,7 +6,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
 {
   this->SerialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
-  this->magnet_pub_ = this->yostlab_nh_.advertise<sensor_msgs::MagneticField>("/imu_mag",10);
+  this->magnet_pub_ = this->yostlab_nh_.advertise<sensor_msgs::MagneticField>("/imu_mag", 10);
   this->updater.setHardwareIDf("IMU: %s", this->getSerialPort().c_str());
   this->updater.add("IMU Diagnostic", this, &YostLabDriver::imu_diagnostic);
 
@@ -163,7 +163,7 @@ const std::string YostLabDriver::getMIMode()
   const std::string ret_buf = [&]() {
     // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
     // Actually no please don't.
-    //this->startGyroCalibration();
+    // this->startGyroCalibration();
     if (buf == "0\r\n")
       return "Disabled";
     else if (buf == "1\r\n")
@@ -194,7 +194,8 @@ void YostLabDriver::run()
   mi_mode_ = this->getMIMode();
 
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
-  if(calibrate_gyro_) {
+  if (calibrate_gyro_)
+  {
     this->startGyroCalibration();
   }
 
