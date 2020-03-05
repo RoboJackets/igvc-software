@@ -60,7 +60,7 @@ public:
       {
         ROS_INFO_STREAM(this->log_zone_ << " Closing the Serial Port");
         connection_port_->close();
-          connected_ = false;
+        connected_ = false;
       }
     }
   }
@@ -79,14 +79,14 @@ public:
       std::string ioerror = e.what();
       ROS_ERROR_STREAM(this->log_zone_ << "Unable to connect port: " << port_.c_str());
       ROS_ERROR_STREAM(this->log_zone_ << "Is the serial port open? : " << ioerror.c_str());
-        connected_ = false;
+      connected_ = false;
     }
 
     if (connection_port_ && connection_port_->isOpen())
     {
       ROS_INFO_STREAM(this->log_zone_ << "Connection Established with Port: " << port_.c_str()
                                       << " with baudrate: " << baud_);
-        connected_ = true;
+      connected_ = true;
     }
   }
 

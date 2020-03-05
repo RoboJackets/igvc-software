@@ -70,7 +70,7 @@ public:
   //! \brief createAndPublishIMUMessage
   //! \param sets some IMU settings and reads some settings from IMU
   //!
-  void createAndPublishIMUMessage(std::vector<double> &parsed_val);
+  void createAndPublishIMUMessage(std::vector<double>& parsed_val);
 
 private:
   // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);

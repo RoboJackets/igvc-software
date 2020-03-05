@@ -4,7 +4,7 @@
 YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
   : SerialInterface(priv_nh_), yostlab_priv_nh_(priv_nh_), yostlab_nh_(nh_)
 {
-    this->serialConnect();
+  this->serialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
   this->updater.setHardwareIDf("IMU: %s", this->getSerialPort().c_str());
   this->updater.add("IMU Diagnostic", this, &YostLabDriver::imu_diagnostic);
@@ -24,13 +24,13 @@ YostLabDriver::~YostLabDriver()
 
 void YostLabDriver::restoreFactorySettings()
 {
-    this->serialWriteString(RESTORE_FACTORY_SETTINGS);
+  this->serialWriteString(RESTORE_FACTORY_SETTINGS);
 }
 
 const std::string YostLabDriver::getSoftwareVersion()
 {
   this->flush();
-    this->serialWriteString(GET_FIRMWARE_VERSION_STRING);
+  this->serialWriteString(GET_FIRMWARE_VERSION_STRING);
   const std::string buf = this->serialReadLine();
   ROS_INFO_STREAM(this->logger << "Software version: " << buf);
   return buf;
@@ -74,7 +74,7 @@ void YostLabDriver::imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &
 const std::string YostLabDriver::getEulerDecomp()
 {
   this->flush();
-    this->serialWriteString(GET_EULER_DECOMPOSTION_ORDER);
+  this->serialWriteString(GET_EULER_DECOMPOSTION_ORDER);
   const std::string buf = this->serialReadLine();
   const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
@@ -99,7 +99,7 @@ const std::string YostLabDriver::getEulerDecomp()
 const std::string YostLabDriver::getAxisDirection()
 {
   this->flush();
-    this->serialWriteString(GET_AXIS_DIRECTION);
+  this->serialWriteString(GET_AXIS_DIRECTION);
   const std::string buf = this->serialReadLine();
   const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
@@ -125,22 +125,22 @@ void YostLabDriver::startGyroCalibration()
 {
   this->flush();
   ROS_INFO_STREAM(this->logger << "Starting Auto Gyro Calibration");
-    this->serialWriteString(BEGIN_GYRO_AUTO_CALIB);
+  this->serialWriteString(BEGIN_GYRO_AUTO_CALIB);
   ros::Duration(5.0).sleep();
 }
 
 void YostLabDriver::setMIMode(bool on)
 {
   if (on)
-      this->serialWriteString(SET_MI_MODE_ENABLED);
+    this->serialWriteString(SET_MI_MODE_ENABLED);
   else
-      this->serialWriteString(SET_MI_MODE_DISABLED);
+    this->serialWriteString(SET_MI_MODE_DISABLED);
 }
 
 const std::string YostLabDriver::getCalibMode()
 {
   this->flush();
-    this->serialWriteString(GET_CALIB_MODE);
+  this->serialWriteString(GET_CALIB_MODE);
   const std::string buf = this->serialReadLine();
   const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
@@ -157,7 +157,7 @@ const std::string YostLabDriver::getCalibMode()
 const std::string YostLabDriver::getMIMode()
 {
   this->flush();
-    this->serialWriteString(GET_MI_MODE_ENABLED);
+  this->serialWriteString(GET_MI_MODE_ENABLED);
   const std::string buf = this->serialReadLine();
   const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
@@ -228,65 +228,66 @@ void YostLabDriver::run()
 
 void YostLabDriver::setAndCheckIMUSettings()
 {
-    this->flush();
-    this->setTimeout(500);
-    this->serialWriteString(SET_AXIS_DIRECTIONS);
-    this->serialWriteString(SET_STREAMING_SLOTS);
-    this->serialWriteString(COMMIT_SETTINGS);
+  this->flush();
+  this->setTimeout(500);
+  this->serialWriteString(SET_AXIS_DIRECTIONS);
+  this->serialWriteString(SET_STREAMING_SLOTS);
+  this->serialWriteString(COMMIT_SETTINGS);
 
-    // small delay to allow imu to commit its settings before we read them back
-    ros::Duration(0.02).sleep();
+  // small delay to allow imu to commit its settings before we read them back
+  ros::Duration(0.02).sleep();
 
-    // print/debug statements
-    software_version_ = this->getSoftwareVersion();
-    axis_direction_ = this->getAxisDirection();
-    std::string euler = this->getEulerDecomp();
-    calibration_mode_ = this->getCalibMode();
-    mi_mode_ = this->getMIMode();
+  // print/debug statements
+  software_version_ = this->getSoftwareVersion();
+  axis_direction_ = this->getAxisDirection();
+  std::string euler = this->getEulerDecomp();
+  calibration_mode_ = this->getCalibMode();
+  mi_mode_ = this->getMIMode();
 }
 
-void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val){
-    // orientation correction matrices in 3x3 row-major format and quaternion
-    static const Eigen::Matrix<double, 3, 3, Eigen::RowMajor> correction_mat(imu_orientation_correction_.data());
-    static const Eigen::Quaternion<double> correction_mat_quat(correction_mat);
-    static const tf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
+void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
+{
+  // orientation correction matrices in 3x3 row-major format and quaternion
+  static const Eigen::Matrix<double, 3, 3, Eigen::RowMajor> correction_mat(imu_orientation_correction_.data());
+  static const Eigen::Quaternion<double> correction_mat_quat(correction_mat);
+  static const tf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
 
-    sensor_msgs::Imu imu_msg;
-    imu_msg.header.seq = 0;
-    imu_msg.header.stamp = ros::Time::now();
-    imu_msg.header.seq++;
-    imu_msg.header.frame_id = frame_id_;
+  sensor_msgs::Imu imu_msg;
+  imu_msg.header.seq = 0;
+  imu_msg.header.stamp = ros::Time::now();
+  imu_msg.header.seq++;
+  imu_msg.header.frame_id = frame_id_;
 
-    // construct quaternion with (x,y,z,w)
-    tf::Quaternion quat{parsed_val[0], parsed_val[1], parsed_val[2], parsed_val[3] };
-    this->quaternion_length_ = tf::length(quat);
-    quat = rot * quat;
+  // construct quaternion with (x,y,z,w)
+  tf::Quaternion quat{ parsed_val[0], parsed_val[1], parsed_val[2], parsed_val[3] };
+  this->quaternion_length_ = tf::length(quat);
+  quat = rot * quat;
 
-    // Filtered orientation estimate
-    tf::quaternionTFToMsg(quat, imu_msg.orientation);
-    imu_msg.orientation_covariance = {.1, 0, 0, 0, .1, 0, 0, 0, .1 };
+  // Filtered orientation estimate
+  tf::quaternionTFToMsg(quat, imu_msg.orientation);
+  imu_msg.orientation_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
-    // Corrected angular velocity.
-    Eigen::Vector3d angular_vel_raw(parsed_val[4], parsed_val[5], parsed_val[6]);
-    angular_vel_raw = correction_mat * angular_vel_raw;
+  // Corrected angular velocity.
+  Eigen::Vector3d angular_vel_raw(parsed_val[4], parsed_val[5], parsed_val[6]);
+  angular_vel_raw = correction_mat * angular_vel_raw;
 
-    // Corrected linear acceleration.
-    Eigen::Vector3d linear_accel_raw(parsed_val[7], parsed_val[8], parsed_val[9]);
-    linear_accel_raw = correction_mat * linear_accel_raw * GRAVITY;
+  // Corrected linear acceleration.
+  Eigen::Vector3d linear_accel_raw(parsed_val[7], parsed_val[8], parsed_val[9]);
+  linear_accel_raw = correction_mat * linear_accel_raw * GRAVITY;
 
-    imu_msg.angular_velocity.x = angular_vel_raw[0];
-    imu_msg.angular_velocity.y = angular_vel_raw[1];
-    imu_msg.angular_velocity.z = angular_vel_raw[2];
-    imu_msg.angular_velocity_covariance = {.1, 0, 0, 0, .1, 0, 0, 0, .07 };
+  imu_msg.angular_velocity.x = angular_vel_raw[0];
+  imu_msg.angular_velocity.y = angular_vel_raw[1];
+  imu_msg.angular_velocity.z = angular_vel_raw[2];
+  imu_msg.angular_velocity_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .07 };
 
-    imu_msg.linear_acceleration.x = linear_accel_raw[0];
-    imu_msg.linear_acceleration.y = linear_accel_raw[1];
-    imu_msg.linear_acceleration.z = linear_accel_raw[2];
-    imu_msg.linear_acceleration_covariance = {.1, 0, 0, 0, .1, 0, 0, 0, .1 };
+  imu_msg.linear_acceleration.x = linear_accel_raw[0];
+  imu_msg.linear_acceleration.y = linear_accel_raw[1];
+  imu_msg.linear_acceleration.z = linear_accel_raw[2];
+  imu_msg.linear_acceleration_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
-    sensor_temp_ = parsed_val[10];
+  sensor_temp_ = parsed_val[10];
 
-    this->imu_pub_.publish(imu_msg);
-    this->lastUpdateTime_ = ros::Time::now();
-    this->last_quat_ = quat;
+  this->imu_pub_.publish(imu_msg);
+  this->lastUpdateTime_ = ros::Time::now();
+  this->last_quat_ = quat;
 }
