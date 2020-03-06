@@ -38,6 +38,10 @@ void TraversabilityLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int mi
 {
   matchCostmapDims(master_grid);
   transferToCostmap();
+  if (config_.map.debug.enabled)
+  {
+    publishCostmap();
+  }
   resetDirty();
 
   uchar *master_array = master_grid.getCharMap();
@@ -81,7 +85,10 @@ void TraversabilityLayer::slopeMapCallback(const grid_map_msgs::GridMap &slope_m
     if (map_.isInside(pos))
     {
       float slope = slope_map.get("slope")((*it)[0], (*it)[1]);
-      float *logodd = &map_.atPosition("logodds", pos);
+      grid_map::Index map_index;
+      map_.getIndex(pos, map_index);
+      touch(map_index);
+      float *logodd = &map_.at("logodds", map_index);
       if (slope > config_.slope_threshold)
       {
         *logodd = std::min(*logodd + config_.logodd_increment, config_.map.max_occupancy);
@@ -116,16 +123,16 @@ void TraversabilityLayer::transferToCostmap()
 {
   if (rolling_window_)
   {
-      updateRollingWindow();
+    updateRollingWindow();
   }
   else
   {
-      updateStaticWindow();
+    updateStaticWindow();
   }
-  publishCostMap();
+  publishCostmap();
 }
 
-void TraversabilityLayer::publishCostMap()
+void TraversabilityLayer::publishCostmap()
 {
   nav_msgs::OccupancyGrid msg;
 
@@ -172,11 +179,19 @@ void TraversabilityLayer::publishCostMap()
 
 void TraversabilityLayer::updateStaticWindow()
 {
+  // Static window, so we can only update dirty cells
   size_t num_cells = map_.getSize().prod();
 
-  uchar *char_map = costmap_2d_.getCharMap();
+  unsigned char *char_map = costmap_2d_.getCharMap();
 
-  for (grid_map::GridMapIterator it(map_); !it.isPastEnd(); ++it)
+  auto optional_it = getDirtyIterator();
+
+  if (!optional_it)
+  {
+    return;
+  }
+
+  for (auto it = *optional_it; !it.isPastEnd(); ++it)
   {
     const auto &log_odds = map_.get("logodds")((*it)[0], (*it)[1]);
     float probability = probability_utils::fromLogOdds(log_odds);
@@ -191,7 +206,6 @@ void TraversabilityLayer::updateStaticWindow()
       char_map[num_cells - linear_index - 1] = costmap_2d::FREE_SPACE;
     }
   }
-  publishCostMap();
 }
 
 void TraversabilityLayer::updateRollingWindow()

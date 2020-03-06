@@ -43,7 +43,7 @@ private:
   void updateStaticWindow();
   void updateRollingWindow();
 
-  void publishCostMap();
+  void publishCostmap();
 };
 }  // namespace traversability_layer
 

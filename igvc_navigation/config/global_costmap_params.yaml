@@ -16,6 +16,7 @@ global_costmap:
     unknown_cost_value: 30
     rolling_window: false
     resolution: 0.1
+    always_send_full_costmap: true
     inflation_layer:
         inflation_radius: 5.0
 line_layer:
@@ -95,7 +96,7 @@ traversability_layer:
         min_occupancy: 0.01
         costmap_topic: "/slope/costmap"
         debug:
-            map_topic: "/slope/debug" # not actually used
+            map_topic: "/slope/debug"
             enabled: false
     logodd_increment: 2.19
     slope_threshold: 0.45
