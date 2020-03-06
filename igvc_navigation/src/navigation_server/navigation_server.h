@@ -40,9 +40,9 @@ private:
   // params
   bool recovery_enabled_ = true;
 
-  NavigationState current_state_;
+  NavigationState navigation_state_;
   NavigationState recovery_trigger_;
-  GoalHandle current_goal_handle_;
+  GoalHandle goal_handle_;
   bool fix_goal_poses_ = true;
 
   ros::NodeHandle nh_;
@@ -64,8 +64,8 @@ private:
 
   ros::Time start_time_;
 
-  ros::Time time_of_last_get_path_;
-  ros::Duration time_between_get_path_ = ros::Duration(0.5);
+  ros::Rate replanning_rate_ = ros::Rate(1.0);
+  boost::mutex replanning_mtx_;
 
   igvc_msgs::NavigateWaypointFeedback move_base_feedback_;
   geometry_msgs::PoseStamped previous_oscillation_pose_;
@@ -82,6 +82,9 @@ private:
 
   void actionGetPathDone(const actionlib::SimpleClientGoalState &state,
                          const mbf_msgs::GetPathResultConstPtr &result_ptr);
+
+  void actionGetPathReplanningDone(const actionlib::SimpleClientGoalState &state,
+                                   const mbf_msgs::GetPathResultConstPtr &result_ptr);
 
   void runExePath(nav_msgs::Path path);
 
