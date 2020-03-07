@@ -13,6 +13,8 @@
 #include <igvc_msgs/NavigateWaypointAction.h>
 #include <igvc_msgs/NavigateWaypointFeedback.h>
 
+#include <mutex>
+
 class NavigationServer
 {
 public:
@@ -65,7 +67,7 @@ private:
   ros::Time start_time_;
 
   ros::Rate replanning_rate_ = ros::Rate(1.0);
-  boost::mutex replanning_mtx_;
+  std::mutex replanning_mtx_;
 
   igvc_msgs::NavigateWaypointFeedback move_base_feedback_;
   geometry_msgs::PoseStamped previous_oscillation_pose_;
