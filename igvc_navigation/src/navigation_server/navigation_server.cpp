@@ -177,7 +177,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
   {
     return;
   }
-  boost::lock_guard<boost::mutex> guard(replanning_mtx_);
+  std::lock_guard<std::mutex> guard(replanning_mtx_);
   replanning_rate_.reset();
   replanning_rate_.sleep();
   if (navigation_state_ != EXE_PATH ||
@@ -209,9 +209,10 @@ void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClient
     runExePath(path);
   }
 
-  replanning_mtx_.lock();
-  replanning_rate_.sleep();
-  replanning_mtx_.unlock();
+  {
+    std::lock_guard<std::mutex> guard{ replanning_mtx_ };
+    replanning_rate_.sleep();
+  }
 
   if (navigation_state_ != EXE_PATH)
     return;
