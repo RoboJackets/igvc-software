@@ -19,6 +19,7 @@ void RollingLayer::onInitialize()
 void RollingLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
                                 double *max_x, double *max_y)
 {
+  updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
   *min_x = getOriginX();
   *max_x = getOriginX() + getSizeInMetersX();
   *min_y = getOriginY();
@@ -55,8 +56,8 @@ void RollingLayer::costmapCallback(const nav_msgs::OccupancyGridConstPtr &map)
   double global_origin_x = map->info.origin.position.x;
   double global_origin_y = map->info.origin.position.y;
 
-  size_t global_start_index_x = (local_origin_x - global_origin_x) / resolution;
-  size_t global_start_index_y = (local_origin_y - global_origin_y) / resolution;
+  size_t global_start_index_x = (local_origin_x - global_origin_x) / resolution + 1;
+  size_t global_start_index_y = (local_origin_y - global_origin_y) / resolution + 1;
 
   unsigned char *charmap = getCharMap();
 
@@ -81,9 +82,5 @@ void RollingLayer::costmapCallback(const nav_msgs::OccupancyGridConstPtr &map)
       }
     }
   }
-}
-
-void RollingLayer::costmapUpdateCallback(const map_msgs::OccupancyGridUpdateConstPtr &map_update)
-{
 }
 }  // namespace rolling_layer

@@ -23,7 +23,6 @@ private:
   void initPubSub();
 
   void costmapCallback(const nav_msgs::OccupancyGridConstPtr& map);
-  void costmapUpdateCallback(const map_msgs::OccupancyGridUpdateConstPtr& map_update);
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
