@@ -25,6 +25,8 @@ Date Created: January 22nd, 2020
 #include <boost/shared_ptr.hpp>
 
 #include "geodetic_conv.hpp"
+#include <GeographicLib/Geocentric.hpp>
+#include <GeographicLib/LocalCartesian.hpp>
 
 using gtsam::symbol_shorthand::B;  // Bias  (ax,ay,az,gx,gy,gz)
 using gtsam::symbol_shorthand::V;  // Vel   (xdot,ydot,zdot)
@@ -80,14 +82,11 @@ private:
   // Initial values to anchor FG. Format: (N,E,D,qX,qY,qZ,qW,velN,velE,velD)
   bool fg_initialized_ = false;                // Priors set and optimization has begun.
   bool initial_imu_reading_received_ = false;  // Initial rotation and vel.
-  bool initial_gps_coords_received = false;    // Initial GPS coords.
+  bool initial_gps_coords_received_ = false;    // Initial GPS coords.
   Eigen::Matrix<double, 10, 1> initial_state_ = Eigen::Matrix<double, 10, 1>::Zero();
 
   // Solution initialization values and optimization results.
   gtsam::Values initial_values_, results_;
-
-  // Number of poses thus far.
-  int correction_count;
 
   // The factor graph.
   gtsam::NonlinearFactorGraph* graph_ = new gtsam::NonlinearFactorGraph();
@@ -96,6 +95,8 @@ private:
   gtsam::imuBias::ConstantBias prior_imu_bias_;
 
   // Used to convert from llh to ned.
+  // const GeographicLib::Geocentric& earth_ = GeographicLib::Geocentric::WGS84();
+  GeographicLib::LocalCartesian enu_;
   geodetic_converter::GeodeticConverter geodetic_converter_{};
 
   // Measured sensor variances and biases.
@@ -117,7 +118,10 @@ private:
   gtsam::NavState prop_state_;
   gtsam::imuBias::ConstantBias prev_bias_;
 
-  // For debug.
+  // UTM to odom transform.
+  gtsam::Pose3 oTutm_;
+
+  // For debug. TODO(alescontrela): remove.
   gtsam::Quaternion current_orientation_;
 
   double last_imu_msg_t_;

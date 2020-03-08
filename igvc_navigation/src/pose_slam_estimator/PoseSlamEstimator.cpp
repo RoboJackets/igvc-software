@@ -2,6 +2,10 @@
 
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
+
+
 
 #include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 #include <gtsam/slam/PriorFactor.h>
@@ -18,7 +22,7 @@ PoseSlamEstimator::PoseSlamEstimator(ros::NodeHandle* nodehandle) : nh_(*nodehan
 
   // Subscribe to sensor readings.
   imu_sub_ = nh_.subscribe("/imu", 1, &PoseSlamEstimator::imu_callback, this);
-  gps_sub_ = nh_.subscribe("/fix", 1, &PoseSlamEstimator::gps_callback, this);
+  gps_sub_ = nh_.subscribe("/gps/filtered", 1, &PoseSlamEstimator::gps_callback, this);
 
   // Publish estimated trajectory.
   trajectory_publisher_ = nh_.advertise<nav_msgs::Path>("/pose_slam_trajectory", 1);
@@ -56,22 +60,36 @@ PoseSlamEstimator::PoseSlamEstimator(ros::NodeHandle* nodehandle) : nh_(*nodehan
 
   imu_preintegrated_ = std::make_shared<gtsam::PreintegratedCombinedMeasurements>(p_, prior_imu_bias_);
 
-  ros::Rate rate(rate_);  // path update rate
+  // Look up transform from UTM to odom.
+  tf::StampedTransform transform;
+  static tf::TransformListener tf_listener;
+  static ros::Duration wait_time = ros::Duration(100);
+  tf_listener.waitForTransform("odom", "utm", ros::Time(0), wait_time);
+  tf_listener.lookupTransform("odom", "utm", ros::Time(0), transform);
+
+  oTutm_ = gtsam::Pose3(
+    gtsam::Rot3::Quaternion(
+      transform.getRotation().w(),
+      transform.getRotation().x(),
+      transform.getRotation().y(),
+      transform.getRotation().z()
+    ), gtsam::Point3(transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z()));
+
+  ROS_INFO_STREAM(oTutm_);
 
   while (ros::ok())
   {
     ros::spinOnce();  // handle subscriber callbacks
-    rate.sleep();
   }
 }
 
 void PoseSlamEstimator::imu_callback(const sensor_msgs::ImuConstPtr& msg)
 {
   // Update initial gps and orientation readings until both are received.
-  double msg_t = msg->header.stamp.nsec * 1e-9;
+  double msg_t = msg->header.stamp.sec + msg->header.stamp.nsec * 1e-9;  // Message timestamp in seconds.
   if (!fg_initialized_)
   {
-    if (!initial_imu_reading_received_ || !initial_gps_coords_received)
+    if (!initial_imu_reading_received_ || !initial_gps_coords_received_)
     {
       initial_imu_reading_received_ = true;
       last_imu_msg_t_ = msg_t;
@@ -90,7 +108,7 @@ void PoseSlamEstimator::imu_callback(const sensor_msgs::ImuConstPtr& msg)
     return;
   }
 
-  double dt = msg_t - last_imu_msg_t_;
+  double dt = msg_t - last_imu_msg_t_;  // Time since last imu message.
   ROS_INFO_STREAM("dt: " << dt);
   gtsam::Vector3 measured_acc =
       (gtsam::Vector(3) << msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z)
@@ -106,20 +124,30 @@ void PoseSlamEstimator::imu_callback(const sensor_msgs::ImuConstPtr& msg)
 
 void PoseSlamEstimator::gps_callback(const sensor_msgs::NavSatFixConstPtr& msg)
 {
-  // Convert gps readings to ned.
-  double north, east, down;
-  geodetic_converter_.geodetic2Ned(static_cast<double>(msg->latitude), static_cast<double>(msg->longitude),
-                                   static_cast<double>(msg->altitude), &north, &east, &down);
+  // if (!initial_gps_coords_received_)
+  //   geodetic_converter_.initialiseReference(static_cast<double>(msg->latitude), static_cast<double>(msg->longitude), static_cast<double>(msg->altitude));
+  if (!initial_gps_coords_received_)
+    enu_.Reset(static_cast<double>(msg->latitude), static_cast<double>(msg->longitude), static_cast<double>(msg->altitude));
+
+  // Convert gps readings to local cartesian.
+  double east, north, up;
+  // geodetic_converter_.geodetic2Ned(static_cast<double>(msg->latitude), static_cast<double>(msg->longitude),
+  //                                  static_cast<double>(msg->altitude), &north, &east, &down);
+  enu_.Forward(static_cast<double>(msg->latitude), static_cast<double>(msg->longitude),
+                                   static_cast<double>(msg->altitude), east, north, up);
+
+  ROS_INFO_STREAM("East: " << east << ", North: " << north << ", Up: " << up);
+
 
   // Update initial gps and orientation readings until both are received.
   if (!fg_initialized_)
   {
-    if (!initial_imu_reading_received_ || !initial_gps_coords_received)
+    if (!initial_imu_reading_received_ || !initial_gps_coords_received_)
     {
-      initial_gps_coords_received = true;
-      initial_state_(0) = north;
-      initial_state_(1) = east;
-      initial_state_(2) = down;
+      initial_gps_coords_received_ = true;
+      initial_state_(0) = east;
+      initial_state_(1) = north;
+      initial_state_(2) = up;
     }
     else
     {
@@ -141,7 +169,7 @@ void PoseSlamEstimator::gps_callback(const sensor_msgs::NavSatFixConstPtr& msg)
   // Add GPS factor.
   gtsam::noiseModel::Diagonal::shared_ptr correction_noise =
       gtsam::noiseModel::Isotropic::Sigma(3, gps_noise_elements_);
-  gtsam::GPSFactor gps_factor(X(correction_count_), gtsam::Point3(north, east, down), correction_noise);
+  gtsam::GPSFactor gps_factor(X(correction_count_), gtsam::Point3(east, north, up), correction_noise);
   graph_->add(gps_factor);
 
   // Optimize!
@@ -149,6 +177,9 @@ void PoseSlamEstimator::gps_callback(const sensor_msgs::NavSatFixConstPtr& msg)
   initial_values_.insert(X(correction_count_), prop_state_.pose());
   initial_values_.insert(V(correction_count_), prop_state_.v());
   initial_values_.insert(B(correction_count_), prev_bias_);
+
+  std::cout << "prop_state: [t: (" << prop_state_.pose().translation().vector().transpose()
+            << "), R: (" << prop_state_.pose().rotation().rpy().transpose() << ")]" << std::endl;
 
   gtsam::LevenbergMarquardtOptimizer optimizer(*graph_, initial_values_);
   results_ = optimizer.optimize();
@@ -163,7 +194,7 @@ void PoseSlamEstimator::gps_callback(const sensor_msgs::NavSatFixConstPtr& msg)
 
   // Print out the position and orientation error for comparison.
   gtsam::Vector3 gtsam_position = prev_state_.pose().translation();
-  gtsam::Vector3 position_error = gtsam_position - (gtsam::Vector(3) << north, east, down).finished();
+  gtsam::Vector3 position_error = gtsam_position - (gtsam::Vector(3) << east, north, up).finished();
   double current_position_error = position_error.norm();
 
   gtsam::Quaternion gtsam_quat = prev_state_.pose().rotation().toQuaternion();
@@ -172,7 +203,9 @@ void PoseSlamEstimator::gps_callback(const sensor_msgs::NavSatFixConstPtr& msg)
   gtsam::Vector3 euler_angle_error(quat_error.x() * 2, quat_error.y() * 2, quat_error.z() * 2);
   double current_orientation_error = euler_angle_error.norm();
 
-  ROS_INFO_STREAM("Position error: " << current_position_error << "\t Angular Error" << current_orientation_error);
+  ROS_INFO_STREAM("Position error: " << current_position_error << "\t Angular Error: " << current_orientation_error);
+  std::cout << "opt_state: [t: (" << prev_state_.pose().translation().vector().transpose()
+            << "), R: (" << prev_state_.pose().rotation().rpy().transpose() << ")]" << std::endl;
 
   // Publish PoseSLAM trajectory.
   publish_path();
