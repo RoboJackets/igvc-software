@@ -1,0 +1,1 @@
+add_library(mocking_utils mock_subscriber.cpp)

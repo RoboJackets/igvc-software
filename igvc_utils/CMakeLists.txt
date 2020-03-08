@@ -87,7 +87,7 @@ catkin_python_setup()
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES igvc_state EthernetSocket
+  LIBRARIES igvc_state EthernetSocket mocking_utils
   CATKIN_DEPENDS roscpp std_msgs geometry_msgs igvc_msgs
 #  DEPENDS system_lib
 )
@@ -164,3 +164,4 @@ add_subdirectory(src/speed_compare)
 add_subdirectory(src/system_stats)
 add_subdirectory(src/quaternion_to_rpy)
 add_subdirectory(src/state)
+add_subdirectory(src/mocking_utils)
