@@ -121,5 +121,5 @@ traversability_layer:
         debug:
             map_topic: "/slope/debug" # not actually used
             enabled: false
-    logodd_increment: 2.19
+    untraversable_probability: 0.8
     slope_threshold: 0.45
