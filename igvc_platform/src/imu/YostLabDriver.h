@@ -23,7 +23,7 @@ public:
   //! \brief getSoftwareVersion
   //! \return returns software string version
   //!
-  std::string getSoftwareVersion();
+  const std::string getSoftwareVersion();
   //!
   //! \brief restoreFactorySettings resets everything
   //!
@@ -36,22 +36,22 @@ public:
   //! \brief getAxisDirection
   //! \return returns axis directions
   //!
-  std::string getAxisDirection();
+  const std::string getAxisDirection();
   //!
   //! \brief getEulerDecomp
   //! \return decompisition string
   //!
-  std::string getEulerDecomp();
+  const std::string getEulerDecomp();
   //!
   //! \brief getCalibMode
   //! \return 0 for bias 1 for scale and bias
   //!
-  std::string getCalibMode();
+  const std::string getCalibMode();
   //!
   //! \brief getMIMode
   //! \return 1 if enabled 0 if disabled
   //!
-  std::string getMIMode();
+  const std::string getMIMode();
   //!
   //! \brief startGyroCalibration
   //!
@@ -71,11 +71,6 @@ public:
   //! \param sets some IMU settings and reads some settings from IMU
   //!
   void createAndPublishIMUMessage(std::vector<double>& parsed_val);
-  //!
-  //! \brief parseLineFromIMU
-  //! \param buf String to parse
-  //!
-  static std::vector<double> parseLineFromIMU(std::string buf);
 
 private:
   // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
