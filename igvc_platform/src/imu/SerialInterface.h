@@ -75,7 +75,7 @@ public:
     try
     {
       const auto uint_baud = static_cast<uint32_t>(baud_);
-      const auto timeout = Timeout::simpleTimeout(60000);  // in milliseconds
+      const auto timeout = Timeout::simpleTimeout(60000); // in milliseconds
       connection_port_ = std::make_unique<Serial>(port_, uint_baud, timeout);
     }
     catch (IOException &e)
@@ -89,7 +89,7 @@ public:
     if (connection_port_ && connection_port_->isOpen())
     {
       ROS_INFO_STREAM(log_zone_ << "Connection Established with Port: " << port_.c_str()
-                                << " with baudrate: " << baud_);
+                                      << " with baudrate: " << baud_);
       connected_ = true;
     }
   }

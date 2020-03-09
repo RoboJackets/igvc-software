@@ -176,7 +176,7 @@ void YostLabDriver::run()
   setAndCheckIMUSettings();
 
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
-  // startGyroCalibration();
+  //startGyroCalibration();
 
   // commit settings and start streaming
   flush();
@@ -234,8 +234,7 @@ void YostLabDriver::setAndCheckIMUSettings()
   mi_mode_ = getMIMode();
 }
 
-std::vector<double> YostLabDriver::parseLineFromIMU(std::string buf)
-{
+std::vector<double> YostLabDriver::parseLineFromIMU(std::string buf){
   std::vector<double> parsed_line;
   std::stringstream ss(buf);
   double i;
