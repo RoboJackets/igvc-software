@@ -76,7 +76,7 @@ public:
   //! \param parsed_vals the previously parsed values
   //! \return number of doubles in the parsed line
   //!
-  static int addToParsedVals(std::string buf, std::vector<double>& parsed_vals);
+  static int addToParsedVals(const std::string& buf, std::vector<double>& parsed_vals);
 
 private:
   // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
