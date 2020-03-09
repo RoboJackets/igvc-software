@@ -283,7 +283,7 @@ void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
   last_quat_ = quat;
 }
 
-int YostLabDriver::addToParsedVals(std::string buf, std::vector<double> &parsed_vals)
+int YostLabDriver::addToParsedVals(const std::string &buf, std::vector<double> &parsed_vals)
 {
   std::stringstream ss(buf);
   int terms_count = 0;
