@@ -75,7 +75,7 @@ public:
     try
     {
       const auto uint_baud = static_cast<uint32_t>(baud_);
-      const auto timeout = Timeout::simpleTimeout(60000); // timeout in milliseconds
+      const auto timeout = Timeout::simpleTimeout(60000);  // timeout in milliseconds
       connection_port_.reset(new Serial(port_, baud_, timeout));
     }
     catch (IOException &e)
