@@ -4,6 +4,8 @@
 #include <ros/ros.h>
 #include <serial/serial.h>
 
+#include <memory>
+
 using namespace serial;
 
 class SerialInterface
@@ -23,7 +25,7 @@ public:
   SerialInterface(ros::NodeHandle &serial_nh_) : log_zone_("[ SerialInterface ] ")
   {
     serial_nh_.param<int>("BAUD_RATE", baud_, 115200);
-    serial_nh_.param<std::string>("SERIAL_PORT", port_, "/dev/ttyACM0");
+    serial_nh_.param<std::string>("SERIAL_PORT", port_, "/dev/imu_top");
   }
 
   const int &getBaudRate()
@@ -58,7 +60,7 @@ public:
     {
       if (connection_port_->isOpen())
       {
-        ROS_INFO_STREAM(this->log_zone_ << " Closing the Serial Port");
+        ROS_INFO_STREAM(log_zone_ << " Closing the Serial Port");
         connection_port_->close();
         connected_ = false;
       }
@@ -72,20 +74,22 @@ public:
   {
     try
     {
-      connection_port_.reset(new Serial(port_, (uint32_t)baud_, Timeout::simpleTimeout(60000)));
+      const auto uint_baud = static_cast<uint32_t>(baud_);
+      const auto timeout = Timeout::simpleTimeout(60000); // timeout in milliseconds
+      connection_port_.reset(new Serial(port_, baud_, timeout));
     }
     catch (IOException &e)
     {
       std::string ioerror = e.what();
-      ROS_ERROR_STREAM(this->log_zone_ << "Unable to connect port: " << port_.c_str());
-      ROS_ERROR_STREAM(this->log_zone_ << "Is the serial port open? : " << ioerror.c_str());
+      ROS_ERROR_STREAM(log_zone_ << "Unable to connect port: " << port_.c_str());
+      ROS_ERROR_STREAM(log_zone_ << "Is the serial port open? : " << ioerror.c_str());
       connected_ = false;
     }
 
     if (connection_port_ && connection_port_->isOpen())
     {
-      ROS_INFO_STREAM(this->log_zone_ << "Connection Established with Port: " << port_.c_str()
-                                      << " with baudrate: " << baud_);
+      ROS_INFO_STREAM(log_zone_ << "Connection Established with Port: " << port_.c_str()
+                                << " with baudrate: " << baud_);
       connected_ = true;
     }
   }
@@ -97,7 +101,7 @@ public:
    */
   inline void serialWriteString(const std::string &str)
   {
-    this->connection_port_->write(str);
+    connection_port_->write(str);
   }
 
   /**
@@ -108,7 +112,7 @@ public:
   void setTimeout(int timeout = 500)
   {
     Timeout t = Timeout::simpleTimeout((uint32_t)timeout);
-    this->connection_port_->setTimeout(t);
+    connection_port_->setTimeout(t);
   }
 
   /**
@@ -118,7 +122,7 @@ public:
    */
   int getTimeout()
   {
-    Timeout t = this->connection_port_->getTimeout();
+    Timeout t = connection_port_->getTimeout();
     return t.read_timeout_constant;
   }
 
@@ -127,7 +131,7 @@ public:
    */
   inline void flush()
   {
-    this->connection_port_->flush();
+    connection_port_->flush();
   }
 
   /**
@@ -137,7 +141,7 @@ public:
    */
   inline std::string serialReadLine()
   {
-    std::string str = this->connection_port_->readline();
+    std::string str = connection_port_->readline();
     return str;
   }
 
@@ -148,6 +152,6 @@ public:
    */
   inline size_t available()
   {
-    return this->connection_port_->available();
+    return connection_port_->available();
   }
 };

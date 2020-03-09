@@ -1,6 +1,0 @@
-analyzers:
-    sensors:
-        type: diagnostic_aggregator/GenericAnalyzer
-        path: IMU
-        startswith: 'imu'
-        num_items: 1
