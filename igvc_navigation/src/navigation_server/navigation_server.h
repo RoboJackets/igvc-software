@@ -47,28 +47,34 @@ private:
   GoalHandle goal_handle_;
   bool fix_goal_poses_ = true;
 
+  // ros
   ros::NodeHandle nh_;
+  ros::NodeHandle private_nh_;
   ros::Publisher current_goal_pose_publisher_;
 
-  ros::NodeHandle private_nh_;
+  // action lib
   ActionClientGetPath action_client_get_path_;
   ActionClientExePath action_client_exe_path_;
   ActionClientRecovery action_client_recovery_;
+  actionlib::ActionServer<igvc_msgs::NavigateWaypointAction> action_server_;
 
+  // recovery
   std::vector<std::string> recovery_behaviors_;
   std::vector<std::string> default_recovery_behaviors_ = { "back_up_recovery" };
   std::vector<std::string>::iterator current_recovery_behavior_;
 
+  // goals
   mbf_msgs::GetPathGoal get_path_goal_;
   std::string exe_path_controller_;
 
-  actionlib::ActionServer<igvc_msgs::NavigateWaypointAction> action_server_;
-
-  ros::Time start_time_;
-
+  // replanning
   ros::Rate replanning_rate_ = ros::Rate(1.0);
   std::mutex replanning_mtx_;
+  int max_replanning_tries_;
+  int current_replanning_tries_;
 
+  // exe_path feedback / oscillation
+  ros::Time start_time_;
   igvc_msgs::NavigateWaypointFeedback move_base_feedback_;
   geometry_msgs::PoseStamped previous_oscillation_pose_;
   ros::Time last_oscillation_reset_;
