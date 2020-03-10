@@ -164,7 +164,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
       navigation_state_ = CANCELED;
       break;
     case actionlib::SimpleClientGoalState::LOST:
-      ROS_FATAL_STREAM_NAMED("nav_server", "Connection lost to the action \"get_path\"!");
+      ROS_FATAL_STREAM_NAMED("nav_server", "Connection lost to the action 'get_path'!");
       goal_handle_.setAborted();
       navigation_state_ = FAILED;
       break;
@@ -178,16 +178,17 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
   if (navigation_state_ == EXE_PATH)
   {
     current_replanning_tries_ = 0;
-    // prevent other threads from replanning while thread sleeps
+    // prevent actionGetPathReplanningDone from replanning until new goal is set
     std::lock_guard<std::mutex> guard(replanning_mtx_);
+    // reset replanning rate and sleep for remaining time
     replanning_rate_.reset();
     replanning_rate_.sleep();
-    // if we are still going along path (not finished),
+    // check to see if still executing path and that get_path is done
     if (navigation_state_ == EXE_PATH &&
         action_client_get_path_.getState() != actionlib::SimpleClientGoalState::PENDING &&
         action_client_get_path_.getState() != actionlib::SimpleClientGoalState::ACTIVE)
     {
-      ROS_INFO_STREAM_NAMED("nav_server", "Start replanning, using the \"get_path\" action!");
+      ROS_INFO_STREAM_NAMED("nav_server", "Start replanning, using the 'get_path' action!");
       action_client_get_path_.sendGoal(get_path_goal_,
                                        boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
     }
@@ -204,7 +205,7 @@ void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClient
     // if get_path was successful, start executing new path
     if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
-      ROS_DEBUG_STREAM_NAMED("nav_server", "Replanning succeeded; sending a goal to \"exe_path\" with the new plan");
+      ROS_DEBUG_STREAM_NAMED("nav_server", "Replanning succeeded; sending a goal to 'exe_path' with the new plan");
       nav_msgs::Path path = result.path;
       if (fix_goal_poses_)
       {
@@ -234,18 +235,20 @@ void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClient
           goal_handle_.setAborted(navigate_waypoint_result, state.getText());
           navigation_state_ = FAILED;
         }
+        return;
       }
     }
 
-    // lock replanning mutex and sleep for remaining time
+    // prevents this thread from replanning if actionGetPathDone is sending new goal
     {
       std::lock_guard<std::mutex> guard{ replanning_mtx_ };
       replanning_rate_.sleep();
     }
 
+    // only start replanning if still executing path
     if (navigation_state_ == EXE_PATH)
     {
-      ROS_DEBUG_STREAM_NAMED("nav_server", "Next replanning cycle, using the \"get_path\" action!");
+      ROS_DEBUG_STREAM_NAMED("nav_server", "Next replanning cycle, using the 'get_path' action!");
       action_client_get_path_.sendGoal(get_path_goal_,
                                        boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
     }
@@ -322,7 +325,7 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
 
 void NavigationServer::actionExePathActive()
 {
-  ROS_DEBUG_STREAM_NAMED("nav_server", "The \"exe_path\" action is active.");
+  ROS_DEBUG_STREAM_NAMED("nav_server", "The 'exe_path' action is active.");
 }
 
 void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback)
