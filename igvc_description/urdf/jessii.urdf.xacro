@@ -590,17 +590,17 @@
       <frameId>imu</frameId>
       <topicName>/imu</topicName>
       <rpyOffsets>0 0 0</rpyOffsets>
-      <gaussianNoise>0.00000001</gaussianNoise>
-      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
-      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
-      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <gaussianNoise>0.0</gaussianNoise>
+      <accelDrift>0.0000000 0.0000000 0.0000000</accelDrift>
+      <accelDriftFrequency>0.0000000 0.0000000 0.0000000</accelDriftFrequency>
+      <accelGaussianNoise>0.0 0.00000000 0.00000000</accelGaussianNoise>
       <rateDrift>0.0 0.0 0.0</rateDrift>
       <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
       <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
       <headingDrift>0.0 0.0 0.0</headingDrift>
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-      <yawOffset>1.57079632679</yawOffset>
+      <yawOffset>0.0</yawOffset>
     </plugin>
 
     <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
@@ -610,17 +610,17 @@
       <frameId>magnetometer</frameId>
       <topicName>/magnetometer</topicName>
       <rpyOffsets>0 0 0</rpyOffsets>
-      <gaussianNoise>0.00000001</gaussianNoise>
-      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
-      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
-      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <gaussianNoise>0.00000000</gaussianNoise>
+      <accelDrift>0.0000000 0.0000000 0.0000000</accelDrift>
+      <accelDriftFrequency>0.0000000 0.0000000 0.0000000</accelDriftFrequency>
+      <accelGaussianNoise>0.0000000 0.0000000 0.0000000</accelGaussianNoise>
       <rateDrift>0.0 0.0 0.0</rateDrift>
       <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
       <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
       <headingDrift>0.0 0.0 0.0</headingDrift>
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-      <yawOffset>1.57079632679</yawOffset>
+      <yawOffset>0.0</yawOffset>
     </plugin>
 
 
@@ -633,10 +633,10 @@
       <referenceLatitude>33.774497</referenceLatitude>
       <referenceLongitude>-84.405001</referenceLongitude>
       <referenceAltitude>309.0</referenceAltitude>
-      <drift>0.001 0.001 0.001</drift>
-      <gaussianNoise>0.0001 0.0001 0.0001</gaussianNoise>
+      <drift>0.00 0.00 0.00</drift>
+      <gaussianNoise>0.000 0.000 0.000</gaussianNoise>
       <velocityDrift>0 0 0</velocityDrift>
-      <velocityGaussianNoise>0.005 0.005 0.05</velocityGaussianNoise>
+      <velocityGaussianNoise>0.000 0.000 0.00</velocityGaussianNoise>
     </plugin>
 
     <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">

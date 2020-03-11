@@ -58,22 +58,31 @@
                X velocity, Y velocity, Z velocity,
                roll velocity, pitch velocity, yaw velocity,
                X acceleration, Y acceleration, Z acceleration -->
-      <rosparam param="odom0_config">[false, false, false,
+      <rosparam param="odom0_config">[true, true, true,
                                       false, false, false,
-                                      true, true, false,
+                                      true, true, true,
                                       false, false, false,
-                                      false, false, false]</rosparam>
+                                      true, true, true]</rosparam>
 
       <!-- IMU -->
       <param name="imu0" value="/imu"/>
       <!-- fused parameters same as above -->
-      <rosparam param="imu0_config">[false, false, false,
-                                     true, true, false,
+      <rosparam param="imu0_config">[true,  true,  true
+                                    false, false, false,
                                      false, false, false,
-                                     false,  false, true,
-                                     true,  false,  false]</rosparam>
+                                     false,  false, false,
+                                     true,  true,  true]</rosparam>
+        <param name="imu1" value="/magnetometer"/>
+        <rosparam param= "imu1_config" >
+            [false, false, false,
+            false, false, false,
+            false, false, false,
+            true,  true, true,
+            false,  false,  false]
+        </rosparam>
       <param name="imu0_differential" value="false"/>
       <param name="imu0_remove_gravitational_acceleration" value="true" />
+      <param name="imu1_remove_gravitational_acceleration" value="true"/>
       <param name="publish_acceleration" value="true" />
 
       <!-- gps from nmea_navsat_transform -->
