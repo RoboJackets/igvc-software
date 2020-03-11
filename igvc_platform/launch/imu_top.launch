@@ -5,7 +5,9 @@
 
     <!-- Top IMU -->
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
+        <!--value="/dev/imu_top"-->
         <param name="SERIAL_PORT" type="string" value="/dev/imu_top" />
+
         <param name="frame_id" type="string" value="magnetometer"/>
         <param name="orientation_rotation" value="1.570" />
         <remap from="imu" to="magnetometer" />
