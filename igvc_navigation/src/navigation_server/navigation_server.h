@@ -13,6 +13,8 @@
 #include <igvc_msgs/NavigateWaypointAction.h>
 #include <igvc_msgs/NavigateWaypointFeedback.h>
 
+#include <mutex>
+
 class NavigationServer
 {
 public:
@@ -40,33 +42,39 @@ private:
   // params
   bool recovery_enabled_ = true;
 
-  NavigationState current_state_;
+  NavigationState navigation_state_;
   NavigationState recovery_trigger_;
-  GoalHandle current_goal_handle_;
+  GoalHandle goal_handle_;
   bool fix_goal_poses_ = true;
 
+  // ros
   ros::NodeHandle nh_;
+  ros::NodeHandle private_nh_;
   ros::Publisher current_goal_pose_publisher_;
 
-  ros::NodeHandle private_nh_;
+  // action lib
   ActionClientGetPath action_client_get_path_;
   ActionClientExePath action_client_exe_path_;
   ActionClientRecovery action_client_recovery_;
+  actionlib::ActionServer<igvc_msgs::NavigateWaypointAction> action_server_;
 
+  // recovery
   std::vector<std::string> recovery_behaviors_;
   std::vector<std::string> default_recovery_behaviors_ = { "back_up_recovery" };
   std::vector<std::string>::iterator current_recovery_behavior_;
 
+  // goals
   mbf_msgs::GetPathGoal get_path_goal_;
   std::string exe_path_controller_;
 
-  actionlib::ActionServer<igvc_msgs::NavigateWaypointAction> action_server_;
+  // replanning
+  ros::Rate replanning_rate_ = ros::Rate(1.0);
+  std::mutex replanning_mtx_;
+  int max_replanning_tries_;
+  int current_replanning_tries_;
 
+  // exe_path feedback / oscillation
   ros::Time start_time_;
-
-  ros::Time time_of_last_get_path_;
-  ros::Duration time_between_get_path_ = ros::Duration(0.5);
-
   igvc_msgs::NavigateWaypointFeedback move_base_feedback_;
   geometry_msgs::PoseStamped previous_oscillation_pose_;
   ros::Time last_oscillation_reset_;
@@ -82,6 +90,9 @@ private:
 
   void actionGetPathDone(const actionlib::SimpleClientGoalState &state,
                          const mbf_msgs::GetPathResultConstPtr &result_ptr);
+
+  void actionGetPathReplanningDone(const actionlib::SimpleClientGoalState &state,
+                                   const mbf_msgs::GetPathResultConstPtr &result_ptr);
 
   void runExePath(nav_msgs::Path path);
 
