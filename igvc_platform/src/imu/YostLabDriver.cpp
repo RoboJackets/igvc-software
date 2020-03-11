@@ -184,7 +184,7 @@ void YostLabDriver::run()
   serialWriteString(SET_STREAMING_TIMING_5_MS);
   serialWriteString(START_STREAMING);
 
-  ros::Rate loop_rate(spin_frequency);  //Hz
+  ros::Rate loop_rate(spin_frequency);  // Hz
 
   int line_num_ = 0;
   std::vector<double> parsed_val;
