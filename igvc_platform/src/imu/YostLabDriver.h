@@ -102,11 +102,9 @@ private:
   std::string calibration_mode_;
   std::string mi_mode_;
   std::string axis_direction_;
-  double sensor_temp_;
-  double quaternion_length_;
+  double sensor_temp_, quaternion_length_, spin_frequency_;
   ros::Time lastUpdateTime_;
   tf::Quaternion last_quat_;
-  double spin_frequency;
 
   // Constants
   const double GRAVITY = 9.80665;
