@@ -106,6 +106,7 @@ private:
   double quaternion_length_;
   ros::Time lastUpdateTime_;
   tf::Quaternion last_quat_;
+  double spin_frequency;
 
   // Constants
   const double GRAVITY = 9.80665;

@@ -14,6 +14,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
                     std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
   assertions::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
   assertions::getParam(yostlab_priv_nh_, "frame_id", frame_id_);
+  yostlab_priv_nh_.param("spin_frequency", spin_frequency, 100.0);
 }
 
 //! Destructor
@@ -183,7 +184,7 @@ void YostLabDriver::run()
   serialWriteString(SET_STREAMING_TIMING_5_MS);
   serialWriteString(START_STREAMING);
 
-  ros::Rate loop_rate(20);  // 20Hz
+  ros::Rate loop_rate(spin_frequency);  //Hz
 
   int line_num_ = 0;
   std::vector<double> parsed_val;
