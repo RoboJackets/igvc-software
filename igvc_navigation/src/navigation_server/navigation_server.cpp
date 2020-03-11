@@ -7,15 +7,16 @@ NavigationServer::NavigationServer()
   , recovery_trigger_(NONE)
   , nh_()
   , private_nh_("~")
-  , action_client_get_path_(private_nh_, "/move_base_flex/get_path")
-  , action_client_exe_path_(private_nh_, "/move_base_flex/exe_path")
-  , action_client_recovery_(private_nh_, "/move_base_flex/recovery")
+  , action_client_get_path_(private_nh_, "/move_base_flex/get_path", true)
+  , action_client_exe_path_(private_nh_, "/move_base_flex/exe_path", true)
+  , action_client_recovery_(private_nh_, "/move_base_flex/recovery", true)
   , action_server_(private_nh_, "/move_to_waypoint", boost::bind(&NavigationServer::start, this, _1),
                    boost::bind(&NavigationServer::cancel, this), false)
 {
   ROS_INFO_STREAM_NAMED("nav_server", "Navigation server created.");
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
   assertions::getParam(private_nh_, "oscillation_distance", oscillation_distance_);
+  assertions::getParam(private_nh_, "max_replanning_tries", max_replanning_tries_);
 
   double timeout, wait_time, rate;
   assertions::getParam(private_nh_, "oscillation_timeout", timeout);
@@ -104,7 +105,6 @@ void NavigationServer::runGetPath()
 void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState &state,
                                          const mbf_msgs::GetPathResultConstPtr &result_ptr)
 {
-  const mbf_msgs::GetPathResult &result = *(result_ptr.get());
   igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
 
   switch (state.state_)
@@ -112,7 +112,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
     case actionlib::SimpleClientGoalState::SUCCEEDED:
     {
       ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server received path from 'get_path'");
-      nav_msgs::Path path = result.path;
+      nav_msgs::Path path = result_ptr->path;
       if (fix_goal_poses_)
       {
         size_t size = path.poses.size();
@@ -147,9 +147,9 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
       else
       {
         // copy result from get_path action
-        navigate_waypoint_result.outcome = result.outcome;
-        navigate_waypoint_result.message = result.message;
-        ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result.message);
+        navigate_waypoint_result.outcome = result_ptr->outcome;
+        navigate_waypoint_result.message = result_ptr->message;
+        ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result_ptr->message);
         goal_handle_.setAborted(navigate_waypoint_result, state.getText());
         navigation_state_ = FAILED;
       }
@@ -157,13 +157,13 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
     case actionlib::SimpleClientGoalState::PREEMPTED:
       // the get_path action has been preempted.
       // copy result from get_path action
-      navigate_waypoint_result.outcome = result.outcome;
-      navigate_waypoint_result.message = result.message;
+      navigate_waypoint_result.outcome = result_ptr->outcome;
+      navigate_waypoint_result.message = result_ptr->message;
       goal_handle_.setCanceled(navigate_waypoint_result, state.getText());
       navigation_state_ = CANCELED;
       break;
     case actionlib::SimpleClientGoalState::LOST:
-      ROS_FATAL_STREAM_NAMED("nav_server", "Connection lost to the action \"get_path\"!");
+      ROS_FATAL_STREAM_NAMED("nav_server", "Connection lost to the action 'get_path'!");
       goal_handle_.setAborted();
       navigation_state_ = FAILED;
       break;
@@ -173,53 +173,84 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
       break;
   }
 
-  if (navigation_state_ != EXE_PATH)
+  // only start replanning if we are executing path
+  if (navigation_state_ == EXE_PATH)
   {
-    return;
+    current_replanning_tries_ = 0;
+    // prevent actionGetPathReplanningDone from replanning until new goal is set
+    std::lock_guard<std::mutex> guard(replanning_mtx_);
+    // reset replanning rate and sleep for remaining time
+    replanning_rate_.reset();
+    replanning_rate_.sleep();
+    // check to see if still executing path and that get_path is done
+    if (navigation_state_ == EXE_PATH &&
+        action_client_get_path_.getState() != actionlib::SimpleClientGoalState::PENDING &&
+        action_client_get_path_.getState() != actionlib::SimpleClientGoalState::ACTIVE)
+    {
+      ROS_INFO_STREAM_NAMED("nav_server", "Start replanning, using the 'get_path' action!");
+      action_client_get_path_.sendGoal(get_path_goal_,
+                                       boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
+    }
   }
-  std::lock_guard<std::mutex> guard(replanning_mtx_);
-  replanning_rate_.reset();
-  replanning_rate_.sleep();
-  if (navigation_state_ != EXE_PATH ||
-      action_client_get_path_.getState() == actionlib::SimpleClientGoalState::PENDING ||
-      action_client_get_path_.getState() == actionlib::SimpleClientGoalState::ACTIVE)
-    return;
-  ROS_INFO_STREAM_NAMED("nav_server", "Start replanning, using the \"get_path\" action!");
-  action_client_get_path_.sendGoal(get_path_goal_,
-                                   boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
 }
 
 void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClientGoalState &state,
                                                    const mbf_msgs::GetPathResultConstPtr &result_ptr)
 {
-  if (navigation_state_ != EXE_PATH)
-    return;
-
-  if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
+  // check if we are executing path
+  if (navigation_state_ == EXE_PATH)
   {
-    const mbf_msgs::GetPathResult &result = *(result_ptr.get());
-    ROS_DEBUG_STREAM_NAMED("move_base", "Replanning succeeded; sending a goal to \"exe_path\" with the new plan");
-    nav_msgs::Path path = result.path;
-    if (fix_goal_poses_)
+    // if get_path was successful, start executing new path
+    if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
-      size_t size = path.poses.size();
-      // change the orientation of the last pose to that of the pose before it
-      path.poses[size - 1].pose.orientation = path.poses[size - 2].pose.orientation;
+      ROS_DEBUG_STREAM_NAMED("nav_server", "Replanning succeeded; sending a goal to 'exe_path' with the new plan");
+      nav_msgs::Path path = result_ptr->path;
+      if (fix_goal_poses_)
+      {
+        size_t size = path.poses.size();
+        // change the orientation of the last pose to that of the pose before it
+        path.poses[size - 1].pose.orientation = path.poses[size - 2].pose.orientation;
+      }
+      runExePath(path);
     }
-    runExePath(path);
+    // if get_path was aborted, retry until we exceed maximum number of tries
+    else if (state == actionlib::SimpleClientGoalState::ABORTED)
+    {
+      if (current_replanning_tries_++ > max_replanning_tries_)
+      {
+        ROS_DEBUG_STREAM_NAMED("nav_server", "Action 'get_path' aborted.");
+        if (attemptRecovery())
+        {
+          recovery_trigger_ = GET_PATH;
+        }
+        else
+        {
+          // copy result from get_path action
+          igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
+          navigate_waypoint_result.outcome = result_ptr->outcome;
+          navigate_waypoint_result.message = result_ptr->message;
+          ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result_ptr->message);
+          goal_handle_.setAborted(navigate_waypoint_result, state.getText());
+          navigation_state_ = FAILED;
+        }
+        return;
+      }
+    }
+
+    // prevents this thread from replanning if actionGetPathDone is sending new goal
+    {
+      std::lock_guard<std::mutex> guard{ replanning_mtx_ };
+      replanning_rate_.sleep();
+    }
+
+    // only start replanning if still executing path
+    if (navigation_state_ == EXE_PATH)
+    {
+      ROS_DEBUG_STREAM_NAMED("nav_server", "Next replanning cycle, using the 'get_path' action!");
+      action_client_get_path_.sendGoal(get_path_goal_,
+                                       boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
+    }
   }
-
-  {
-    std::lock_guard<std::mutex> guard{ replanning_mtx_ };
-    replanning_rate_.sleep();
-  }
-
-  if (navigation_state_ != EXE_PATH)
-    return;
-
-  ROS_DEBUG_STREAM_NAMED("move_base", "Next replanning cycle, using the \"get_path\" action!");
-  action_client_get_path_.sendGoal(get_path_goal_,
-                                   boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
 }
 
 void NavigationServer::runExePath(nav_msgs::Path path)
@@ -292,7 +323,7 @@ void NavigationServer::actionExePathDone(const actionlib::SimpleClientGoalState 
 
 void NavigationServer::actionExePathActive()
 {
-  ROS_DEBUG_STREAM_NAMED("nav_server", "The \"exe_path\" action is active.");
+  ROS_DEBUG_STREAM_NAMED("nav_server", "The 'exe_path' action is active.");
 }
 
 void NavigationServer::actionExePathFeedback(const mbf_msgs::ExePathFeedbackConstPtr &feedback)
@@ -442,8 +473,7 @@ void NavigationServer::runNextRecoveryBehavior(const igvc_msgs::NavigateWaypoint
   if (current_recovery_behavior_ == recovery_behaviors_.end())
   {
     ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server: All recovery behaviors failed. Abort recovering and abort the "
-                                         "move_base "
-                                         "action");
+                                         "move_base action");
     goal_handle_.setAborted(navigate_waypoint_result, "All recovery behaviors failed.");
     navigation_state_ = FAILED;
   }
