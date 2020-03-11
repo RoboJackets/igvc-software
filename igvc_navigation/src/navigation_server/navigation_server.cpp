@@ -105,7 +105,6 @@ void NavigationServer::runGetPath()
 void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState &state,
                                          const mbf_msgs::GetPathResultConstPtr &result_ptr)
 {
-  const mbf_msgs::GetPathResult &result = *(result_ptr.get());
   igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
 
   switch (state.state_)
@@ -113,7 +112,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
     case actionlib::SimpleClientGoalState::SUCCEEDED:
     {
       ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server received path from 'get_path'");
-      nav_msgs::Path path = result.path;
+      nav_msgs::Path path = result_ptr->path;
       if (fix_goal_poses_)
       {
         size_t size = path.poses.size();
@@ -148,9 +147,9 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
       else
       {
         // copy result from get_path action
-        navigate_waypoint_result.outcome = result.outcome;
-        navigate_waypoint_result.message = result.message;
-        ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result.message);
+        navigate_waypoint_result.outcome = result_ptr->outcome;
+        navigate_waypoint_result.message = result_ptr->message;
+        ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result_ptr->message);
         goal_handle_.setAborted(navigate_waypoint_result, state.getText());
         navigation_state_ = FAILED;
       }
@@ -158,8 +157,8 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
     case actionlib::SimpleClientGoalState::PREEMPTED:
       // the get_path action has been preempted.
       // copy result from get_path action
-      navigate_waypoint_result.outcome = result.outcome;
-      navigate_waypoint_result.message = result.message;
+      navigate_waypoint_result.outcome = result_ptr->outcome;
+      navigate_waypoint_result.message = result_ptr->message;
       goal_handle_.setCanceled(navigate_waypoint_result, state.getText());
       navigation_state_ = CANCELED;
       break;
@@ -201,12 +200,11 @@ void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClient
   // check if we are executing path
   if (navigation_state_ == EXE_PATH)
   {
-    const mbf_msgs::GetPathResult &result = *(result_ptr.get());
     // if get_path was successful, start executing new path
     if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
     {
       ROS_DEBUG_STREAM_NAMED("nav_server", "Replanning succeeded; sending a goal to 'exe_path' with the new plan");
-      nav_msgs::Path path = result.path;
+      nav_msgs::Path path = result_ptr->path;
       if (fix_goal_poses_)
       {
         size_t size = path.poses.size();
@@ -229,9 +227,9 @@ void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClient
         {
           // copy result from get_path action
           igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
-          navigate_waypoint_result.outcome = result.outcome;
-          navigate_waypoint_result.message = result.message;
-          ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result.message);
+          navigate_waypoint_result.outcome = result_ptr->outcome;
+          navigate_waypoint_result.message = result_ptr->message;
+          ROS_WARN_STREAM_NAMED("nav_server", "Abort the execution of the planner: " << result_ptr->message);
           goal_handle_.setAborted(navigate_waypoint_result, state.getText());
           navigation_state_ = FAILED;
         }
