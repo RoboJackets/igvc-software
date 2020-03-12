@@ -44,14 +44,14 @@
 */cmake-build-*/
 
 #Camera Calibration
-/sandbox/camera_pose_estimation/CMakeFiles
-/sandbox/camera_pose_estimation/CMakeCache.txt
-/sandbox/camera_pose_estimation/cmake_install.cmake
-/sandbox/camera_pose_estimation/Makefile
-/sandbox/camera_pose_estimation/solvepnp
+/igvc_sandbox/camera_pose_estimation/CMakeFiles
+/igvc_sandbox/camera_pose_estimation/CMakeCache.txt
+/igvc_sandbox/camera_pose_estimation/cmake_install.cmake
+/igvc_sandbox/camera_pose_estimation/Makefile
+/igvc_sandbox/camera_pose_estimation/solvepnp
 
 #CNN models
-/sandbox/models/
+/igvc_sandbox/models/
 
 #generated textures
 /igvc_gazebo/scripts/gen

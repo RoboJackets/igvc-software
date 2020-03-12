@@ -25,6 +25,7 @@ void FastSegmentFilter::filter(pointcloud_filter::Bundle &bundle)
   ground_pub_.publish(ground_points_);
   nonground_pub_.publish(nonground_points_);
 
+  bundle.occupied_pointcloud->header = bundle.pointcloud->header;
   bundle.occupied_pointcloud->points = std::move(nonground_points_.points);
 }
 
@@ -203,7 +204,7 @@ int FastSegmentFilter::getSegIdFromPoint(const velodyne_pointcloud::PointXYZIR p
 
 double FastSegmentFilter::getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point)
 {
-  return std::hypot(point.x, point.y);
+  return std::hypot(point.x, point.y, point.z);
 }
 
 double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1,
@@ -225,7 +226,7 @@ bool FastSegmentFilter::evaluateIsGround(Line &l)
   double dz = l.end_point_.point_.z - l.start_point_.point_.z;
   double len_xy = std::hypot(dx, dy);
   double slope = std::abs(dz) / len_xy;
-  return slope < config_.slope_t && l.end_point_.point_.z < config_.intercept_z_t;
+  return slope < config_.slope_t;
 }
 
 void FastSegmentFilter::debugViz()

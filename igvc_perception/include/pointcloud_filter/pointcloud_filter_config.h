@@ -15,6 +15,7 @@ struct PointcloudFilterConfig
   std::string topic_transformed;
   std::string topic_occupied;
   std::string topic_free;
+  std::string topic_filtered;
 
   std::string base_frame;
 

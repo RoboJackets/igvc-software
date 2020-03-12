@@ -1,3 +1,3 @@
 recovery_behaviors:
-    - name: 'clear_costmap'
-      type: 'clear_costmap_recovery/ClearCostmapRecovery'
+    - name: 'back_up_recovery'
+      type: 'back_up_recovery/BackUpRecovery'

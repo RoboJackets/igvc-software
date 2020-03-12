@@ -9,6 +9,7 @@ PointcloudFilterConfig::PointcloudFilterConfig(const ros::NodeHandle &nh)
   assertions::getParam(nh, "topic/transformed", topic_transformed);
   assertions::getParam(nh, "topic/occupied", topic_occupied);
   assertions::getParam(nh, "topic/free", topic_free);
+  assertions::getParam(nh, "topic/filtered", topic_filtered);
 
   assertions::getParam(nh, "frames/base_footprint", base_frame);
 

@@ -41,6 +41,8 @@ private:
   ros::Publisher occupied_pointcloud_pub_;
   ros::Publisher free_pointcloud_pub_;
 
+  ros::Publisher filtered_pointcloud_pub_;
+
   void setupPubSub();
   void pointcloudCallback(const PointCloud::ConstPtr& raw_pointcloud);
 };

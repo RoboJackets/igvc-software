@@ -20,4 +20,10 @@
 
     <!-- pointcloud filter -->
     <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
+
+    <!-- elevation mapping -->
+    <include file="$(find igvc_perception)/launch/elevation_mapping.launch" />
+
+    <!-- traversability filter -->
+    <include file="$(find igvc_perception)/launch/slope_filter.launch"/>
 </launch>
