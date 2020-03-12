@@ -1,0 +1,38 @@
+slope_map_filters:
+
+    - name: buffer_normalizer
+      type: gridMapFilters/BufferNormalizerFilter
+
+    # Delete color layer.
+    - name: delete_original_layers
+      type: gridMapFilters/DeletionFilter
+      params:
+          layers: [variance, horizontal_variance_x, horizontal_variance_y, horizontal_variance_xy,
+                   color, time, standard_deviation, horizontal_standard_deviation, two_sigma_bound] # List of layers.
+
+    # Boxblur as an alternative to the inpaint and radial blurring filter above.
+    - name: boxblur
+      type: gridMapFilters/SlidingWindowMathExpressionFilter
+      params:
+          input_layer: elevation
+          output_layer: elevation_smooth
+          expression: meanOfFinites(elevation)
+          compute_empty_cells: true
+          edge_handling: crop # options: inside, crop, empty, mean
+          window_size: 5 # optional
+
+    # Compute surface normals.
+    - name: surface_normals
+      type: gridMapFilters/NormalVectorsFilter
+      params:
+          input_layer: elevation_smooth
+          output_layers_prefix: normal_vectors_
+          radius: 0.05
+          normal_vector_positive_axis: z
+
+    # Compute slope from surface normal.
+    - name: slope
+      type: gridMapFilters/MathExpressionFilter
+      params:
+          output_layer: slope
+          expression: acos(normal_vectors_z)
