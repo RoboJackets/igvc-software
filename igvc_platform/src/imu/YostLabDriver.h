@@ -5,6 +5,8 @@
 
 #include <tf/tf.h>
 #include <Eigen/Dense>
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
 
 // This is the  basic ros-based device driver of IMU
 class YostLabDriver : SerialInterface
@@ -16,48 +18,68 @@ public:
   //!
   //! \brief run: runs system
   //!
-  void run(void);
+  void run();
   //!
   //! \brief getSoftwareVersion
   //! \return returns software string version
   //!
-  const std::string getSoftwareVersion(void);
+  std::string getSoftwareVersion();
   //!
   //! \brief restoreFactorySettings resets everything
   //!
-  void restoreFactorySettings(void);
+  void restoreFactorySettings();
+  //!
+  //! \brief imu_diagnostic runs diagnostics
+  //!
+  void imu_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
   //!
   //! \brief getAxisDirection
   //! \return returns axis directions
   //!
-  const std::string getAxisDirection(void);
+  std::string getAxisDirection();
   //!
   //! \brief getEulerDecomp
   //! \return decompisition string
   //!
-  const std::string getEulerDecomp(void);
+  std::string getEulerDecomp();
   //!
   //! \brief getCalibMode
   //! \return 0 for bias 1 for scale and bias
   //!
-  const std::string getCalibMode(void);
+  std::string getCalibMode();
   //!
   //! \brief getMIMode
   //! \return 1 if enabled 0 if disabled
   //!
-  const std::string getMIMode(void);
+  std::string getMIMode();
   //!
   //! \brief startGyroCalibration
   //!
-  void startGyroCalibration(void);
+  void startGyroCalibration();
   //!
   //! \brief setMIMode
   //! \param on True to set , False to Unset
   //!
   void setMIMode(bool on);
+  //!
+  //! \brief setAndCheckIMUSettings
+  //! \param sets some IMU settings and reads some settings from IMU
+  //!
+  void setAndCheckIMUSettings();
+  //!
+  //! \brief createAndPublishIMUMessage
+  //! \param sets some IMU settings and reads some settings from IMU
+  //!
+  void createAndPublishIMUMessage(std::vector<double>& parsed_val);
+  //!
+  //! \param buf the string to parse
+  //! \param parsed_vals the previously parsed values
+  //! \return number of doubles in the parsed line
+  //!
+  static int addToParsedVals(const std::string& buf, std::vector<double>& parsed_vals);
 
 private:
-  // whether or not to commit the imu settings
+  // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
   bool commit_settings_;
 
   // IMU orientation correction.
@@ -72,8 +94,24 @@ private:
   ros::NodeHandle yostlab_priv_nh_;
   ros::NodeHandle yostlab_nh_;
   ros::Publisher imu_pub_;
+
+  // Diagnostic_updator
+  diagnostic_updater::Updater updater;
+
+  std::string software_version_;
+  std::string calibration_mode_;
+  std::string mi_mode_;
+  std::string axis_direction_;
+  double sensor_temp_, quaternion_length_, spin_frequency_;
+  ros::Time lastUpdateTime_;
+  tf::Quaternion last_quat_;
+
   // Constants
   const double GRAVITY = 9.80665;
+  static constexpr auto MAX_IMU_TEMP = 185.0;
+  static constexpr auto MIN_IMU_TEMP = -40.0;
+  static constexpr auto QUATERNION_LENGTH_TOL = 0.02;
+  static constexpr auto IMU_TIMEOUT_DELAY = 1.0;
 
   static constexpr auto SET_GYRO_ENABLED = ":107,1\n";           // enable gyroscope readings as inputs to
                                                                  // the orientation estimation

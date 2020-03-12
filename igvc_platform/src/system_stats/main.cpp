@@ -17,9 +17,7 @@ ros::Publisher stats_pub;
 double get_used_memory()
 {
   glibtop_mem mem;
-
   glibtop_get_mem(&mem);
-
   return (double)mem.user / ((double)(G_GUINT64_CONSTANT(1) << 30));
 }
 
@@ -46,7 +44,7 @@ std::vector<double> get_cpu_usage()
   return percentages;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "system_state");
 

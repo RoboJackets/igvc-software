@@ -54,6 +54,13 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 
   assertions::param(pNh, "log_period", log_period_, 5.0);
 
+  // Diagnostic_updator
+
+  mc_updater_.setHardwareID("Motor Controller");
+  mc_updater_.add("MC Diagnostic", this, &MotorController::mc_diagnostic);
+  battery_updater_.setHardwareID("Battery Controller");
+  battery_updater_.add("Battery Diagnostic", this, &MotorController::battery_diagnostic);
+
   // communication frequency
   assertions::getParam(pNh, std::string("frequency"), frequency_);
   ros::Rate rate(frequency_);
@@ -66,6 +73,8 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
     sendRequest();
     recieveResponse();
     ros::spinOnce();
+    mc_updater_.update();
+    battery_updater_.update();
     rate.sleep();
   }
 }
@@ -74,6 +83,29 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 {
   current_motor_command_ = *msg;
   last_motors_message_ = ros::Time::now();
+}
+
+void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
+{
+  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
+  stat.add("mc publishing freq", std::to_string(mc_hertz_) + " Hz");
+}
+
+void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
+{
+  if (battery_avg_ < min_battery_voltage_)
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Battery voltage dangerously low");
+  }
+  else if (battery_avg_ < (min_battery_voltage_ + 0.25))
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Battery voltage low");
+  }
+  else
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Battery voltage okay");
+  }
+  stat.add("battery voltage", battery_avg_);
 }
 
 void MotorController::setPID()
@@ -124,6 +156,8 @@ void MotorController::setPID()
   if (!status)
   {
     ROS_ERROR_STREAM("Encoding failed: " << PB_GET_ERROR(&ostream));
+    mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed");
+    battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed. Lost battery tracking.");
     ros::shutdown();
   }
 
@@ -143,6 +177,10 @@ void MotorController::setPID()
     if (n == 0)
     {
       ROS_ERROR_STREAM("Connection closed by server");
+      mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "Failed to send PID. Connection Closed by "
+                                                                      "server.");
+      battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "Failed to send PID. Lost battery "
+                                                                           "tracking.");
       ros::shutdown();
     }
 
@@ -159,6 +197,9 @@ void MotorController::setPID()
     if (!status)
     {
       ROS_ERROR_STREAM("Decoding Failed: " << PB_GET_ERROR(&istream));
+      mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID decoding failed. Shutting Down.");
+      battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID decoding failed. Lost battery "
+                                                                           "tracking.");
       ros::shutdown();
     }
 
@@ -247,8 +288,7 @@ void MotorController::recieveResponse()
   }
 
   publishResponse(response);
-
-  ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << 1 / response.dt_sec << "hz.");
+  mc_hertz_ = 1 / response.dt_sec;
 }
 
 void MotorController::publishResponse(const ResponseMessage& response)
