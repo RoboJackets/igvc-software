@@ -286,8 +286,8 @@
               <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>480</height>
               </image>
               <clip>
                 <near>0.1</near>
@@ -352,8 +352,8 @@
               <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>480</height>
               </image>
               <clip>
                 <near>0.1</near>
@@ -418,8 +418,8 @@
               <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>480</height>
               </image>
               <clip>
                 <near>0.1</near>
