@@ -180,7 +180,8 @@ void YostLabDriver::run()
   setAndCheckIMUSettings();
 
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
-  if (calibrate_imu_) {
+  if (calibrate_imu_)
+  {
     startGyroCalibration();
   }
 
