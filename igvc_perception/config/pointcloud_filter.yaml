@@ -1,9 +1,10 @@
 pointcloud_filter:
     topic:
-        input: "velodyne_points"            # Input topic for the pointcloud filter
-        transformed: "lidar/transformed"    # Output topic for the transformed pointcloud (in base_frame instead of lidar frame)
-        occupied: "lidar/occupied"          # Output topic for the occupied points
-        free: "lidar/free"                  # Output topic for the free points
+        input: "velodyne_points"
+        transformed: "lidar/transformed"
+        occupied: "lidar/occupied"
+        free: "lidar/free"
+        filtered: "lidar/filtered"
     # back_filter filters out points behind the lidar, ie. the robot itself
     back_filter:
         start_angle: -2.0                   # Starting angle to filter from (rad)

@@ -2,7 +2,8 @@ local_costmap:
     global_frame: odom
     robot_base_frame: base_link
     plugins:
-        - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
+#        - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
+        - {name: traversability_layer, type: "traversability_layer::TraversabilityLayer"}
         - {name: line_layer,     type: "line_layer::LineLayer"}
     publish_frequency: 5.0
     footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
@@ -107,3 +108,18 @@ line_layer:
         length_y: 30
         line_closing_kernel_size: 5
         freespace_closing_kernel_size: 5
+traversability_layer:
+    map:
+        frame_id: "odom"
+        resolution: 0.1
+        length_x: 200
+        length_y: 200
+        occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
+        costmap_topic: "/slope/costmap"
+        debug:
+            map_topic: "/slope/debug" # not actually used
+            enabled: false
+    untraversable_probability: 0.8
+    slope_threshold: 0.45

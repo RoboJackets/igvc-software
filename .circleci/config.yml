@@ -6,7 +6,7 @@ image: &image
   - image: robojackets/igvc-baseimage:latest
 
 install_deps: &install_deps
-  run: apt-get update && rosdep update && rosdep install -iy --from-paths ./src
+  run: apt-get update && rosdep update && rosdep install -iy --from-paths ./src --skip-keys='kindr'
 
 save_src_cache: &save_src_cache
   save_cache:
