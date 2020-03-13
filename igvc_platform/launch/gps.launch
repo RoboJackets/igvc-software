@@ -9,6 +9,4 @@
         <param name="port" type="str" value="/dev/igvc_gps" />
         <param name="baud" type="int" value="19200" />
     </node>
-
-
 </launch>

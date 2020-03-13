@@ -168,7 +168,6 @@ if (CATKIN_ENABLE_TESTING)
     add_subdirectory(src/tests)
 endif ()
 
-
 add_subdirectory(src/imu)
 add_subdirectory(src/joystick_driver)
 add_subdirectory(src/motor_controller)
