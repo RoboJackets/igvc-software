@@ -5,10 +5,10 @@ local_costmap:
         - {name: rolling_layer, type: "rolling_layer::RollingLayer"}
     publish_frequency: 5.0
     footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
-    width: 40
-    height: 40
-    origin_x: -20
-    origin_y: -20
+    width: 20
+    height: 20
+    origin_x: -10
+    origin_y: -10
     update_frequency: 10
     track_unknown_space: false
     unknown_cost_value: 30
