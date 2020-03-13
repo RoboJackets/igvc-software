@@ -33,3 +33,16 @@ the slope we desire. The filters are:
 
 `traversability_layer` subscribes to the slope grid map, and uses log-odds to update the traversability probability
 for each cell in the costmap. If the slope is above a certain threshold, the cell is more likely to be untraversable.
+
+For more information on the `elevation_mapping` library:
+* github page: https://github.com/ANYbotics/elevation_mapping
+* relevant paper: https://www.research-collection.ethz.ch/handle/20.500.11850/272110
+
+The basics is that each cell is updated using a Kalman filter, taking into account the uncertainty of the data.
+The pointcloud is transformed to the odom frame, and then fit into cells based on their `x` and `y` values, with
+the height being their `z` value. There is an additional functionally to smooth over the elevation map, but we found
+it was too inefficient for what we wanted to use it for.
+
+A possible alternative to using the `elevation_mapping` library would be to make our own library. This would allow us
+to remove our dependencies of `kindr_ros`, `kindr`, and `elevation_mapping` itself. However, the library handles a lot
+of complex math, so its hard to recreate it without extensive knowledge on the subject. So we stuck to using the library.
