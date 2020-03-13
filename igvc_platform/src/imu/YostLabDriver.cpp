@@ -170,7 +170,7 @@ std::string YostLabDriver::getMIMode()
     else
       return "Unknown";
   }();
-  ROS_INFO_STREAM(this->logger << "MI Mode: " << ret_buf << ", buf is: " << buf);
+  ROS_INFO_STREAM(logger << "MI Mode: " << ret_buf << ", buf is: " << buf);
   return ret_buf;
 }
 
