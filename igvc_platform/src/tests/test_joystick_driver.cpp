@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include <igvc_msgs/velocity_pair.h>
-#include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <mocking_utils/mock_subscriber.h>
@@ -36,9 +35,18 @@ protected:
     ros::Publisher mock_joy_pub;
 };
 
+sensor_msgs::Joy createJoyMsg(float left, float right)
+{
+    sensor_msgs::Joy joy_msg;
+    joy_msg.axes = { 0, left, 0, 0, right };
+    joy_msg.buttons = { 0, 0, 0, 0 };
+
+    return joy_msg;
+}
+
 TEST_F(TestJoystickDriver, FullForward)
 {
-  MockMotorSubscriber mock_sub("/motors");
+  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
   ASSERT_TRUE(waitForSubscriber());
 
@@ -56,7 +64,7 @@ TEST_F(TestJoystickDriver, FullForward)
 
 TEST_F(TestJoystickDriver, FullReverse)
 {
-  MockMotorSubscriber mock_sub("/motors");
+  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
   ASSERT_TRUE(waitForSubscriber());
   const float full_speed = 1.0;
@@ -73,7 +81,7 @@ TEST_F(TestJoystickDriver, FullReverse)
 
 TEST_F(TestJoystickDriver, SpinRight)
 {
-  MockMotorSubscriber mock_sub("/motors");
+  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
   ASSERT_TRUE(waitForSubscriber());
   const float full_speed = 1.0;
@@ -90,7 +98,7 @@ TEST_F(TestJoystickDriver, SpinRight)
 
 TEST_F(TestJoystickDriver, SpinLeft)
 {
-  MockMotorSubscriber mock_sub("/motors");
+  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
   ASSERT_TRUE(waitForSubscriber());
   const float full_speed = 1.0;
@@ -107,7 +115,7 @@ TEST_F(TestJoystickDriver, SpinLeft)
 
 TEST_F(TestJoystickDriver, HalfSpeedForward)
 {
-  MockMotorSubscriber mock_sub("/motors");
+  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
   ASSERT_TRUE(waitForSubscriber());
   const float half_speed = 0.5;

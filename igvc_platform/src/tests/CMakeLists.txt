@@ -1,3 +1,7 @@
 add_rostest_gtest(TestJoystickDriver test/test_joystick_driver.test test_joystick_driver.cpp)
 add_dependencies(TestJoystickDriver ${catkin_EXPORTED_TARGETS} joystick_driver)
 target_link_libraries(TestJoystickDriver ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestDifferentialDrive test/test_differential_drive.test test_differential_drive.cpp)
+add_dependencies(TestDifferentialDrive ${catkin_EXPORTED_TARGETS} differential_drive)
+target_link_libraries(TestDifferentialDrive ${catkin_LIBRARIES})
