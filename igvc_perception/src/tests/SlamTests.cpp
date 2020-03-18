@@ -1,5 +1,5 @@
 #include "tests/SlamTests.h"
 
-SlamTests::SlamTests() {
-
+SlamTests::SlamTests()
+{
 }

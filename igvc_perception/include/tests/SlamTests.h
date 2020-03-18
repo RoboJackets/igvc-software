@@ -5,14 +5,15 @@
 #include <tests/SlamTests.h>
 #include <ros/ros.h>
 
-class SlamTests {
+class SlamTests
+{
 public:
-    SlamTests();
+  SlamTests();
 
 private:
-    ros::NodeHandle pnh_;
-    ros::Subscriber slam_sub_;
-    ros::Subscriber ground_truth_sub_;
+  ros::NodeHandle pnh_;
+  ros::Subscriber slam_sub_;
+  ros::Subscriber ground_truth_sub_;
 };
 
-#endif //SRC_SLAMTESTS_H
+#endif  // SRC_SLAMTESTS_H

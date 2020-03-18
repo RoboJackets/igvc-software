@@ -22,12 +22,25 @@
     <include file="$(find igvc_platform)/launch/velodyne_lidar.launch" />
 
     <!-- Bottom IMU -->
-    <include file="$(find igvc_platform)/launch/imu_bottom.launch" />
+    <include file="$(find igvc_platform)/launch/imu_bottom.launch" >
+        <arg name="calibrate_imu" value="false"/>
+    </include>
 
     <!-- Top IMU -->
-    <include file="$(find igvc_platform)/launch/imu_top.launch" />
+    <include file="$(find igvc_platform)/launch/imu_top.launch" >
+        <arg name="calibrate_imu" value="false"/>
+    </include>
 
     <!-- System Stats -->
     <include file="$(find igvc_utils)/launch/system_stats.launch" />
+
+    <node pkg="diagnostic_aggregator" type="aggregator_node"
+          name="diagnostic_aggregator" >
+        <!-- Load the file you made above -->
+        <rosparam command="load"
+                  file="$(find igvc_platform)/config/analyzers.yaml" />
+    </node>
+
+    <node pkg="rqt_robot_monitor" name="robot_monitor" type="rqt_robot_monitor" />
 
 </launch>

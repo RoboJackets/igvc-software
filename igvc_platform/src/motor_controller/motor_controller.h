@@ -7,6 +7,8 @@
 
 #include <igvc_msgs/velocity_pair.h>
 #include <igvc_utils/EthernetSocket.h>
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
 
 class MotorController
 {
@@ -46,11 +48,28 @@ private:
   ros::Publisher enabled_pub_;
   ros::Publisher battery_pub_;
 
-  /**
-  get current motor command from the /motors topic
+  // diagnostics
+  diagnostic_updater::Updater mc_updater_;
+  diagnostic_updater::Updater battery_updater_;
+  double mc_hertz_ = 0;
 
-  @param[in] msg current message on the /motors topic
+  /**
+  updates the motor controller diagnostics
+
+  @param[in] Diagnostics Status Wrapper
   */
+  void mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
+  /**
+  updates the battery diagnostics
+
+  @param[in] Diagnostics Status Wrapper
+  */
+  void battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
+  /**
+    get current motor command from the /motors topic
+
+    @param[in] msg current message on the /motors topic
+    */
   void cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg);
   /**
   Sets PID values on the mbed

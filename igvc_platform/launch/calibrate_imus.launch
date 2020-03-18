@@ -1,0 +1,16 @@
+<!-- calibrate_imus.launch -->
+<!--
+    This file will launch both IMUs with calibration enabled, and it should be shut down after calibration is done.
+    -->
+<launch>
+    <!-- Bottom IMU -->
+    <include file="$(find igvc_platform)/launch/imu_bottom.launch" >
+        <arg name="calibrate_imu" value="true"/>
+    </include>
+
+    <!-- Top IMU -->
+    <include file="$(find igvc_platform)/launch/imu_top.launch" >
+        <arg name="calibrate_imu" value="true"/>
+    </include>
+
+</launch>

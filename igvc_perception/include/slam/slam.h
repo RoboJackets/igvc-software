@@ -23,43 +23,44 @@
 #include <gtsam/nonlinear/ISAM2.h>
 #include <slam/type_conversions.h>
 
-class Slam {
+class Slam
+{
 public:
-    Slam();
+  Slam();
 
 private:
-    ros::NodeHandle pnh_;
+  ros::NodeHandle pnh_;
 
-    ros::Subscriber odom_sub_;
-    ros::Subscriber imu_sub_;
-    ros::Subscriber gps_sub_;
+  ros::Subscriber odom_sub_;
+  ros::Subscriber imu_sub_;
+  ros::Subscriber gps_sub_;
 
-    ros::Publisher location_pub;
+  ros::Publisher location_pub;
 
-    void GpsCallback(const nav_msgs::Odometry &msg);
-    void ImuCallback(const sensor_msgs::Imu &msg);
-//    void OdomCallback(const nav_msgs::Odometry &msg);
-    void IntegrateAndAddIMUFactor();
-    void Optimize();
-    void InitializeImuParams();
-    void InitializePriors();
-    void InitializeNoiseMatrices();
+  void GpsCallback(const nav_msgs::Odometry &msg);
+  void ImuCallback(const sensor_msgs::Imu &msg);
+  //    void OdomCallback(const nav_msgs::Odometry &msg);
+  void IntegrateAndAddIMUFactor();
+  void Optimize();
+  void InitializeImuParams();
+  void InitializePriors();
+  void InitializeNoiseMatrices();
 
-    // Defining some types
-    typedef gtsam::noiseModel::Diagonal noiseDiagonal;
-    typedef gtsam::Vector3 Vec3;
+  // Defining some types
+  typedef gtsam::noiseModel::Diagonal noiseDiagonal;
+  typedef gtsam::Vector3 Vec3;
 
-    // Establishing global variables
-    gtsam::Values initEstimate, result;
-    gtsam::NonlinearFactorGraph graph;
-    gtsam::Pose3 previousPose;
-    unsigned long curr_index_;
-    noiseDiagonal::shared_ptr odometry_noise_, gps_noise_, bias_noise_;
-    gtsam::ISAM2 isam;
-    const double KGRAVITY = 9.81;
-    gtsam::PreintegratedImuMeasurements accum;
-    ros::Time lastImuMeasurement;
-    bool imu_connected_, imu_update_available_;
+  // Establishing global variables
+  gtsam::Values initEstimate, result;
+  gtsam::NonlinearFactorGraph graph;
+  gtsam::Pose3 previousPose;
+  unsigned long curr_index_;
+  noiseDiagonal::shared_ptr odometry_noise_, gps_noise_, bias_noise_;
+  gtsam::ISAM2 isam;
+  const double KGRAVITY = 9.81;
+  gtsam::PreintegratedImuMeasurements accum;
+  ros::Time lastImuMeasurement;
+  bool imu_connected_, imu_update_available_;
 };
 
-#endif //SRC_SLAM_H
+#endif  // SRC_SLAM_H

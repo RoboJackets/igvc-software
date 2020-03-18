@@ -26,4 +26,11 @@
       </description>
     </class>
   </library>
+  <library path="lib/libtraversability_layer">
+    <class type="traversability_layer::TraversabilityLayer" base_class_type="costmap_2d::Layer">
+      <description>
+        Layer that that performs occupancy grid mapping, using gridmap as the backing data structure.
+      </description>
+    </class>
+  </library>
 </class_libraries>

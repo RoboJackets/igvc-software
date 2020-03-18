@@ -1,14 +1,16 @@
 <launch>
-    <!-- Whether or not to tare the orientation using the current orientation.
-    If set to true, the current orientation will be set as the reference heading (0 deg)
-    and all orientation readings will be gathered relative to this orientation. -->
+    <arg name="calibrate_imu" default="false"/>
 
     <!-- Top IMU -->
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
+        <!--value="/dev/imu_top"-->
         <param name="SERIAL_PORT" type="string" value="/dev/imu_top" />
+
         <param name="frame_id" type="string" value="magnetometer"/>
         <param name="orientation_rotation" value="1.570" />
+        <param name="calibrate_imu" value="$(arg calibrate_imu)" />
         <remap from="imu" to="magnetometer" />
+        <remap from="imu_mag" to="magnetometer_mag" />
     </node>
     <include file="$(find igvc_platform)/launch/quaternion_to_rpy.launch" />
 </launch>

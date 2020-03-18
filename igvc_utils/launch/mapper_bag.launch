@@ -5,9 +5,6 @@
           <param name="z" type="double" value="0.0025" />
     </node>
 
-    <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
-    <include file="$(find igvc_perception)/launch/compressed_to_raw.launch" />
-
     <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(env BAG_LOC)">
           <remap from="/map" to="/map_old"/>
           <remap from="/odometry/filtered" to="/odometry/filtered_old"/>
