@@ -1,6 +1,7 @@
 #pragma once
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 #include "SerialInterface.h"
 
 #include <tf/tf.h>
@@ -79,8 +80,11 @@ public:
   static int addToParsedVals(const std::string& buf, std::vector<double>& parsed_vals);
 
 private:
-  // whether or not to commit the imu settingstf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
+  // whether or not to commit the imu settings
   bool commit_settings_;
+
+  // whether gyroscope should be calibrated on startup
+  bool calibrate_imu_;
 
   // IMU orientation correction.
   std::vector<double> imu_orientation_correction_;
@@ -94,8 +98,9 @@ private:
   ros::NodeHandle yostlab_priv_nh_;
   ros::NodeHandle yostlab_nh_;
   ros::Publisher imu_pub_;
+  ros::Publisher magnet_pub_;
 
-  // Diagnostic_updator
+  // Diagnostic_updater
   diagnostic_updater::Updater updater;
 
   std::string software_version_;
@@ -103,11 +108,13 @@ private:
   std::string mi_mode_;
   std::string axis_direction_;
   double sensor_temp_, quaternion_length_, spin_frequency_;
+  int msg_counter_;
   ros::Time lastUpdateTime_;
   tf::Quaternion last_quat_;
 
   // Constants
   const double GRAVITY = 9.80665;
+  const double GAUSSTOTESLA = 1e-4;
   static constexpr auto MAX_IMU_TEMP = 185.0;
   static constexpr auto MIN_IMU_TEMP = -40.0;
   static constexpr auto QUATERNION_LENGTH_TOL = 0.02;
@@ -136,9 +143,11 @@ private:
   Slot #1: untared orientation as quaternion [4x float]
   Slot #2: corrected gyroscope vector [3x float]
   Slot #3: corrected acceleration vector [3x float]
-  Slot #[4-8]: No Command
+  Slot #4: corrected magnetometer vector [3x float]
+  Slot #5: temperature in Fahrenheit [1x float]
+  Slot #[6-8]: No Command
   */
-  static constexpr auto SET_STREAMING_SLOTS = ":80,6,38,39,44,255,255,255,255\n";
+  static constexpr auto SET_STREAMING_SLOTS = ":80,6,38,39,40,44,255,255,255\n";
 
   static constexpr auto BEGIN_GYRO_AUTO_CALIB = ":165\n";  // Performs auto-gyroscope calibration. Sensor should
                                                            // remain still while samples are taken.

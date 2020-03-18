@@ -6,6 +6,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
 {
   serialConnect();
   imu_pub_ = yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
+  magnet_pub_ = yostlab_nh_.advertise<sensor_msgs::MagneticField>("/imu_mag", 10);
   updater.setHardwareIDf("IMU: %s", getSerialPort().c_str());
   updater.add("IMU Diagnostic", this, &YostLabDriver::imu_diagnostic);
 
@@ -15,6 +16,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle &nh_, ros::NodeHandle &priv_nh_)
   assertions::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
   assertions::getParam(yostlab_priv_nh_, "frame_id", frame_id_);
   yostlab_priv_nh_.param("spin_frequency", spin_frequency_, 100.0);
+  assertions::param(yostlab_priv_nh_, "calibrate_imu", calibrate_imu_, false);
 }
 
 //! Destructor
@@ -172,12 +174,16 @@ std::string YostLabDriver::getMIMode()
   return ret_buf;
 }
 
+//! Run the serial sync
 void YostLabDriver::run()
 {
   setAndCheckIMUSettings();
 
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
-  startGyroCalibration();
+  if (calibrate_imu_)
+  {
+    startGyroCalibration();
+  }
 
   // commit settings and start streaming
   flush();
@@ -199,8 +205,8 @@ void YostLabDriver::run()
       // Checks for a single a line containing a single number (IMU temp) which signifies the end of the imu message
       if (terms_count == 1)
       {
-        // Verify that it is a complete message of 4 lines
-        if (line_num_ == 4)
+        // Verify that it is a complete message of 5 lines
+        if (line_num_ == 5)
         {
           createAndPublishIMUMessage(parsed_val);
         }
@@ -245,10 +251,13 @@ void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
   static const tf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
 
   sensor_msgs::Imu imu_msg;
-  imu_msg.header.seq = 0;
+  imu_msg.header.seq = msg_counter_;
   imu_msg.header.stamp = ros::Time::now();
-  imu_msg.header.seq++;
   imu_msg.header.frame_id = frame_id_;
+  sensor_msgs::MagneticField magnet_msg;
+  magnet_msg.header.seq = msg_counter_;
+  magnet_msg.header.stamp = ros::Time::now();
+  magnet_msg.header.frame_id = frame_id_;
 
   // construct quaternion with (x,y,z,w)
   tf::Quaternion quat{ parsed_val[0], parsed_val[1], parsed_val[2], parsed_val[3] };
@@ -267,6 +276,10 @@ void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
   Eigen::Vector3d linear_accel_raw(parsed_val[7], parsed_val[8], parsed_val[9]);
   linear_accel_raw = correction_mat * linear_accel_raw * GRAVITY;
 
+  // Corrected magnetometer
+  Eigen::Vector3d compass_raw(parsed_val[10], parsed_val[11], parsed_val[12]);
+  compass_raw = correction_mat * compass_raw * GAUSSTOTESLA;
+
   imu_msg.angular_velocity.x = angular_vel_raw[0];
   imu_msg.angular_velocity.y = angular_vel_raw[1];
   imu_msg.angular_velocity.z = angular_vel_raw[2];
@@ -277,11 +290,18 @@ void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
   imu_msg.linear_acceleration.z = linear_accel_raw[2];
   imu_msg.linear_acceleration_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
-  sensor_temp_ = parsed_val[10];
+  magnet_msg.magnetic_field.x = compass_raw[0];
+  magnet_msg.magnetic_field.y = compass_raw[1];
+  magnet_msg.magnetic_field.z = compass_raw[2];
+  magnet_msg.magnetic_field_covariance = { 1e-5, 0, 0, 0, 1e-5, 0, 0, 0, 1e-5 };
+
+  sensor_temp_ = parsed_val[13];
 
   imu_pub_.publish(imu_msg);
+  magnet_pub_.publish(magnet_msg);
   lastUpdateTime_ = ros::Time::now();
   last_quat_ = quat;
+  msg_counter_++;
 }
 
 int YostLabDriver::addToParsedVals(const std::string &buf, std::vector<double> &parsed_vals)
