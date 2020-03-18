@@ -298,7 +298,7 @@ void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
   sensor_temp_ = parsed_val[13];
 
   imu_pub_.publish(imu_msg);
-  magnet_pub_.publish(magnet_msg);
+  magnet_pub_.publish(magnet_msg);  // Published in teslas
   lastUpdateTime_ = ros::Time::now();
   last_quat_ = quat;
   msg_counter_++;
