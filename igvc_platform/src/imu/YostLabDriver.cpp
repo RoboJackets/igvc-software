@@ -205,7 +205,7 @@ void YostLabDriver::run()
       // Checks for a single a line containing a single number (IMU temp) which signifies the end of the imu message
       if (terms_count == 1)
       {
-        // Verify that it is a complete message of 4 lines
+        // Verify that it is a complete message of 5 lines
         if (line_num_ == 5)
         {
           createAndPublishIMUMessage(parsed_val);

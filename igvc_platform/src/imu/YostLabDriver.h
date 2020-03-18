@@ -143,7 +143,9 @@ private:
   Slot #1: untared orientation as quaternion [4x float]
   Slot #2: corrected gyroscope vector [3x float]
   Slot #3: corrected acceleration vector [3x float]
-  Slot #[4-8]: No Command
+  Slot #4: corrected magnetometer vector [3x float]
+  Slot #5: temperature in Fahrenheit [1x float]
+  Slot #[6-8]: No Command
   */
   static constexpr auto SET_STREAMING_SLOTS = ":80,6,38,39,40,44,255,255,255\n";
 
