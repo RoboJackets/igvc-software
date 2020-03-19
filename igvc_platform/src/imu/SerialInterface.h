@@ -4,115 +4,154 @@
 #include <ros/ros.h>
 #include <serial/serial.h>
 
+#include <memory>
+
 using namespace serial;
 
 class SerialInterface
 {
 private:
   using SerialPtr = std::unique_ptr<serial::Serial>;
+  // baudrate
+  int baud_;
+  // connection related variables
+  SerialPtr connection_port_;
+  std::string port_;
+  bool connected_ = false;
+  // logger zone
+  const std::string log_zone_;
 
 public:
-  SerialInterface(ros::NodeHandle& serial_nh_) : log_zone_("[ SerialInterface ] ")
+  SerialInterface(ros::NodeHandle &serial_nh_) : log_zone_("[ SerialInterface ] ")
   {
     serial_nh_.param<int>("BAUD_RATE", baud_, 115200);
-    serial_nh_.param<std::string>("SERIAL_PORT", port_, "/dev/ttyACM0");
+    serial_nh_.param<std::string>("SERIAL_PORT", port_, "/dev/imu_top");
   }
 
-  const int& getBaudRate()
+  const int &getBaudRate()
   {
     return baud_;
   }
 
-  const std::string& getSerialPort()
+  /**
+   * Destructor for the interface
+   */
+  const std::string &getSerialPort()
   {
     return port_;
   }
 
-  virtual ~SerialInterface()
+  /**
+   * Returns true if connection is established with the serial port.
+   *
+   * @return true if connected to serial, false otherwise
+   */
+  bool isConnected()
   {
-    if (connection_port != NULL)
+    return connected_;
+  }
+
+  /**
+   * Destructor
+   */
+  ~SerialInterface()
+  {
+    if (connection_port_ != NULL)
     {
-      if (connection_port->isOpen())
+      if (connection_port_->isOpen())
       {
-        ROS_INFO_STREAM(this->log_zone_ << " Closing the Serial Port");
-        connection_port->close();
+        ROS_INFO_STREAM(log_zone_ << " Closing the Serial Port");
+        connection_port_->close();
+        connected_ = false;
       }
     }
   }
 
-  virtual void SerialConnect()
+  /**
+   * Connects to the serial port.
+   */
+  void serialConnect()
   {
     try
     {
-      connection_port.reset(new Serial(port_, (uint32_t)baud_, Timeout::simpleTimeout(60000)));
+      const auto uint_baud = static_cast<uint32_t>(baud_);
+      const auto timeout = Timeout::simpleTimeout(60000);  // timeout in milliseconds
+      connection_port_.reset(new Serial(port_, baud_, timeout));
     }
-    catch (IOException& e)
+    catch (IOException &e)
     {
       std::string ioerror = e.what();
-      ROS_ERROR_STREAM(this->log_zone_ << "Unable to connect port: " << port_.c_str());
-      ROS_ERROR_STREAM(this->log_zone_ << "Is the serial port open? : " << ioerror.c_str());
+      ROS_ERROR_STREAM(log_zone_ << "Unable to connect port: " << port_.c_str());
+      ROS_ERROR_STREAM(log_zone_ << "Is the serial port open? : " << ioerror.c_str());
+      connected_ = false;
     }
 
-    if (connection_port && connection_port->isOpen())
+    if (connection_port_ && connection_port_->isOpen())
     {
-      ROS_INFO_STREAM(this->log_zone_ << "Connection Established with Port: " << port_.c_str()
-                                      << " with baudrate: " << baud_);
+      ROS_INFO_STREAM(log_zone_ << "Connection Established with Port: " << port_.c_str()
+                                << " with baudrate: " << baud_);
+      connected_ = true;
     }
   }
 
-  virtual inline void SerialWrite(uint8_t* buf, size_t len_)
+  /**
+   * Writes a string to the serial port
+   *
+   * @param str The string to write to the serial port
+   */
+  inline void serialWriteString(const std::string &str)
   {
-    size_t written_ = this->connection_port->write(buf, len_);
-    if (written_ != len_)
-      ROS_WARN_STREAM(this->log_zone_ << "Len: " << len_ << " Written: " << written_);
+    connection_port_->write(str);
   }
 
-  virtual inline void SerialWriteString(const std::string& str)
+  /**
+   * Sets the timeout of read and write operations.
+   *
+   * @param timeout The desired timeout in milliseconds
+   */
+  void setTimeout(int timeout = 500)
   {
-    size_t written_ = this->connection_port->write(str);
+    Timeout t = Timeout::simpleTimeout((uint32_t)timeout);
+    connection_port_->setTimeout(t);
   }
 
-  virtual inline uint8_t SerialReadByte()
+  /**
+   * Gets the timeout of read operations.
+   *
+   * @return the current timeout of read operations in milliseconds
+   */
+  int getTimeout()
   {
-    uint8_t buffer;
-    if (this->connection_port->available() > 0)
-    {
-      size_t byte_ = this->connection_port->read(&buffer, 1);
-      if ((byte_ != 1))
-        ROS_WARN_STREAM(this->log_zone_ << "Unable to read");
-    }
-    return buffer;
+    Timeout t = connection_port_->getTimeout();
+    return t.read_timeout_constant;
   }
 
-  virtual inline std::string SerialReadLine()
+  /**
+   * Flushes the read and write string buffers.
+   */
+  inline void flush()
   {
-    std::string str = this->connection_port->readline();
+    connection_port_->flush();
+  }
+
+  /**
+   * Flushes the read and write string buffers.
+   *
+   * @return the string read in from serial
+   */
+  inline std::string serialReadLine()
+  {
+    std::string str = connection_port_->readline();
     return str;
   }
 
-  virtual inline uint8_t* SerialReadBytes(size_t number_of_bytes)
+  /**
+   * Gets the number of available bytes
+   *
+   * @return the number of available bytes
+   */
+  inline size_t available()
   {
-    uint8_t* buffer = (uint8_t*)malloc(sizeof(uint8_t) * number_of_bytes);
-    if (this->connection_port->available() > 0)
-    {
-      size_t byte_ = this->connection_port->read(buffer, number_of_bytes);
-      if ((byte_ != number_of_bytes))
-        ROS_WARN_STREAM(this->log_zone_ << "Unable to read");
-    }
-    return buffer;
+    return connection_port_->available();
   }
-
-  virtual inline size_t Available()
-  {
-    return this->connection_port->available();
-  }
-
-private:
-  //! baudrate
-  int baud_;
-  //! connection related variables
-  SerialPtr connection_port;
-  std::string port_;
-  // logger zone
-  const std::string log_zone_;
 };

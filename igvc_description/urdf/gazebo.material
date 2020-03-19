@@ -74,3 +74,24 @@ material Gazebo/Texture_autonav
     }
   }
 }
+
+material Gazebo/Texture_ramp_lane
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        colour_op_ex source1 src_manual src_current .9 0 .8
+      }
+      texture_unit
+      {
+        texture textures/ground_grass_texture.jpg
+        colour_op_ex blend_current_alpha src_texture src_current
+        alpha_op_ex source1 src_manual src_current 1.0
+        scale .1 .4
+      }
+    }
+  }
+}

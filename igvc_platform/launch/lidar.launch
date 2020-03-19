@@ -22,5 +22,4 @@
         <param name="neighbor_dist" value="0.2"/>
         <param name="offset"        value="2.35619449019"/>
     </node>
-    <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
 </launch>

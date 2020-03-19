@@ -52,14 +52,20 @@
   <depend>mbf_msgs</depend>
   <depend>pluginlib</depend>
   <depend>nav_core</depend>
+  <depend>grid_map_core</depend>
+  <depend>grid_map_ros</depend>
+  <depend>grid_map_cv</depend>
+  <depend>grid_map_filters</depend>
+  <depend>grid_map_loader</depend>
+  <depend>grid_map_msgs</depend>
+  <depend>grid_map_octomap</depend>
+  <depend>grid_map_rviz_plugin</depend>
+  <depend>grid_map_visualization</depend>
 
   <build_depend>cv_bridge</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>igvc_utils</build_depend>
-  <build_depend>octomap</build_depend>
-  <build_depend>octomap_ros</build_depend>
-  <build_depend>grid_map</build_depend>
 
   <!-- Run dependencies -->
   <exec_depend>cv_bridge</exec_depend>

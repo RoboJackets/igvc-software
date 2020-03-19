@@ -30,6 +30,8 @@ void PointcloudFilter::setupPubSub()
   transformed_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topic_transformed, 1);
   occupied_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topic_occupied, 1);
   free_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topic_free, 1);
+
+  filtered_pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(config_.topic_filtered, 1);
 }
 
 void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointcloud)
@@ -40,6 +42,8 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
 
   back_filter_.filter(bundle);
 
+  filtered_pointcloud_pub_.publish(bundle.pointcloud);
+
   fast_segment_filter_.filter(bundle);
 
   std::string base_frame = config_.base_frame;
@@ -47,8 +51,6 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
   ros::Duration timeout{ config_.timeout_duration };
 
   tf_transform_filter_.transform(*bundle.pointcloud, *bundle.pointcloud, base_frame, timeout);
-
-  ground_filter_.filter(bundle);
 
   tf_transform_filter_.transform(*bundle.occupied_pointcloud, *bundle.occupied_pointcloud, lidar_frame, timeout);
   raycast_filter_.filter(bundle);

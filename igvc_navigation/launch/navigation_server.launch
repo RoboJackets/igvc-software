@@ -1,5 +1,7 @@
 <launch>
     <node name="navigation_server" pkg="igvc_navigation" type="navigation_server" output="screen">
+        <param name="replanning_rate" value="2"/>
+        <param name="max_replanning_tries" value="10"/>
         <param name="recovery_enabled" value="true"/>
         <param name="oscillation_timeout" value="10"/> <!-- Determines how much time between oscillation checks -->
         <param name="oscillation_distance" value="0.2"/><!-- Determines the distance the robot must travel to not be 'oscillating` -->

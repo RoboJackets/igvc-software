@@ -19,7 +19,7 @@
   <!-- TODO set proper mass values -->
   <xacro:property name="drive_wheel_mass" value="5.0"/>
 
-  <xacro:property name="wheelbase" value="0.714333"/>
+  <xacro:property name="wheelbase" value="0.556"/>
 
   <!-- wheel acuator limits -->
   <xacro:property name="drive_wheel_eff_limit" value="8"/>
@@ -286,8 +286,8 @@
               <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>480</height>
               </image>
               <clip>
                 <near>0.1</near>
@@ -352,8 +352,8 @@
               <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>480</height>
               </image>
               <clip>
                 <near>0.1</near>
@@ -418,8 +418,8 @@
               <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>480</height>
               </image>
               <clip>
                 <near>0.1</near>
@@ -622,7 +622,6 @@
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
       <yawOffset>1.57079632679</yawOffset>
     </plugin>
-
 
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
       <updateRate>20.0</updateRate>

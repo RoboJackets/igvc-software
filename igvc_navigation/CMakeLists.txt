@@ -19,7 +19,6 @@ find_package(catkin REQUIRED COMPONENTS
              pcl_ros
              pcl_conversions
              igvc_utils
-             octomap_ros
              tf_conversions
              robot_localization
              parameter_assertions
@@ -218,8 +217,6 @@ add_subdirectory(src/path_follower)
 add_subdirectory(src/trajectory_follower)
 add_subdirectory(src/trajectory_planner)
 
-add_subdirectory(src/d_lite_planner)
-add_subdirectory(src/field_d_planner)
 
 add_subdirectory(src/back_circle)
 
