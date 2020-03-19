@@ -1,7 +1,3 @@
-//
-// Created by vivek on 3/11/20.
-//
-
 #include <gtest/gtest.h>
 #include <igvc_msgs/velocity_pair.h>
 #include <ros/ros.h>
@@ -16,21 +12,6 @@ public:
   }
 
 protected:
-  [[nodiscard]] bool waitForSubscriber() const {
-    const double timeout = 5.0;
-    const double sleep_time = 1.0;
-    ros::Time end = ros::Time::now() + ros::Duration(timeout);
-    while (mock_joy_pub.getNumSubscribers() == 0)
-    {
-      ros::Duration(sleep_time).sleep();
-      if (ros::Time::now() > end)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
   ros::NodeHandle handle;
   ros::Publisher mock_joy_pub;
 };
@@ -70,9 +51,9 @@ igvc_msgs::velocity_pair twistToVelocity(geometry_msgs::Twist twist, double axle
 
 TEST_F(TestDifferentialDrive, StopTest)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
 
   const float stop = 0.0;
   mock_joy_pub.publish(createTwistMsg(stop, stop));
@@ -88,9 +69,9 @@ TEST_F(TestDifferentialDrive, StopTest)
 
 TEST_F(TestDifferentialDrive, ForwardTest)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
 
   const float forward = 2.0;
   mock_joy_pub.publish(createTwistMsg(forward, 0.0));
@@ -106,9 +87,9 @@ TEST_F(TestDifferentialDrive, ForwardTest)
 
 TEST_F(TestDifferentialDrive, TurnTest)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -135,9 +116,9 @@ TEST_F(TestDifferentialDrive, TurnTest)
 
 TEST_F(TestDifferentialDrive, SpinTest)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -164,9 +145,9 @@ TEST_F(TestDifferentialDrive, SpinTest)
 
 TEST_F(TestDifferentialDrive, MaxSpeedTest)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -177,6 +158,41 @@ TEST_F(TestDifferentialDrive, MaxSpeedTest)
   const float spin = 1.0;
 
   const geometry_msgs::Twist twist_msg = createTwistMsg(forward, spin);
+
+  mock_joy_pub.publish(twist_msg);
+
+  const igvc_msgs::velocity_pair vel_msg = twistToVelocity(twist_msg, axle_length_, max_vel_);
+
+  ASSERT_TRUE(mock_sub.spinUntilMessages());
+
+  ASSERT_EQ(mock_sub.messages().size(), 1LU);
+  const igvc_msgs::velocity_pair& response = mock_sub.front();
+
+  EXPECT_EQ(response.left_velocity, vel_msg.left_velocity);
+  EXPECT_EQ(response.right_velocity, vel_msg.right_velocity);
+}
+
+TEST_F(TestDifferentialDrive, NoiseIgnoreTest)
+{
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+
+  double axle_length_;
+  handle.getParam("differential_drive/axle_length", axle_length_);
+  double max_vel_;
+  handle.getParam("differential_drive/max_vel", max_vel_);
+
+  const float forward = 4.0;
+  const float spin = 1.0;
+
+  geometry_msgs::Twist twist_msg;
+  twist_msg.angular.x = 2.0;
+  twist_msg.angular.y = 3.0;
+  twist_msg.angular.z = spin;
+  twist_msg.linear.x = forward;
+  twist_msg.linear.y = 4.0;
+  twist_msg.linear.z = 2.0;
 
   mock_joy_pub.publish(twist_msg);
 

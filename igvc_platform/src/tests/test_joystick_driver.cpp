@@ -16,21 +16,6 @@ public:
   }
 
 protected:
-  [[nodiscard]] bool waitForSubscriber() const {
-    const double timeout = 5.0;
-    const double sleep_time = 1.0;
-    ros::Time end = ros::Time::now() + ros::Duration(timeout);
-    while (mock_joy_pub.getNumSubscribers() == 0)
-    {
-      ros::Duration(sleep_time).sleep();
-      if (ros::Time::now() > end)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
   ros::NodeHandle handle;
   ros::Publisher mock_joy_pub;
 };
@@ -42,13 +27,13 @@ sensor_msgs::Joy createJoyMsg(float left, float right)
   joy_msg.buttons = { 0, 0, 0, 0 };
 
   return joy_msg;
-}
+};
 
 TEST_F(TestJoystickDriver, FullForward)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
 
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(full_speed, full_speed));
@@ -64,9 +49,9 @@ TEST_F(TestJoystickDriver, FullForward)
 
 TEST_F(TestJoystickDriver, FullReverse)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(-full_speed, -full_speed));
 
@@ -81,9 +66,9 @@ TEST_F(TestJoystickDriver, FullReverse)
 
 TEST_F(TestJoystickDriver, SpinRight)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(full_speed, -full_speed));
 
@@ -98,9 +83,9 @@ TEST_F(TestJoystickDriver, SpinRight)
 
 TEST_F(TestJoystickDriver, SpinLeft)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
   const float full_speed = 1.0;
   mock_joy_pub.publish(createJoyMsg(-full_speed, full_speed));
 
@@ -115,9 +100,9 @@ TEST_F(TestJoystickDriver, SpinLeft)
 
 TEST_F(TestJoystickDriver, HalfSpeedForward)
 {
-  MockMotorSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(waitForSubscriber());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
   const float half_speed = 0.5;
   mock_joy_pub.publish(createJoyMsg(half_speed, half_speed));
 
