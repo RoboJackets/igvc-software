@@ -293,7 +293,7 @@ void YostLabDriver::createAndPublishIMUMessage(std::vector<double> &parsed_val)
   magnet_msg.magnetic_field.x = compass_raw[0];
   magnet_msg.magnetic_field.y = compass_raw[1];
   magnet_msg.magnetic_field.z = compass_raw[2];
-  magnet_msg.magnetic_field_covariance = { 1e-5, 0, 0, 0, 1e-5, 0, 0, 0, 1e-5 };
+  magnet_msg.magnetic_field_covariance = { 1e-6, 0, 0, 0, 1e-6, 0, 0, 0, 1e-6 };
 
   sensor_temp_ = parsed_val[13];
 

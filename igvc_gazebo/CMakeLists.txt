@@ -46,6 +46,7 @@ install(DIRECTORY config/
     FILES_MATCHING PATTERN "*.yaml"
     )
 
+add_subdirectory(nodes/magnetometer)
 add_subdirectory(nodes/control)
 add_subdirectory(nodes/scan_to_pointcloud)
 add_subdirectory(nodes/ground_truth)

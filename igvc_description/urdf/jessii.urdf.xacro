@@ -627,7 +627,7 @@
         <updateRate>200.0</updateRate>
         <magnitude>.0000489162</magnitude>
         <bodyName>magnetometer</bodyName>
-        <topicName>/magnetometer_mag</topicName>
+        <topicName>/magnetometer/vector</topicName>
         <referenceHeading>0.0</referenceHeading>
         <declination>-5.2290</declination>
         <inclination>62.2126</inclination>

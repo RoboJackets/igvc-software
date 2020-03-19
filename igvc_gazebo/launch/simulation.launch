@@ -53,6 +53,11 @@
         <param name="ground_truth_pub_topic" value="/ground_truth"/>
     </node>
 
+    <node name="mag_republisher" pkg="igvc_gazebo" type="mag_republisher" output="screen">
+        <param name="mag_sub_topic" value="/magnetometer/vector"/>
+        <param name="mag_pub_topic" value="/magnetometer_mag"/>
+    </node>
+
     <node pkg="igvc_utils" type="quaternion_to_rpy" name="ground_truth_to_rpy" respawn="true" output="screen">
         <param name="topics/quaternion" value="/ground_truth"/>
         <param name="topics/rpy" value="/ground_truth_rpy"/>
