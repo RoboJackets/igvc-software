@@ -28,30 +28,42 @@ The repo is comprised of multiple ROS packages and one sandbox folder for miscel
     *RVIZ plugins that provide visualization for our stack.*
  * **igvc_utils**
     *A collection of utility nodes and classes*
- * **sandbox**
+ * **igvc_sandbox**
     *Miscellaneous resources, including the models used by the neural network, udev rules, and waypoints files*
  * **documents**
     *Research and design documents.*
-    
+
 ## Building Code
  For an installation guide for ROS, check out the
  [installation guide on the RoboJackets wiki](https://wiki.robojackets.org/IGVC_Software_Installation_Instructions).
- 
+
 1. Clone the repository (with the git submodules) into the src directory of a catkin workspace:
     ```bash
     git clone https://github.com/RoboJackets/igvc-software --recursive
     ```
 
-2. Use `catkin_make` in the workspace to build all the packages:
+2. Install kindr library (if not done already):
+    ```bash
+    git clone https://github.com/ANYbotics/kindr.git
+    cd kindr
+    mkdir build
+    cd build
+    cmake ..
+    sudo make install
+    cd ../..
+    rm -rf kindr
+    ```
+
+3. Use `catkin_make` in the workspace to build all the packages:
     ```bash
     catkin_make
     ```
 
-3. Make sure the `devel/setup.bash` is sourced before using any of the nodes in this package:
+4. Make sure the `devel/setup.bash` is sourced before using any of the nodes in this package:
     ```bash
    source devel/setup.bash
     ```
-   
+
 ## Common Errors
 - `Could not find a package configuration file provided by "parameter_assertions" with any of the following names:`
     - `parameter_assertions` comes from a git submodule. Initialize the submodules by doing
