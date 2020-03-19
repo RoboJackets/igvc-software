@@ -11,37 +11,37 @@
 class TestJoystickDriver : public testing::Test
 {
 public:
-    TestJoystickDriver() : mock_joy_pub(handle.advertise<sensor_msgs::Joy>("/joy", 1))
-    {
-    }
+  TestJoystickDriver() : mock_joy_pub(handle.advertise<sensor_msgs::Joy>("/joy", 1))
+  {
+  }
 
 protected:
-    [[nodiscard]] bool waitForSubscriber() const {
-        const double timeout = 5.0;
-        const double sleep_time = 1.0;
-        ros::Time end = ros::Time::now() + ros::Duration(timeout);
-        while (mock_joy_pub.getNumSubscribers() == 0)
-        {
-            ros::Duration(sleep_time).sleep();
-            if (ros::Time::now() > end)
-            {
-                return false;
-            }
-        }
-        return true;
+  [[nodiscard]] bool waitForSubscriber() const {
+    const double timeout = 5.0;
+    const double sleep_time = 1.0;
+    ros::Time end = ros::Time::now() + ros::Duration(timeout);
+    while (mock_joy_pub.getNumSubscribers() == 0)
+    {
+      ros::Duration(sleep_time).sleep();
+      if (ros::Time::now() > end)
+      {
+        return false;
+      }
     }
+    return true;
+  }
 
-    ros::NodeHandle handle;
-    ros::Publisher mock_joy_pub;
+  ros::NodeHandle handle;
+  ros::Publisher mock_joy_pub;
 };
 
 sensor_msgs::Joy createJoyMsg(float left, float right)
 {
-    sensor_msgs::Joy joy_msg;
-    joy_msg.axes = { 0, left, 0, 0, right };
-    joy_msg.buttons = { 0, 0, 0, 0 };
+  sensor_msgs::Joy joy_msg;
+  joy_msg.axes = { 0, left, 0, 0, right };
+  joy_msg.buttons = { 0, 0, 0, 0 };
 
-    return joy_msg;
+  return joy_msg;
 }
 
 TEST_F(TestJoystickDriver, FullForward)
