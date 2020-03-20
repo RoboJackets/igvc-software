@@ -1,9 +1,5 @@
-#include <gtest/gtest.h>
-#include <igvc_msgs/velocity_pair.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
-#include <sensor_msgs/Joy.h>
-
 /**
  * \brief A wrapper class around a Subscriber for testing.
  *
