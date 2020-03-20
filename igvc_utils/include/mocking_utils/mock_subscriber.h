@@ -1,7 +1,3 @@
-//
-// Created by vivek on 3/1/20.
-//
-
 #include <gtest/gtest.h>
 #include <igvc_msgs/velocity_pair.h>
 #include <ros/callback_queue.h>
@@ -11,7 +7,7 @@
 /**
  * \brief A wrapper class around a Subscriber for testing.
  *
- * A MockMotorSubscriber contains helper methods such as blocking until there is a publisher
+ * A MockSubscriber contains helper methods such as blocking until there is a publisher
  * and spinning until a message arrives.
  *
  * A user provided callback function can be called to perform additional testing logic on a callback
@@ -39,7 +35,7 @@ public:
   [[nodiscard]] bool hasMessage() const;
   [[nodiscard]] const MessageType& front() const;
   [[nodiscard]] const std::vector<MessageType>& messages() const;
-  [[nodiscard]] bool waitForSubscriber(const ros::Publisher& mock_joy_pub) const;
+  [[nodiscard]] bool waitForSubscriber(const ros::Publisher& mock_pub) const;
 
 private:
   void callback(const typename MessageType::ConstPtr& message);
@@ -48,8 +44,6 @@ private:
   ros::CallbackQueue callback_queue_;
   std::vector<MessageType> message_buffer_;
 };
-
-sensor_msgs::Joy createJoyMsg(float left, float right);
 
 template <typename M>
 MockSubscriber<M>::MockSubscriber(const std::string& topic, CBFunctionType cb_function, int queue_size)
@@ -75,7 +69,7 @@ void MockSubscriber<M>::init(const std::string& topic, int queue_size)
 {
   ros::NodeHandle nh;
   ros::SubscribeOptions ops;
-  ops.template init<igvc_msgs::velocity_pair>(topic, queue_size, boost::bind(&MockSubscriber::callback, this, _1));
+  ops.template init<M>(topic, queue_size, boost::bind(&MockSubscriber::callback, this, _1));
   ops.callback_queue = &callback_queue_;
   sub_ = nh.subscribe(ops);
 }
@@ -107,11 +101,11 @@ bool MockSubscriber<M>::waitForPublisher(const ros::Duration& timeout) const
 }
 
 template <typename M>
-[[nodiscard]] bool MockSubscriber<M>::waitForSubscriber(const ros::Publisher& mock_joy_pub) const {
+[[nodiscard]] bool MockSubscriber<M>::waitForSubscriber(const ros::Publisher& mock_pub) const {
   const double timeout = 5.0;
   const double sleep_time = 1.0;
   ros::Time end = ros::Time::now() + ros::Duration(timeout);
-  while (mock_joy_pub.getNumSubscribers() == 0)
+  while (mock_pub.getNumSubscribers() == 0)
   {
     ros::Duration(sleep_time).sleep();
     if (ros::Time::now() > end)

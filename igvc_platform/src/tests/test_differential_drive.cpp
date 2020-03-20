@@ -7,13 +7,13 @@
 class TestDifferentialDrive : public testing::Test
 {
 public:
-  TestDifferentialDrive() : mock_joy_pub(handle.advertise<geometry_msgs::Twist>("/cmd_vel", 1))
+  TestDifferentialDrive() : mock_pub(handle.advertise<geometry_msgs::Twist>("/cmd_vel", 1))
   {
   }
 
 protected:
   ros::NodeHandle handle;
-  ros::Publisher mock_joy_pub;
+  ros::Publisher mock_pub;
 };
 
 geometry_msgs::Twist createTwistMsg(float forward, float spin)
@@ -53,10 +53,10 @@ TEST_F(TestDifferentialDrive, StopTest)
 {
   MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   const float stop = 0.0;
-  mock_joy_pub.publish(createTwistMsg(stop, stop));
+  mock_pub.publish(createTwistMsg(stop, stop));
 
   ASSERT_TRUE(mock_sub.spinUntilMessages());
 
@@ -71,10 +71,10 @@ TEST_F(TestDifferentialDrive, ForwardTest)
 {
   MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   const float forward = 2.0;
-  mock_joy_pub.publish(createTwistMsg(forward, 0.0));
+  mock_pub.publish(createTwistMsg(forward, 0.0));
 
   ASSERT_TRUE(mock_sub.spinUntilMessages());
 
@@ -89,7 +89,7 @@ TEST_F(TestDifferentialDrive, TurnTest)
 {
   MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -101,7 +101,7 @@ TEST_F(TestDifferentialDrive, TurnTest)
 
   const geometry_msgs::Twist twist_msg = createTwistMsg(forward, spin);
 
-  mock_joy_pub.publish(twist_msg);
+  mock_pub.publish(twist_msg);
 
   const igvc_msgs::velocity_pair vel_msg = twistToVelocity(twist_msg, axle_length_, max_vel_);
 
@@ -118,7 +118,7 @@ TEST_F(TestDifferentialDrive, SpinTest)
 {
   MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -130,7 +130,7 @@ TEST_F(TestDifferentialDrive, SpinTest)
 
   const geometry_msgs::Twist twist_msg = createTwistMsg(forward, spin);
 
-  mock_joy_pub.publish(twist_msg);
+  mock_pub.publish(twist_msg);
 
   const igvc_msgs::velocity_pair vel_msg = twistToVelocity(twist_msg, axle_length_, max_vel_);
 
@@ -147,7 +147,7 @@ TEST_F(TestDifferentialDrive, MaxSpeedTest)
 {
   MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -159,7 +159,7 @@ TEST_F(TestDifferentialDrive, MaxSpeedTest)
 
   const geometry_msgs::Twist twist_msg = createTwistMsg(forward, spin);
 
-  mock_joy_pub.publish(twist_msg);
+  mock_pub.publish(twist_msg);
 
   const igvc_msgs::velocity_pair vel_msg = twistToVelocity(twist_msg, axle_length_, max_vel_);
 
@@ -176,7 +176,7 @@ TEST_F(TestDifferentialDrive, NoiseIgnoreTest)
 {
   MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
   ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   double axle_length_;
   handle.getParam("differential_drive/axle_length", axle_length_);
@@ -194,7 +194,7 @@ TEST_F(TestDifferentialDrive, NoiseIgnoreTest)
   twist_msg.linear.y = 4.0;
   twist_msg.linear.z = 2.0;
 
-  mock_joy_pub.publish(twist_msg);
+  mock_pub.publish(twist_msg);
 
   const igvc_msgs::velocity_pair vel_msg = twistToVelocity(twist_msg, axle_length_, max_vel_);
 
