@@ -42,16 +42,10 @@ The repo is comprised of multiple ROS packages and one sandbox folder for miscel
     git clone https://github.com/RoboJackets/igvc-software --recursive
     ```
 
-2. Install kindr library (if not done already):
+2. Install dependencies:
     ```bash
-    git clone https://github.com/ANYbotics/kindr.git
-    cd kindr
-    mkdir build
-    cd build
-    cmake ..
-    sudo make install
-    cd ../..
-    rm -rf kindr
+    cd igvc-software
+    ./install_dependencies.sh
     ```
 
 3. Use `catkin_make` in the workspace to build all the packages:
