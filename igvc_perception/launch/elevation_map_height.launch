@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="igvc_perception" type="elevation_map_height_node" name="elevation_map_height_node" output="screen">
+        <param name="output_topic" value="odometry/elevation_map_estimation"
+    </node>
+</launch>
