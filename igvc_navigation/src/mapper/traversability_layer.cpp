@@ -38,6 +38,10 @@ void TraversabilityLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int mi
 {
   matchCostmapDims(master_grid);
   transferToCostmap();
+  if (config_.map.debug.enabled)
+  {
+    publishCostmap();
+  }
   resetDirty();
 
   uchar *master_array = master_grid.getCharMap();
@@ -81,7 +85,10 @@ void TraversabilityLayer::slopeMapCallback(const grid_map_msgs::GridMap &slope_m
     if (map_.isInside(pos))
     {
       float slope = slope_map.get("slope")((*it)[0], (*it)[1]);
-      float *logodd = &map_.atPosition("logodds", pos);
+      grid_map::Index map_index;
+      map_.getIndex(pos, map_index);
+      touch(map_index);
+      float *logodd = &map_.at("logodds", map_index);
       if (slope > config_.slope_threshold)
       {
         *logodd = std::min(*logodd + config_.logodd_increment, config_.map.max_occupancy);
@@ -113,6 +120,95 @@ void TraversabilityLayer::matchCostmapDims(const costmap_2d::Costmap2D &master_g
 }
 
 void TraversabilityLayer::transferToCostmap()
+{
+  if (rolling_window_)
+  {
+    updateRollingWindow();
+  }
+  else
+  {
+    updateStaticWindow();
+  }
+  publishCostmap();
+}
+
+void TraversabilityLayer::publishCostmap()
+{
+  nav_msgs::OccupancyGrid msg;
+
+  boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(costmap_2d_.getMutex()));
+
+  double resolution = costmap_2d_.getResolution();
+
+  msg.header.frame_id = config_.map.frame_id;
+  msg.header.stamp = ros::Time::now();
+  msg.info.resolution = resolution;
+
+  msg.info.width = costmap_2d_.getSizeInCellsX();
+  msg.info.height = costmap_2d_.getSizeInCellsY();
+
+  double wx;
+  double wy;
+  costmap_2d_.mapToWorld(0, 0, wx, wy);
+  msg.info.origin.position.x = wx - resolution / 2;
+  msg.info.origin.position.y = wy - resolution / 2;
+  msg.info.origin.position.z = 0.0;
+  msg.info.origin.orientation.w = 1.0;
+
+  msg.data.resize(msg.info.width * msg.info.height);
+
+  unsigned char *data = costmap_2d_.getCharMap();
+  for (size_t i = 0; i < msg.data.size(); i++)
+  {
+    switch (data[i])
+    {
+      case costmap_2d::FREE_SPACE:
+        msg.data[i] = 0;
+        break;
+      case costmap_2d::LETHAL_OBSTACLE:
+        msg.data[i] = 100;
+        break;
+      default:
+        msg.data[i] = -1;
+        break;
+    }
+  }
+
+  costmap_pub_.publish(msg);
+}
+
+void TraversabilityLayer::updateStaticWindow()
+{
+  // Static window, so we can only update dirty cells
+  size_t num_cells = map_.getSize().prod();
+
+  unsigned char *char_map = costmap_2d_.getCharMap();
+
+  auto optional_it = getDirtyIterator();
+
+  if (!optional_it)
+  {
+    return;
+  }
+
+  for (auto it = *optional_it; !it.isPastEnd(); ++it)
+  {
+    const auto &log_odds = map_.get("logodds")((*it)[0], (*it)[1]);
+    float probability = probability_utils::fromLogOdds(log_odds);
+    size_t linear_index = grid_map::getLinearIndexFromIndex(*it, map_.getSize(), false);
+
+    if (probability > config_.map.occupied_threshold)
+    {
+      char_map[num_cells - linear_index - 1] = costmap_2d::LETHAL_OBSTACLE;
+    }
+    else
+    {
+      char_map[num_cells - linear_index - 1] = costmap_2d::FREE_SPACE;
+    }
+  }
+}
+
+void TraversabilityLayer::updateRollingWindow()
 {
   const size_t cells_x = costmap_2d_.getSizeInCellsX();
   const size_t cells_y = costmap_2d_.getSizeInCellsY();
@@ -158,51 +254,5 @@ void TraversabilityLayer::transferToCostmap()
       y_idx--;
     }
   }
-  publishCostMap();
-}
-
-void TraversabilityLayer::publishCostMap()
-{
-  nav_msgs::OccupancyGrid msg;
-
-  boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(costmap_2d_.getMutex()));
-
-  double resolution = costmap_2d_.getResolution();
-
-  msg.header.frame_id = config_.map.frame_id;
-  msg.header.stamp = ros::Time::now();
-  msg.info.resolution = resolution;
-
-  msg.info.width = costmap_2d_.getSizeInCellsX();
-  msg.info.height = costmap_2d_.getSizeInCellsY();
-
-  double wx;
-  double wy;
-  costmap_2d_.mapToWorld(0, 0, wx, wy);
-  msg.info.origin.position.x = wx - resolution / 2;
-  msg.info.origin.position.y = wy - resolution / 2;
-  msg.info.origin.position.z = 0.0;
-  msg.info.origin.orientation.w = 1.0;
-
-  msg.data.resize(msg.info.width * msg.info.height);
-
-  unsigned char *data = costmap_2d_.getCharMap();
-  for (size_t i = 0; i < msg.data.size(); i++)
-  {
-    switch (data[i])
-    {
-      case costmap_2d::FREE_SPACE:
-        msg.data[i] = 0;
-        break;
-      case costmap_2d::LETHAL_OBSTACLE:
-        msg.data[i] = 100;
-        break;
-      default:
-        msg.data[i] = -1;
-        break;
-    }
-  }
-
-  costmap_pub_.publish(msg);
 }
 }  // namespace traversability_layer
