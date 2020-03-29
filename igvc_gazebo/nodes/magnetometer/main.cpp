@@ -2,8 +2,8 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <sensor_msgs/MagneticField.h>
 
-ros::Publisher g_mag_field_pub_;
-static double g_mag_field_covar_;
+ros::Publisher g_mag_field_pub;
+static double g_mag_field_covar;
 
 void magCallback(const geometry_msgs::Vector3Stamped& msg)
 {
@@ -14,10 +14,8 @@ void magCallback(const geometry_msgs::Vector3Stamped& msg)
   magnet_msg.magnetic_field.x = msg.vector.x;
   magnet_msg.magnetic_field.y = msg.vector.y;
   magnet_msg.magnetic_field.z = msg.vector.z;
-  magnet_msg.magnetic_field_covariance = {
-    g_mag_field_covar_, 0, 0, 0, g_mag_field_covar_, 0, 0, 0, g_mag_field_covar_
-  };
-  g_mag_field_pub_.publish(magnet_msg);
+  magnet_msg.magnetic_field_covariance = { g_mag_field_covar, 0, 0, 0, g_mag_field_covar, 0, 0, 0, g_mag_field_covar };
+  g_mag_field_pub.publish(magnet_msg);
 }
 
 int main(int argc, char** argv)
@@ -27,8 +25,8 @@ int main(int argc, char** argv)
   ros::NodeHandle pnh("~");
   std::string sub_topic = pnh.param("mag_sub_topic", std::string("/magnetometer/vector"));
   std::string pub_topic = pnh.param("mag_pub_topic", std::string("/magnetometer_mag"));
-  g_mag_field_covar_ = pnh.param("mag_field_variance", 1e-6);
-  g_mag_field_pub_ = nh.advertise<sensor_msgs::MagneticField>(pub_topic, 10);
+  g_mag_field_covar = pnh.param("mag_field_variance", 1e-6);
+  g_mag_field_pub = nh.advertise<sensor_msgs::MagneticField>(pub_topic, 10);
   ros::Subscriber scan_sub = nh.subscribe(sub_topic, 1, magCallback);
   ros::spin();
 }
