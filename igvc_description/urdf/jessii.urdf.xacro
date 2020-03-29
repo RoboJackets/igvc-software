@@ -590,7 +590,7 @@
       <frameId>imu</frameId>
       <topicName>/imu</topicName>
       <rpyOffsets>0 0 0</rpyOffsets>
-      <gaussianNoise>0.00000001</gaussianNoise>
+      <gaussianNoise>0.00000005</gaussianNoise>
       <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
       <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
       <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
@@ -610,7 +610,7 @@
       <frameId>magnetometer</frameId>
       <topicName>/magnetometer</topicName>
       <rpyOffsets>0 0 0</rpyOffsets>
-      <gaussianNoise>0.00000001</gaussianNoise>
+      <gaussianNoise>0.00000005</gaussianNoise>
       <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
       <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
       <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
@@ -621,6 +621,20 @@
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
       <yawOffset>1.57079632679</yawOffset>
+    </plugin>
+
+    <plugin name="magnetometer" filename="libhector_gazebo_ros_magnetic.so">
+        <updateRate>200.0</updateRate>
+        <magnitude>.0000489162</magnitude>
+        <bodyName>magnetometer</bodyName>
+        <topicName>/magnetometer/vector</topicName>
+        <referenceHeading>0.0</referenceHeading>
+        <declination>-5.2290</declination>
+        <inclination>62.2126</inclination>
+        <offset>0 0 0</offset>
+        <drift>0 0 0</drift>
+        <driftFrequency>0 0 0</driftFrequency>
+        <gaussianNoise>0.00000005 0.00000005 0.00000005</gaussianNoise>
     </plugin>
 
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
