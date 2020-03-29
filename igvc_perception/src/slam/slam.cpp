@@ -20,7 +20,7 @@ Slam::Slam() : pnh_{ "~" }
   imu_connected_ = false;
   imu_update_available_ = false;
 
-  intializeDirectionOfLocalMagField();
+  initializeDirectionOfLocalMagField();
   initializeNoiseMatrices();
   initializeImuParams();
   initializePriors();
@@ -78,7 +78,15 @@ void Slam::magCallback(const sensor_msgs::MagneticField &msg)
 }
 
 /**
- * If there are IMU measurements in the acumulator, this adds them as a single factor to the factor graph.
+ * Adds the magFactor 
+ */
+void Slam::addMagFactor()
+{
+
+}
+
+/**
+ * If there are IMU measurements in the accumulator, this adds them as a single factor to the factor graph.
  */
 void Slam::integrateAndAddIMUFactor()
 {
@@ -183,9 +191,12 @@ void Slam::initializeNoiseMatrices()
   bias_noise_ = noiseDiagonal::Sigmas(gtsam::Vector6::Constant(bias_noise));
 }
 
-void Slam::intializeDirectionOfLocalMagField()
+/**
+ * Initialize the local magnetic field direction from launch params
+ */
+void Slam::initializeDirectionOfLocalMagField()
 {
   std::vector<double> lmg =
-      pnh_.param("localMagneticField", std::vector<double>{ 0.0000227095, -0.0000020783, 0.0000432753 });
+      pnh_.param("localMagneticField", std::vector<double>{ 0.0000227095, 0.0000020783, -0.0000432753 });
   local_mag_field_ = gtsam::Unit3(lmg[0], lmg[1], lmg[2]);
 }

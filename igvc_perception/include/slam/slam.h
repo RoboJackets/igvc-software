@@ -49,7 +49,7 @@ private:
   void initializeImuParams();
   void initializePriors();
   void initializeNoiseMatrices();
-  void intializeDirectionOfLocalMagField();
+  void initializeDirectionOfLocalMagField();
 
   // Defining some types
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;
