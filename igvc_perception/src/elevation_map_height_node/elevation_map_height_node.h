@@ -2,7 +2,7 @@
 #define SRC_ELEVATIONMAPHEIGHTNODE_H
 
 #include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <grid_map_msgs/GridMap.h>
 #include <nav_msgs/Odometry.h>
 
@@ -16,7 +16,7 @@ private:
     ros::Subscriber elevation_map_sub_;
     ros::Subscriber robot_pose_sub_;
 
-    nav_msgs::Odometry robot_pose_;
+    geometry_msgs::PoseWithCovarianceStamped robot_pose_;
 
     void elevationMapCallback(const grid_map_msgs::GridMap& elevation_map);
     void robotPoseCallback(const nav_msgs::Odometry& robot_pose);
