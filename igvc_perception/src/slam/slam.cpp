@@ -33,7 +33,7 @@ Slam::Slam() : pnh_{ "~" }
 void Slam::gpsCallback(const nav_msgs::Odometry &msg)
 {
   gtsam::Point3 curr_point = Conversion::getPoint3FromOdom(msg);
-  gtsam::GPSFactor gps_factor (X(curr_index_+1), curr_point, gps_noise_);
+  gtsam::GPSFactor gps_factor(X(curr_index_ + 1), curr_point, gps_noise_);
   graph_.add(gps_factor);
 
   addMagFactor();
@@ -83,8 +83,8 @@ void Slam::magCallback(const sensor_msgs::MagneticField &msg)
  */
 void Slam::addMagFactor()
 {
-  MagPoseFactor mag_factor (X(curr_index_), curr_mag_reading_, scale_,
-      local_mag_field_, gtsam::Point3(1e-9, 1e-9, 1e-9), mag_noise_);
+  MagPoseFactor mag_factor(X(curr_index_), curr_mag_reading_, scale_, local_mag_field_, gtsam::Point3(1e-9, 1e-9, 1e-9),
+                           mag_noise_);
   graph_.add(mag_factor);
 }
 
