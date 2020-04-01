@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
-    <node name="slam" pkg="igvc_perception" type="slam" output="screen" >
+    <node name="slam" pkg="igvc_perception" type="slam" output="screen">
         <!-- Needs to be updated for each location: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml -->
         <param name="localMagneticField" value="[0.0000227095, 0.0000020783, -0.0000432753]" />
+        <param name="magNoiseConstant" value="0.00000005" />
     </node>
 </launch>

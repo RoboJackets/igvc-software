@@ -60,6 +60,7 @@ private:
 
   // Establishing global variables
   gtsam::Values init_estimate_, result_;
+  gtsam::Values history_;
   gtsam::NonlinearFactorGraph graph_;
   gtsam::Pose3 previous_pose_;
   unsigned long curr_index_;

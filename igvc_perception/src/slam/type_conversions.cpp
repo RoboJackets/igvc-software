@@ -10,6 +10,7 @@ gtsam::Pose3 Conversion::getPose3FromOdom(const nav_msgs::Odometry &msg)
 nav_msgs::Odometry Conversion::getOdomFromPose3(const gtsam::Pose3 &pos)
 {
   nav_msgs::Odometry msg;
+  msg.header.stamp = ros::Time::now();
   msg.child_frame_id = "/base_footprint";
   msg.header.frame_id = "/odom";
   msg.pose.pose.position.x = pos.x();

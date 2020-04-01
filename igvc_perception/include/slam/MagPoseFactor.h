@@ -40,12 +40,32 @@ public:
   /**
    * @brief vector of errors
    */
-  gtsam::Vector evaluateError(const gtsam::Pose3& nRb, boost::optional<gtsam::Matrix&> H = boost::none) const
+  gtsam::Vector evaluateError(const gtsam::Pose3& nRb, boost::optional<gtsam::Matrix&> H) const override
   {
     // measured bM = nRbÕ * nM + b
-    gtsam::Point3 hx = nRb.rotation().unrotate(nM_, H) + bias_;
-    auto error = ((gtsam::Point3)(hx - measured_)).vector();
+    gtsam::Point3 hx = nRb.rotation().unrotate(nM_, H, boost::none) + bias_;
+    // H is 3x3 from above unrotate operation, but needs to be 3x6, ie. set the 3x3 block on the right
+    // to all zeros.
+    if (H) {
+      H->conservativeResize(3, 6);
+      H->rightCols(3).setZero();
+    }
+    const auto error = hx - measured_;
     return error;
+//    std::cout << "> [MagPoseFactor] evaluateError\n";
+//    std::cout << "         hx: " << hx.transpose() << "\n";
+//    std::cout << "  measured_: " << measured_.transpose() << "\n";
+//    std::cout << "      error: " << error.transpose() << "\n";
+//    const auto whitened = noiseModel_ ? noiseModel_->whiten(error) : error;
+//    std::cout << "   whitened: " << whitened.transpose() << std::endl;
+//    std::cout << "  tot error: " << whitened.norm() << std::endl;
+//    return gtsam::Vector3::Zero();
+  }
+
+  void print(const std::string& s, const gtsam::KeyFormatter& keyFormatter) const override {
+      std::cout << s << "MagPoseFactor on " << keyFormatter(key()) << "\n";
+      std::cout << s << "  Mag measurement: " << measured_.transpose() << std::endl;
+      noiseModel_->print("  noise model: ");
   }
 };
 
