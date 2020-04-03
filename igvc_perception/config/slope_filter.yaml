@@ -3,11 +3,11 @@ slope_map_filters:
     - name: buffer_normalizer
       type: gridMapFilters/BufferNormalizerFilter
 
-    # Delete color layer.
+    # Delete unneeded layers.
     - name: delete_original_layers
       type: gridMapFilters/DeletionFilter
       params:
-          layers: [variance, horizontal_variance_x, horizontal_variance_y, horizontal_variance_xy,
+          layers: [horizontal_variance_x, horizontal_variance_y, horizontal_variance_xy,
                    color, time, standard_deviation, horizontal_standard_deviation, two_sigma_bound] # List of layers.
 
     # Boxblur as an alternative to the inpaint and radial blurring filter above.
