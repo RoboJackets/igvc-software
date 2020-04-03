@@ -52,14 +52,6 @@ public:
     }
     const auto error = hx - measured_;
     return error;
-//    std::cout << "> [MagPoseFactor] evaluateError\n";
-//    std::cout << "         hx: " << hx.transpose() << "\n";
-//    std::cout << "  measured_: " << measured_.transpose() << "\n";
-//    std::cout << "      error: " << error.transpose() << "\n";
-//    const auto whitened = noiseModel_ ? noiseModel_->whiten(error) : error;
-//    std::cout << "   whitened: " << whitened.transpose() << std::endl;
-//    std::cout << "  tot error: " << whitened.norm() << std::endl;
-//    return gtsam::Vector3::Zero();
   }
 
   void print(const std::string& s, const gtsam::KeyFormatter& keyFormatter) const override {

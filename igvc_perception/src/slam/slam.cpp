@@ -10,7 +10,6 @@ using gtsam::symbol_shorthand::X;
  */
 Slam::Slam() : pnh_{ "~" }
 {
-  //    odom_sub_ = pnh_.subscribe("/wheel_odometry", 10, &Slam::OdomCallback, this);
   imu_sub_ = pnh_.subscribe("/imu", 100, &Slam::imuCallback, this);
   gps_sub_ = pnh_.subscribe("/odometry/gps", 1, &Slam::gpsCallback, this);
   mag_sub_ = pnh_.subscribe("/magnetometer_mag", 1, &Slam::magCallback, this);
@@ -35,7 +34,6 @@ void Slam::gpsCallback(const nav_msgs::Odometry &msg)
   gtsam::Point3 curr_point = Conversion::getPoint3FromOdom(msg);
   gtsam::GPSFactor gps_factor(X(curr_index_ + 1), curr_point, gps_noise_);
   graph_.add(gps_factor);
-  ROS_INFO_STREAM("Factor " << graph_.size() << ": GPSFactor on x" << curr_index_ + 1);
 
   addMagFactor();
 
@@ -84,8 +82,8 @@ void Slam::magCallback(const sensor_msgs::MagneticField &msg)
  */
 void Slam::addMagFactor()
 {
-  MagPoseFactor mag_factor(X(curr_index_ + 1), curr_mag_reading_, scale_, local_mag_field_, gtsam::Point3(1e-9, 1e-9, 1e-9),
-                           mag_noise_);
+  MagPoseFactor mag_factor(X(curr_index_ + 1), curr_mag_reading_, scale_,
+      local_mag_field_, gtsam::Point3(1e-9, 1e-9, 1e-9),mag_noise_);
   graph_.add(mag_factor);
 }
 
@@ -97,14 +95,14 @@ void Slam::integrateAndAddIMUFactor()
   if (accum_.preintMeasCov().trace() != 0)
   {
     // Add bias factor
-//    auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(
-//        B(curr_index_), B(curr_index_ + 1), gtsam::imuBias::ConstantBias(), bias_noise_);
-//    graph_.add(factor);
-//    init_estimate_.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
+    auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(
+        B(curr_index_), B(curr_index_ + 1), gtsam::imuBias::ConstantBias(), bias_noise_);
+    graph_.add(factor);
+    init_estimate_.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
 
     // Add imu factor
-    gtsam::ImuFactor imufac(X(curr_index_), V(curr_index_), X(curr_index_ + 1), V(curr_index_ + 1), B(0),
-                            accum_);
+    gtsam::ImuFactor imufac(X(curr_index_), V(curr_index_), X(curr_index_ + 1),
+        V(curr_index_ + 1), B(curr_index_ + 1),accum_);
 
     graph_.add(imufac);
     auto newPoseEstimate = result_.at<gtsam::Pose3>(X(curr_index_));  // gtsam::Pose3 newPoseEstimate
@@ -126,26 +124,31 @@ void Slam::integrateAndAddIMUFactor()
 void Slam::optimize()
 {
   static int iteration = 0;
-  ROS_WARN_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
+  ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
                                      << " curr_index: " << curr_index_);
-
-  // Add initial estimates to history_
-  history_.insert(init_estimate_);
-
   // Update ISAM graph with new factors and estimates
   isam_.update(graph_, init_estimate_);
-//  graph_.printErrors(history_);
 
-//  ROS_INFO_STREAM("printErrors:");
-//  isam_.getFactorsUnsafe().printErrors(history_);
+  #if defined(_DEBUG)
+  // Add initial estimates to history_
+  history_.insert(init_estimate_);
+  graph_.printErrors(history_);
 
-//  ROS_INFO_STREAM("isam_ graph");
-//  isam_.getFactorsUnsafe().print();
+  ROS_INFO_STREAM("printErrors:");
+  isam_.getFactorsUnsafe().printErrors(history_);
+
+  ROS_INFO_STREAM("isam_ graph");
+  isam_.getFactorsUnsafe().print();
+  #endif
+
   result_ = isam_.calculateEstimate();
-//  graph_.printErrors(init_estimate_);
+
+#if defined(_DEBUG)
+  graph_.printErrors(init_estimate_);
 
   // Update variables with optimized ones
   history_.update(result_);
+#endif
 
   // Clear graph and estimates
   graph_.resize(0);
@@ -180,21 +183,27 @@ void Slam::initializePriors()
   noiseDiagonal::shared_ptr poseNoise =
       noiseDiagonal::Sigmas((gtsam::Vector(6) << Vec3::Constant(0.1), Vec3::Constant(0.3)).finished());
   graph_.push_back(gtsam::PriorFactor<gtsam::Pose3>(X(0), priorPose, poseNoise));
+#if defined(_DEBUG)
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Pose3> on x0");
+#endif
   init_estimate_.insert(X(0), priorPose);
 
   // Adding Initial Velocity (Pose + Covariance Matrix)
   Vec3 priorVel(0.0, 0.0, 0.0);
   noiseDiagonal::shared_ptr velNoise = noiseDiagonal::Sigmas(Vec3::Constant(0.1));
   graph_.push_back(gtsam::PriorFactor<Vec3>(V(0), priorVel, velNoise));
+#if defined(_DEBUG)
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Vec3> on v0");
+#endif
   init_estimate_.insert(V(0), priorVel);
 
   // Adding Bias Prior
   noiseDiagonal::shared_ptr biasNoise = noiseDiagonal::Sigmas(gtsam::Vector6::Constant(0.1));
   gtsam::PriorFactor<gtsam::imuBias::ConstantBias> biasprior(B(0), gtsam::imuBias::ConstantBias(), biasNoise);
   graph_.push_back(biasprior);
+#if defined(_DEBUG)
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<constantBias> on B0");
+#endif
   init_estimate_.insert(B(0), gtsam::imuBias::ConstantBias());
 
   optimize();
@@ -224,5 +233,5 @@ void Slam::initializeDirectionOfLocalMagField()
       pnh_.param("localMagneticField", std::vector<double>{ 0.0000227095, 0.0000020783, -0.0000432753 });
   local_mag_field_ = gtsam::Unit3(lmg[0], lmg[1], lmg[2]);
   scale_ = Vec3(lmg[0], lmg[1], lmg[2]).norm();
-  ROS_WARN_STREAM("scale_:" << scale_);
+  ROS_INFO_STREAM("Initializing Direction of Local Magnetic Field");
 }

@@ -28,6 +28,9 @@
 #include <slam/type_conversions.h>
 #include <sensor_msgs/MagneticField.h>
 
+// Uncomment to enable debugging and have additional print statements
+//#define _DEBUG 1
+
 class Slam
 {
 public:
@@ -58,11 +61,13 @@ private:
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;
   typedef gtsam::Vector3 Vec3;
 
-  // Establishing global variables
+  // Defining some variables
   gtsam::Values init_estimate_, result_;
+#if defined(_DEBUG)
   gtsam::Values history_;
+#endif
+
   gtsam::NonlinearFactorGraph graph_;
-  gtsam::Pose3 previous_pose_;
   unsigned long curr_index_;
   noiseDiagonal::shared_ptr gps_noise_, bias_noise_, mag_noise_;
   gtsam::Unit3 local_mag_field_;
