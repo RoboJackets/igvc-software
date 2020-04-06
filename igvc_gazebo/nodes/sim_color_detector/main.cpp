@@ -80,7 +80,7 @@ void handleImage(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::Camer
     return;
   }
 
-  cv::resize(frame, frame, g_output_size, 0, 0, cv::INTER_AREA);
+  cv::resize(frame, frame, g_output_size, 0, 0, cv::INTER_LINEAR);
   cv::Mat frame_hsv;
   cv::cvtColor(frame, frame_hsv, CV_BGR2HSV);
 
