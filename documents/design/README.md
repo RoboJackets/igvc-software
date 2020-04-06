@@ -5,7 +5,7 @@
 * **Mapping & Navigation**
     * [Cone of Shame](cone_of_shame.md)
     * [Fine Tuning TEB Parameters](fine_tuning_teb_parameters.md)
-    * [Mapping Refactor](mapping.md)
+    * [Mapping Refactor](mapping_refactor.md)
     * [Navigation State Machine](navigation_state_machine/navigation_state_machine.md)
     * [Waypoint Orientation for TEB](waypoint_orientation.md)
 
