@@ -7,128 +7,134 @@
 -->
 <launch>
 
-    <include file="$(find igvc_navigation)/launch/wheel_odometry.launch" />
+    <include file="$(find igvc_navigation)/launch/wheel_odometry.launch"/>
 
-    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true"
+          output="screen">
 
-      <param name="frequency" value="30"/>
+        <param name="frequency" value="30"/>
 
-      <!-- delay time could be useful but defaults to 0 -->
-      <param name="delay" value="0"/>
+        <!-- delay time could be useful but defaults to 0 -->
+        <param name="delay" value="0"/>
 
-      <!-- does ardupilot account for magnetic declination? -->
-      <param name="magnetic_declination_radians" value="0"/>
+        <!-- does ardupilot account for magnetic declination? -->
+        <param name="magnetic_declination_radians" value="0"/>
 
-      <!-- this assumes we are in a planar environment -->
-      <param name="two_d_mode" value="false"/>
+        <!-- this assumes we are in a planar environment -->
+        <param name="two_d_mode" value="false"/>
 
-      <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
-      <param name="yaw_offset" value="0"/>
+        <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
+        <param name="yaw_offset" value="0"/>
 
-      <!-- sets altitude to 0 -->
-      <param name="zero_altitude" value="true"/>
+        <!-- sets altitude to 0 -->
+        <param name="zero_altitude" value="true"/>
 
-      <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
-      <param name="broadcast_utm_transform" value="true"/>
+        <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
+        <param name="broadcast_utm_transform" value="true"/>
 
-      <!-- publishes the lat and long of the robot position -->
-      <param name="publish_filtered_gps" value="true"/>
+        <!-- publishes the lat and long of the robot position -->
+        <param name="publish_filtered_gps" value="true"/>
 
-      <!-- if true uses yaw angle from the input odom source -->
-      <param name="use_odometry_yaw" value="false"/>
+        <!-- if true uses yaw angle from the input odom source -->
+        <param name="use_odometry_yaw" value="false"/>
 
-      <!-- input remapping -->
-      <remap from="/imu/data" to="/magnetometer"/>
-      <remap from="/gps/fix" to="/fix"/>
+        <!-- input remapping -->
+        <remap from="/imu/data" to="/magnetometer"/>
+        <remap from="/gps/fix" to="/fix"/>
 
-      <!-- can do output remapping also -->
+        <!-- can do output remapping also -->
     </node>
 
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se">
-      <param name="base_link_frame" value="base_footprint"/>
-      <param name="frequency" value="30"/>
-      <param name="two_d_mode" value="false"/>
+        <param name="base_link_frame" value="base_footprint"/>
+        <param name="frequency" value="30"/>
+        <param name="two_d_mode" value="false"/>
 
-      <!-- wheel odometry -->
-      <param name="odom0" value="/wheel_odometry"/>
-      <param name="odom0_differential" value="false"/>
-      <!-- order of fused parameters:
-               X, Y, Z,
-               roll, pitch, yaw,
-               X velocity, Y velocity, Z velocity,
-               roll velocity, pitch velocity, yaw velocity,
-               X acceleration, Y acceleration, Z acceleration -->
-      <rosparam param="odom0_config">[true, true, true,
-                                      false, false, false,
-                                      true, true, true,
-                                      false, false, false,
-                                      true, true, true]</rosparam>
+        <!-- wheel odometry -->
+        <param name="odom0" value="/wheel_odometry"/>
+        <param name="odom0_differential" value="false"/>
+        <!-- order of fused parameters:
+                 X, Y, Z,
+                 roll, pitch, yaw,
+                 X velocity, Y velocity, Z velocity,
+                 roll velocity, pitch velocity, yaw velocity,
+                 X acceleration, Y acceleration, Z acceleration -->
+        <rosparam param="odom0_config">[false, false, false,
+            false, false, false,
+            true, true, true,
+            false, false, false,
+            true, true, true]
+        </rosparam>
 
-      <!-- IMU -->
-      <param name="imu0" value="/imu"/>
-      <!-- fused parameters same as above -->
-      <rosparam param="imu0_config">[true,  true,  true
-                                    false, false, false,
-                                     false, false, false,
-                                     false,  false, false,
-                                     true,  true,  true]</rosparam>
+        <!-- IMU -->
+        <param name="imu0" value="/imu"/>
         <param name="imu1" value="/magnetometer"/>
-        <rosparam param= "imu1_config" >
+        <!-- fused parameters same as above -->
+        <rosparam param="imu0_config">
             [false, false, false,
             false, false, false,
             false, false, false,
-            true,  true, true,
-            false,  false,  false]
+            false, false, false,
+            true, true, true]
         </rosparam>
-      <param name="imu0_differential" value="false"/>
-      <param name="imu0_remove_gravitational_acceleration" value="true" />
-      <param name="imu1_remove_gravitational_acceleration" value="true"/>
-      <param name="publish_acceleration" value="true" />
+        <rosparam param="imu1_config">
+            [false, false, false,
+            true, true, true,
+            false, false, false,
+            false, false, false,
+            false, false, false]
+        </rosparam>
+        <param name="imu0_differential" value="false"/>
+        <param name="imu1_differential" value="false"/>
+        <param name="imu0_remove_gravitational_acceleration" value="true"/>
+        <param name="imu1_remove_gravitational_acceleration" value="true"/>
+        <param name="publish_acceleration" value="true"/>
 
-      <!-- gps from nmea_navsat_transform -->
-      <param name="odom1" value="/odometry/gps"/>
-      <!-- fused parameters same as above -->
-      <rosparam param="odom1_config">[true, true, false,
-                               false, false, false,
-                               false, false, false,
-                               false, false, false,
-                               false, false, false]</rosparam>
-      <param name="odom1_differential" value="false"/>
+        <!-- gps from nmea_navsat_transform -->
+        <param name="odom1" value="/odometry/gps"/>
+        <!-- fused parameters same as above -->
+        <rosparam param="odom1_config">[true, true, true,
+            false, false, false,
+            false, false, false,
+            false, false, false,
+            false, false, false]
+        </rosparam>
+        <param name="odom1_differential" value="false"/>
 
-      <rosparam param="process_noise_covariance">
-        [.6,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-         0,    .6,   0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-         0,    0,    .1,   0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    .1,   0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    .1,   0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    .3,   0,     0,     0,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    .1,    0,     0,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     .1,    0,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,    .1,    0,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,     0,   .1,    0,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,   .1,    0,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,   .5,    0,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,   .1,    0,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,   .1,    0,
-         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    .1]
-      </rosparam>
-      <rosparam param="initial_estimate_covariance">
-        [1,    0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-         0,    1,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-         0,    0,    1e-6,   0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-         0,    0,    0,      1e-6,   0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-         0,    0,    0,      0,      1e-6,   0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-         0,    0,    0,      0,      0,      1e-6,  0,      0,      0,     0,     0,     0,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     1e-6,   0,      0,     0,     0,     0,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     0,      1e-6,   0,     0,     0,     0,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     0,      0,      1e-6,  0,     0,     0,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     0,      0,      0,     1e-6,  0,     0,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     0,      0,      0,     0,     1e-6,  0,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     1,     0,     0,     0,
-         0,    0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     1e-6,  0,     0,
-         0,    0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     1e-6,  0,
-         0,    0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     1e-6]
-      </rosparam>
+        <rosparam param="process_noise_covariance">
+            [.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, .6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, .1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, .1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, .1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, .3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, .1, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, .1, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, .1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, .1, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .1, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .1, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .1, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .1]
+        </rosparam>
+        <rosparam param="initial_estimate_covariance">
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 1e-6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1e-6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1e-6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 1e-6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 1e-6, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 1e-6, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 1e-6, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-6, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-6, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-6, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-6, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-6]
+        </rosparam>
     </node>
 
     <node pkg="igvc_utils" type="quaternion_to_rpy" name="odometry_filtered_to_rpy" respawn="true" output="screen">
