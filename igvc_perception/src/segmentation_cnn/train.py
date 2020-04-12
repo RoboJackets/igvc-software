@@ -30,11 +30,11 @@ from catalyst.dl.callbacks import (
     MulticlassDiceMetricCallback,
 )
 
-
 # Dataset and data loaders
 from segmentation_dataset import SegmentationDataset
 from data_loaders import get_loaders
 import helper_operations
+
 
 # Sets a seed for better reproducibility
 SEED = 42
