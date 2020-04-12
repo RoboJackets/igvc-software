@@ -53,14 +53,12 @@ def create_dataset(path_to_folder, file_type):
 if __name__ == "__main__":
 
     masks = create_dataset("/content/drive/My Drive/RoboJackets/RJ_Data/*.json", "json")
+    masks = np.reshape(masks, (741, 480, 640, 1))
+
     images = create_dataset(
         "/content/drive/My Drive/RoboJackets/RJ_Data/*.png", "images"
     )
 
-    # Reshape into NN-compatible format
-    masks = np.reshape(masks, (741, 480, 640, 1))
-
     # Save NumPy arrays as .npy files
-
     np.save("images.npy", images)
     np.save("masks.npy", masks)
