@@ -2,8 +2,9 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-# Defines and establishes a dataset class
+
 class SegmentationDataset(Dataset):
+    # Defines and establishes a dataset class
     def __init__(self, image_arr_path, mask_arr_path,) -> None:
         self.images = np.load(image_arr_path)
         self.masks = np.load(mask_arr_path)

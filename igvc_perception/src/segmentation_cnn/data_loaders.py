@@ -22,7 +22,7 @@ def get_loaders(
     # train_transforms_fn = None,
     # valid_transforms_fn = None,
 ) -> dict:
-    #Creates Torch dataloaders
+    # Creates Torch dataloaders
 
     indices = np.arange(len(images))
 
