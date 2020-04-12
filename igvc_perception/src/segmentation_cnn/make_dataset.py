@@ -9,9 +9,7 @@ from operator import itemgetter
 
 
 def json_to_numpy_mask(shapes, width, height):
-    """
-    Converts JSON labels with pixel classifications into NumPy arrays
-    """
+    "Converts JSON labels with pixel classifications into NumPy arrays"
     img = Image.new("L", (width, height), 0)
     for shape in shapes:
         if shape["label"] == "barrel":
@@ -25,9 +23,7 @@ def json_to_numpy_mask(shapes, width, height):
 
 
 def create_dataset(path_to_folder, file_type):
-    """
-    Organizes a collection of images or JSON files into a NumPy array
-    """
+    "Organizes a collection of images or JSON files into a NumPy array"
     all_data = []
     files = glob.glob(path_to_folder)
     for temp_name in files:
