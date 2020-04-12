@@ -30,9 +30,18 @@ Steps to solve issue:
 3. Then I will implement my algorithm using C++
 4. Test the performance in past simulations using ros bag files.
 
+Challenges:
+How to handle curves in the track:
+- Segment the image and handle in small parts.
+How to avoid detecting barrels withh white lines:
+- Try to capture lines with a green background (grass) and reject lines with an orange background (barrels)
+
 ## Questions & Research
 
-Not sure about the line color but I can find that out by looking at the training images. Other than that I do not have many questions.
+Not sure about the line color but I can find that out by looking at the training images.
+How will I handle curves in the course?
+How will I handle white lines in the barrel?
+How will varying weather conditions affect line detection?
 
 ## Overall Scope
 
