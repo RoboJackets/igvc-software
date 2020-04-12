@@ -1,6 +1,6 @@
 # Helpful code taken from Joseph Chen
 #
-#    Copyright 2019 Division of Medical Image Computing, 
+#    Copyright 2019 Division of Medical Image Computing,
 #    German Cancer Research Center (DKFZ), Heidelberg, Germany
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
