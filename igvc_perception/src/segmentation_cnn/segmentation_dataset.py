@@ -27,4 +27,4 @@ class SegmentationDataset(Dataset):
         return result
 
 
-# dset = SegmentationDataset(image_arr_path="/content/drive/My Drive/RoboJackets/Split_Data/train_images.npy", mask_arr_path="/content/drive/My Drive/RoboJackets/Split_Data/train_masks.npy")
+# dset = SegmentationDataset(image_arr_path="", mask_arr_path="")
