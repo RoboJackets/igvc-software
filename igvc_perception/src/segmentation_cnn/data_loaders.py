@@ -10,7 +10,6 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 
-# Creates Torch dataloaders
 def get_loaders(
     images: List[Path],
     masks: List[Path],
@@ -23,6 +22,7 @@ def get_loaders(
     # train_transforms_fn = None,
     # valid_transforms_fn = None,
 ) -> dict:
+    #Creates Torch dataloaders
 
     indices = np.arange(len(images))
 
