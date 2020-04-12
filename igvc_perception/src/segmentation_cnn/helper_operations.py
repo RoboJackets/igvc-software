@@ -1,6 +1,7 @@
 # Helpful code taken from Joseph Chen
 #
-#    Copyright 2019 Division of Medical Image Computing, German Cancer Research Center (DKFZ), Heidelberg, Germany
+#    Copyright 2019 Division of Medical Image Computing, 
+#    German Cancer Research Center (DKFZ), Heidelberg, Germany
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -66,7 +67,9 @@ class CrossentropyND(nn.CrossEntropyLoss):
 def get_tp_fp_fn(net_output, gt, axes=None, mask=None, square=False):
     """
     net_output must be (b, c, x, y(, z)))
-    gt must be a label map (shape (b, 1, x, y(, z)) OR shape (b, x, y(, z))) or one hot encoding (b, c, x, y(, z))
+    gt must be a label map (shape (b, 1, x, y(, z)) 
+     or shape (b, x, y(, z))) 
+     or one hot encoding (b, c, x, y(, z))
     if mask is provided it must have shape (b, 1, x, y(, z)))
     :param net_output:
     :param gt:
