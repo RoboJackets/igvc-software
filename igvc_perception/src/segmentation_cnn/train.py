@@ -1,6 +1,4 @@
 # Dependencies
-
-# Data handling
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +14,6 @@ from torch.utils.data import DataLoader
 # Model building and training
 import segmentation_models_pytorch as smp
 from torch import nn
-
 from catalyst.contrib.nn import DiceLoss, IoULoss
 from torch import optim
 from catalyst import utils
@@ -72,20 +69,17 @@ loaders = get_loaders(
     num_workers=2,
 )
 
-# Define loss criterion
+# Optimizes for cross entropy using Adam
 criterion = {
     "CE": CrossentropyND(),
 }
 
-
-# Set up optimization
-
-learning_rate = 0.001  # 0.001
+learning_rate = 0.001
 encoder_learning_rate = 0.0005
-encoder_weight_decay = 0.00003  # 0.00003
-optimizer_weight_decay = 0.0003  # 0.0003
-optim_factor = 0.25  # 0.25
-optim_patience = 2  # 2
+encoder_weight_decay = 0.00003
+optimizer_weight_decay = 0.0003
+optim_factor = 0.25
+optim_patience = 2
 
 optimizer = AdamW(
     model.parameters(),
@@ -119,7 +113,7 @@ runner.train(
     scheduler=scheduler,
     loaders=loaders,
     callbacks=callbacks,
-    logdir="content/full_model2",  # this logdir must be changed with every new run
+    logdir="content/full_model2",
     num_epochs=num_epochs,
     main_metric="loss",
     minimize_metric=True,
@@ -136,7 +130,7 @@ test_data = SegmentationDataset(
 
 infer_loader = DataLoader(test_data, batch_size=12, shuffle=False, num_workers=4)
 
-# get predictions on test data
+# Generates predictions on test data
 predictions = runner.predict_loader(
     model=model,
     loader=infer_loader,
@@ -144,10 +138,7 @@ predictions = runner.predict_loader(
     verbose=False,
 )
 
-print(type(predictions))
-print(predictions.shape)
-
-# Show clean image
+# Show an image from the test dataset
 show_image = np.asarray(test_data[30]["image"])
 show_image = np.swapaxes(show_image, 2, 0)
 show_image = np.swapaxes(show_image, 1, 0)
@@ -155,7 +146,7 @@ show_image = show_image.astype(np.uint8)
 np.shape(show_image)
 plt.imshow(show_image)
 
-# Show model prediction for clean image
+# Show model prediction for image
 show_image = np.asarray(predictions[30])
 show_image = np.swapaxes(show_image, 2, 0)
 show_image = np.swapaxes(show_image, 1, 0)
