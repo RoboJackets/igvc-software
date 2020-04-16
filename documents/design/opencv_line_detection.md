@@ -18,8 +18,8 @@ Depending on the color of the lines I would use one or two masks. The algorithm 
 1. Use BGR to HSV transformation to make lines the same color
 2. Filter out pixels using a mask to isolate line color. Possibly a white and yellow mask?
 3. Process Gaussian Blur to reduce image noise and help smooth out edges in the image.
-4. Process edge detection using Canny
-5. Apply a trapezoidal mask over edges to narrow down image.
+4. Use a morphological transformation to further remove noise in the image. Will most likely use opening, which just erosion followed by dilation.
+5. Process edge detection using Canny
 6. Use Hough Transform (HoughLinesP) to get lines
 7. Draw lines on source image
 
@@ -33,7 +33,7 @@ Steps to solve issue:
 Challenges:
 How to handle curves in the track:
 - Segment the image and handle in small parts.
-How to avoid detecting barrels withh white lines:
+How to avoid detecting barrels with white lines:
 - Try to capture lines with a green background (grass) and reject lines with an orange background (barrels)
 
 ## Questions & Research
@@ -42,6 +42,7 @@ Not sure about the line color but I can find that out by looking at the training
 How will I handle curves in the course?
 How will I handle white lines in the barrel?
 How will varying weather conditions affect line detection?
+What topic will I need to subscribe to in order to get images from the ros bag files when testing?
 
 ## Overall Scope
 
@@ -51,10 +52,10 @@ I will need the OpenCV package and line_layer.cpp. I will be making changes to t
 
 ### Schedule
 
-Subtask 1 (April 12th): Implement algorithm in python?
+Subtask 1 (April 19th): Finish implementing algorithm in python.
 
-Subtask 2 (April 19th): Implement algorithm in C++.
+Subtask 2 (April 26th): Implement algorithm in C++.
 
-Subtask 3 (April 26th): Test algorithm using ros bag files.
+Subtask 3 (April 29th): Test algorithm using ros bag files.
 
-Code Review (May 29th): Everything should be done now.
+Code Review (May 1st): Everything should be done now.
