@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import cv2
 import glob
 from operator import itemgetter
+import sys
 
 
 def json_to_numpy_mask(shapes, width, height):
