@@ -32,17 +32,14 @@ def get_loaders(
 
     np_images = np.array(images)
     np_masks = np.array(masks)
-    # print(np_images.shape, np_masks.shape)
 
     train_dataset = SegmentationDataset(image_arr_path, mask_arr_path)
     train_dataset.images = np_images[train_indices]
     train_dataset.masks = np_masks[train_indices]
-    # print(len(train_dataset))
 
     valid_dataset = SegmentationDataset(image_arr_path, mask_arr_path)
     valid_dataset.images = np_images[valid_indices]
     valid_dataset.masks = np_masks[valid_indices]
-    # print(len(valid_dataset))
 
     train_loader = DataLoader(
         train_dataset,
