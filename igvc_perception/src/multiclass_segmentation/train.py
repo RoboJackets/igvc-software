@@ -40,19 +40,22 @@ import helper_operations
 ap = argparse.ArgumentParser()
 
 ap.add_argument(
-    "-a", "--train_images", required=True, help="path to train images npy file"
+    "-a", "--train_images", required=True, help="path to train images .npy file"
 )
 ap.add_argument(
-    "-b", "--train_masks", required=True, help="path to train masks npy file"
+    "-b", "--train_masks", required=True, help="path to train masks .npy file"
 )
-ap.add_argument("-c", "--test_images", required=True, help="path to test images")
-ap.add_argument("-d", "--test_masks", required=True, help="path to test mask")
+ap.add_argument(
+    "-c", "--test_images", required=True, help="path to test images .npy file"
+)
+ap.add_argument("-d", "--test_masks", required=True, help="path to test mask .npy file")
+
 args = vars(ap.parse_args())
 
-train_images_path = str((args["train_images"]))
-train_masks_path = str((args["train_masks"]))
-test_images_path = str((args["test_images"]))
-test_masks_path = str((args["test_masks"]))
+train_images_path = str((args['train_images']))
+train_masks_path = str((args['train_masks']))
+test_images_path = str((args['test_images']))
+test_masks_path = str((args['test_masks']))
 
 # Sets a seed for better reproducibility
 SEED = 42
