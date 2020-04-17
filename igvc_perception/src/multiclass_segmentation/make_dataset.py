@@ -7,6 +7,7 @@ import cv2
 import glob
 from operator import itemgetter
 import sys
+import argparse
 
 
 def json_to_numpy_mask(shapes, width, height):
@@ -47,15 +48,21 @@ def create_dataset(path_to_folder, file_type):
     return all_data
 
 
-if __name__ == "__main__":
+# Establish arguments as file paths
+ap = argparse.ArgumentParser()
 
-    masks = create_dataset("/content/drive/My Drive/RoboJackets/RJ_Data/*.json", "json")
-    masks = np.reshape(masks, (741, 480, 640, 1))
+ap.add_argument("-a", "--images", required=True, help="path to folder with images")
+ap.add_argument("-b", "--masks", required=True, help="path to folder with masks")
+args = vars(ap.parse_args())
 
-    images = create_dataset(
-        "/content/drive/My Drive/RoboJackets/RJ_Data/*.png", "images"
-    )
+images_path = str((args["images"]))
+masks_path = str((args["masks"]))
 
-    # Save NumPy arrays as .npy files
-    np.save("images.npy", images)
-    np.save("masks.npy", masks)
+images = create_dataset(images_path, "images")
+
+masks = create_dataset(masks_path, "json")
+masks = np.reshape(masks, (741, 480, 640, 1))
+
+# Save NumPy arrays as .npy files
+np.save("images.npy", images)
+np.save("masks.npy", masks)

@@ -47,6 +47,7 @@ ap.add_argument(
 )
 ap.add_argument("-c", "--test_images", required=True, help="path to test images")
 ap.add_argument("-d", "--test_masks", required=True, help="path to test mask")
+args = vars(ap.parse_args())
 
 train_images_path = str((args["train_images"]))
 train_masks_path = str((args["train_masks"]))
