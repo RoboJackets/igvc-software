@@ -1,4 +1,4 @@
-# Helpful code taken from Joseph Chen
+#    (Code contributed by Joseph Chen)
 #
 #    Copyright 2019 Division of Medical Image Computing,
 #    German Cancer Research Center (DKFZ), Heidelberg, Germany
