@@ -55,8 +55,8 @@ ap.add_argument("-a", "--images", required=True, help="path to folder with image
 ap.add_argument("-b", "--masks", required=True, help="path to folder with masks")
 args = vars(ap.parse_args())
 
-images_path = str((args["images"]))
-masks_path = str((args["masks"]))
+images_path = args["images"]
+masks_path = args["masks"]
 
 images = create_dataset(images_path, "images")
 
