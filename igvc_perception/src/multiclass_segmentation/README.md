@@ -1,6 +1,6 @@
 # Multiclass Semantic Segmentation System
 
-Using transfer learning, we can simultaneously classify lines and barrels in images. A U-Net with a pretrained EfficientNet encoder performs multi class semantic segmentation, classifying the pixels in each image as a line, barrel, or neither. This system uses the [Catalyst](https://github.com/catalyst-team/catalyst) and [Segmentation_Models](https://github.com/qubvel/segmentation_models.pytorch) libraries. 
+Using transfer learning, we can simultaneously classify lines and barrels in images. A U-Net with a pretrained EfficientNet encoder performs multiclass semantic segmentation, classifying the pixels in each image as a line, barrel, or neither. This system uses the [Catalyst](https://github.com/catalyst-team/catalyst) and [Segmentation_Models](https://github.com/qubvel/segmentation_models.pytorch) libraries. 
 
 <p align="center">
   <img src="https://github.com/suhacker1/igvc-software/blob/multiclass_segmentation/igvc_perception/src/multiclass_segmentation/combine_images.png">
