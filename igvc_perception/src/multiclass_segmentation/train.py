@@ -35,6 +35,7 @@ from catalyst.dl.callbacks import (
 from segmentation_dataset import SegmentationDataset
 from data_loaders import get_loaders
 import helper_operations
+from helper_operations import CrossentropyND, DC_and_CE_loss
 
 # Argument parsing for file paths
 ap = argparse.ArgumentParser()
@@ -52,10 +53,10 @@ ap.add_argument("-d", "--test_masks", required=True, help="path to test mask .np
 
 args = vars(ap.parse_args())
 
-train_images_path = str((args['train_images']))
-train_masks_path = str((args['train_masks']))
-test_images_path = str((args['test_images']))
-test_masks_path = str((args['test_masks']))
+train_images_path = args["train_images"]
+train_masks_path = args["train_masks"]
+test_images_path = args["test_images"]
+test_masks_path = args["test_masks"]
 
 # Sets a seed for better reproducibility
 SEED = 42
