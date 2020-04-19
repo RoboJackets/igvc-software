@@ -7,9 +7,9 @@ Using transfer learning, we can simultaneously classify lines and barrels in ima
 </p>
 
 ## Folder Structure 
-+ **IGVC_Full_Dataset.ipynb**: a notebook implementing the training and testing of the neural network
++ **IGVC_Full_Dataset.ipynb**: implements the training and testing of the neural network in a notebook
 + **data_loaders.py**: defines the Torch data loaders
-+ **helper_operations.py**: defines multiple operations used in loss and metric calculations
++ **helper_operations.py**: defines multiple operations used for loss and metric calculations
 + **make_dataset.py**: converts folders of images and masks into .npy files
 + **requirements.txt**: lists dependencies
 + **segmentation_dataset.py**: defines the utilized dataset
@@ -23,4 +23,4 @@ Using transfer learning, we can simultaneously classify lines and barrels in ima
 4. Establish train_images.npy, train_masks.npy, test_images.npy, and test_masks.npy files. 
 5. Run `python train.py -a /path_to_train_images -b /path_to_train_masks -c /path_to_test_images -d /path_to_test_masks` to train and test the neural network.
 
-Alternatively, download **IGVC_Full_Dataset.ipynb** and run it in [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) or a local Jupyter environment. 
+Alternatively, download **IGVC_Full_Dataset.ipynb**, and run it in [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) or a local Jupyter environment. 
