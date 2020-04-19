@@ -6,5 +6,6 @@ catalyst==20.3.2
 numpy==1.18.2
 opencv-python==4.1.2.30
 scikit-learn==0.20
+matplotlib==3.2.1
 
 # Make sure to install the dependencies for each. 
