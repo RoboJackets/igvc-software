@@ -8,6 +8,7 @@ Using transfer learning, we can simultaneously classify lines and barrels in ima
 
 ## Folder Structure 
 + **IGVC_Full_Dataset.ipynb**: implements the training and testing of the neural network in a notebook
++ **IGVC_Full_Dataset.pdf**: provides a PDF version of the aforementioned notebook for readibility
 + **data_loaders.py**: defines the Torch data loaders
 + **helper_operations.py**: defines multiple operations used for loss and metric calculations
 + **make_dataset.py**: converts folders of images and masks into .npy files
