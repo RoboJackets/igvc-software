@@ -8,6 +8,7 @@ import glob
 from operator import itemgetter
 import sys
 import argparse
+from tqdm import tqdm
 
 num_images = 741
 
@@ -30,8 +31,8 @@ def create_dataset(path_to_folder, file_type):
     # Organizes a collection of images or JSON files into a NumPy array
     all_data = []
     files = glob.glob(path_to_folder)
-    for temp_name in files:
-        print("loading " + str(temp_name))
+    for temp_name in tqdm(files):
+        # print("loading " + str(temp_name))
         if file_type == "images":
             temp_data = cv2.imread(temp_name)
         elif file_type == "json":
