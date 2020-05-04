@@ -68,6 +68,7 @@ masks_shape = np.shape(masks)
 
 if images_shape[0] != masks_shape[0]:
     print("There is not the same number of images and masks. Examine your folders.")
+    sys.exit()
 
 masks = np.reshape(masks, (num_images, 480, 640, 1))
 
