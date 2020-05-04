@@ -9,6 +9,7 @@ from operator import itemgetter
 import sys
 import argparse
 
+num_images = 741
 
 def json_to_numpy_mask(shapes, width, height):
     # Converts JSON labels with pixel classifications into NumPy arrays
@@ -61,7 +62,7 @@ masks_path = args["masks"]
 images = create_dataset(images_path, "images")
 
 masks = create_dataset(masks_path, "json")
-masks = np.reshape(masks, (741, 480, 640, 1))
+masks = np.reshape(masks, (num_images, 480, 640, 1))
 
 # Save NumPy arrays as .npy files
 np.save("images.npy", images)
