@@ -11,6 +11,7 @@ import argparse
 
 num_images = 741
 
+
 def json_to_numpy_mask(shapes, width, height):
     # Converts JSON labels with pixel classifications into NumPy arrays
     img = Image.new("L", (width, height), 0)
@@ -60,8 +61,14 @@ images_path = args["images"]
 masks_path = args["masks"]
 
 images = create_dataset(images_path, "images")
-
 masks = create_dataset(masks_path, "json")
+
+images_shape = np.shape(images)
+masks_shape = np.shape(masks)
+
+if images_shape[0] != masks_shape[0]:
+    print("There is not the same number of images and masks. Examine your folders.")
+
 masks = np.reshape(masks, (num_images, 480, 640, 1))
 
 # Save NumPy arrays as .npy files
