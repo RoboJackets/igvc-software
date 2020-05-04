@@ -8,7 +8,7 @@ Using transfer learning, we can simultaneously classify lines and barrels in ima
 
 ## Folder Structure 
 + **EfficientNet_UNet.ipynb**: implements the training and testing of the neural network in a notebook
-+ **EfficientNetUNet.pdf**: provides a PDF version of the aforementioned notebook for readability
++ **EfficientNet_UNet.pdf**: provides a PDF version of the aforementioned notebook for readability
 + **data_loaders.py**: defines the Torch data loaders
 + **helper_operations.py**: defines multiple operations used for loss and metric calculations
 + **make_dataset.py**: converts folders of images and masks into .npy files
