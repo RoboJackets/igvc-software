@@ -9,12 +9,11 @@ from operator import itemgetter
 import sys
 import argparse
 from tqdm import tqdm
-
-num_images = 741
+import os.path
 
 
 def json_to_numpy_mask(shapes, width, height):
-    # Converts JSON labels with pixel classifications into NumPy arrays
+    """Converts JSON labels with pixel classifications into NumPy arrays"""
     img = Image.new("L", (width, height), 0)
     for shape in shapes:
         if shape["label"] == "barrel":
@@ -28,21 +27,27 @@ def json_to_numpy_mask(shapes, width, height):
 
 
 def create_dataset(path_to_folder, file_type):
-    # Organizes a collection of images or JSON files into a NumPy array
+    """Organizes a collection of images or JSON files into a NumPy array"""
     all_data = []
     files = glob.glob(path_to_folder)
     for temp_name in tqdm(files):
-        # print("loading " + str(temp_name))
         if file_type == "images":
+            # Ensure every image has a mask
+            corr_json = temp_name[:-3] + "json"
+            if os.path.exists(corr_json) == False:
+                continue
             temp_data = cv2.imread(temp_name)
         elif file_type == "json":
             f = open(temp_name, encoding="utf-8")
+            # Ensure every mask has an image
+            corr_png = temp_name[:-4] + "png"
+            if os.path.exists(corr_png) == False:
+                continue
             loaded = json.load(f)
             temp_data = json_to_numpy_mask(loaded["shapes"], 640, 480)
-        elif file_type == "numpy":
-            print(file_type)
         else:
-            print(file_type)
+            print("Error: Your file type is:" + file_type)
+            sys.exit()
         temp = [temp_name, temp_data]
         all_data.append(temp)
     all_data = sorted(all_data, key=itemgetter(0))
@@ -54,22 +59,19 @@ def create_dataset(path_to_folder, file_type):
 # Establish arguments as file paths
 ap = argparse.ArgumentParser()
 
-ap.add_argument("-a", "--images", required=True, help="path to folder with images")
-ap.add_argument("-b", "--masks", required=True, help="path to folder with masks")
+ap.add_argument("-images", "--images", required=True, help="path to folder with images")
+ap.add_argument("-masks", "--masks", required=True, help="path to folder with masks")
 args = vars(ap.parse_args())
 
 images_path = args["images"]
 masks_path = args["masks"]
 
+# Create separate images and masks datasets
+
 images = create_dataset(images_path, "images")
 masks = create_dataset(masks_path, "json")
 
-images_shape = np.shape(images)
-masks_shape = np.shape(masks)
-
-if images_shape[0] != masks_shape[0]:
-    print("There is not the same number of images and masks. Examine your folders.")
-    sys.exit()
+num_images = len(images)
 
 masks = np.reshape(masks, (num_images, 480, 640, 1))
 
