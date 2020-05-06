@@ -3,6 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
+import pickle
 
 # Torch utilities
 from typing import List
@@ -41,15 +42,20 @@ from helper_operations import CrossentropyND, DC_and_CE_loss
 ap = argparse.ArgumentParser()
 
 ap.add_argument(
-    "-a", "--train_images", required=True, help="path to train images .npy file"
+    "-train_images",
+    "--train_images",
+    required=True,
+    help="path to train images .npy file",
 )
 ap.add_argument(
-    "-b", "--train_masks", required=True, help="path to train masks .npy file"
+    "-train_masks", "--train_masks", required=True, help="path to train masks .npy file"
 )
 ap.add_argument(
-    "-c", "--test_images", required=True, help="path to test images .npy file"
+    "-test_images", "--test_images", required=True, help="path to test images .npy file"
 )
-ap.add_argument("-d", "--test_masks", required=True, help="path to test mask .npy file")
+ap.add_argument(
+    "-test_masks", "--test_masks", required=True, help="path to test mask .npy file"
+)
 
 args = vars(ap.parse_args())
 
@@ -69,7 +75,6 @@ ENCODER = "efficientnet-b3"
 ENCODER_WEIGHTS = "imagenet"
 DEVICE = "cuda"
 
-# ACTIVATION = 'softmax'
 ACTIVATION = None
 
 model = smp.Unet(
@@ -148,26 +153,67 @@ runner.train(
 test_data = SegmentationDataset(test_images_path, test_masks_path)
 infer_loader = DataLoader(test_data, batch_size=12, shuffle=False, num_workers=4)
 
-# Generates predictions on test data
-predictions = runner.predict_loader(
-    model=model,
-    loader=infer_loader,
-    resume=f"content/full_model2/checkpoints/best.pth",
-    verbose=False,
+# Get model predictions on test dataset
+predictions = np.vstack(
+    list(
+        map(
+            lambda x: x["logits"].cpu().numpy(),
+            runner.predict_loader(
+                loader=infer_loader, resume=f"content/full_model2/checkpoints/best.pth"
+            ),
+        )
+    )
 )
 
-# Show an image from the test dataset
-show_image = np.asarray(test_data[30]["image"])
-show_image = np.swapaxes(show_image, 2, 0)
-show_image = np.swapaxes(show_image, 1, 0)
-show_image = show_image.astype(np.uint8)
-np.shape(show_image)
-plt.imshow(show_image)
+# Display sample prediction results
+pred_results = {}
+rand_nums = np.random.randint(low=1, high=148, size=18)
+rand_nums = np.insert(rand_nums, 0, 30)
+rand_nums = np.insert(rand_nums, 0, 141)
 
-# Show model prediction for image
-show_image = np.asarray(predictions[30])
-show_image = np.swapaxes(show_image, 2, 0)
-show_image = np.swapaxes(show_image, 1, 0)
-show_image = show_image.astype(np.float64)
-np.shape(show_image)
-plt.imshow(show_image)
+for num in rand_nums:
+    # Show image
+    image = np.asarray(test_data[num]["image"])
+    image = np.swapaxes(image, 2, 0)
+    image = np.swapaxes(image, 1, 0)
+    image = image.astype(np.uint8)
+
+    # Show mask
+    mask = np.squeeze(test_data[num]["mask"])
+
+    # Show predicted mask
+    pred_mask = np.asarray(predictions[num])
+    pred_mask = np.swapaxes(pred_mask, 2, 0)
+    pred_mask = np.swapaxes(pred_mask, 1, 0)
+    pred_mask = pred_mask.astype(np.float64)
+    pred_mask = np.argmax(pred_mask, axis=2)
+
+    # Add three images to list
+    images = []
+    images.append(image)
+    images.append(mask)
+    images.append(pred_mask)
+
+    # Show and plot all three images
+    plt.figure(figsize=(30, 30))
+    columns = 5
+    for i, image in enumerate(images):
+        image_plot = plt.subplot(len(images) / columns + 1, columns, i + 1)
+        if i == 0:
+            label = "Raw Image {}".format(num)
+            image_plot.set_title(label)
+            result = plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        elif i == 1:
+            label = "Ground Truth {}".format(num)
+            image_plot.set_title(label)
+            result = plt.imshow(image)
+        elif i == 2:
+            label = "Predicted Mask {}".format(num)
+            image_plot.set_title(label)
+            result = plt.imshow(image)
+        pred_results[label] = result
+
+# Pickle sample test results
+f = open("pred_results.pkl", "wb")
+pickle.dump(pred_results, f)
+f.close()
