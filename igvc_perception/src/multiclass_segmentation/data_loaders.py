@@ -1,4 +1,4 @@
-# Dependencies
+# import dependencies
 import numpy as np
 from typing import List
 from pathlib import Path
@@ -19,19 +19,21 @@ def get_loaders(
     valid_size: float = 0.1,
     batch_size: int = 12,
     num_workers: int = 4,
-    # train_transforms_fn = None,
-    # valid_transforms_fn = None,
 ) -> dict:
-    # Creates Torch dataloaders
+
+    """Creates Torch dataloaders"""
 
     indices = np.arange(len(images))
 
+    # Split training and validation data
     train_indices, valid_indices = train_test_split(
         indices, test_size=valid_size, random_state=random_state, shuffle=True
     )
 
     np_images = np.array(images)
     np_masks = np.array(masks)
+
+    # Establish datasets within dataset class
 
     train_dataset = SegmentationDataset(image_arr_path, mask_arr_path)
     train_dataset.images = np_images[train_indices]
@@ -41,6 +43,7 @@ def get_loaders(
     valid_dataset.images = np_images[valid_indices]
     valid_dataset.masks = np_masks[valid_indices]
 
+    # Generate loaders for both datasets
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,

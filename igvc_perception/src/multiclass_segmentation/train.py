@@ -1,11 +1,11 @@
-# Dependencies
+# Import dependencies
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import pickle
 
-# Torch utilities
+# Import utilities for Torch
 from typing import List
 from pathlib import Path
 import torch
@@ -13,7 +13,7 @@ from torch.utils.data import Dataset
 import collections
 from torch.utils.data import DataLoader
 
-# Model building and training
+# Import model building and training utilities
 import segmentation_models_pytorch as smp
 from torch import nn
 from catalyst.contrib.nn import DiceLoss, IoULoss
@@ -32,7 +32,7 @@ from catalyst.dl.callbacks import (
     MulticlassDiceMetricCallback,
 )
 
-# Dataset and data loaders
+# Import dataset and data loaders
 from segmentation_dataset import SegmentationDataset
 from data_loaders import get_loaders
 import helper_operations
