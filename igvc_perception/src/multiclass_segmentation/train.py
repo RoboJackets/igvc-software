@@ -38,7 +38,7 @@ from data_loaders import get_loaders
 import helper_operations
 from helper_operations import CrossentropyND, DC_and_CE_loss
 
-# Argument parsing for file paths
+# Enable argument parsing for file paths
 ap = argparse.ArgumentParser()
 
 ap.add_argument(
@@ -64,12 +64,12 @@ train_masks_path = args["train_masks"]
 test_images_path = args["test_images"]
 test_masks_path = args["test_masks"]
 
-# Sets a seed for better reproducibility
+# Set a seed for reproducibility
 SEED = 42
 utils.set_global_seed(SEED)
 utils.prepare_cudnn(deterministic=True)
 
-# Sets up transfer learning system
+# Set up U-Net with pretrained EfficientNet backbone
 
 ENCODER = "efficientnet-b3"
 ENCODER_WEIGHTS = "imagenet"
@@ -84,7 +84,7 @@ model = smp.Unet(
     activation=ACTIVATION,
 )
 
-# Runs data loaders
+# Get Torch loaders
 loaders = get_loaders(
     images=np.load(train_images_path),
     masks=np.load(train_masks_path),
@@ -96,7 +96,7 @@ loaders = get_loaders(
     num_workers=2,
 )
 
-# Optimizes for cross entropy using Adam
+# Optimize for cross entropy using Adam
 criterion = {
     "CE": CrossentropyND(),
 }
@@ -126,13 +126,13 @@ device = utils.get_device()
 
 runner = SupervisedRunner(device=device, input_key="image", input_target_key="mask")
 
-# Uses Catalyst callbacks for metric calculations
+# Use Catalyst callbacks for metric calculations during training
 callbacks = [
     CriterionCallback(input_key="mask", prefix="loss", criterion_key="CE"),
     MulticlassDiceMetricCallback(input_key="mask"),
 ]
 
-# Trains and prints training logs for model
+# Train and print model training logs
 runner.train(
     model=model,
     criterion=criterion,
