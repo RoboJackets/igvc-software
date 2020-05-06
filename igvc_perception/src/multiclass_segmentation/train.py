@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import pickle
+import cv2
 
 # Import utilities for Torch
 from typing import List
@@ -151,23 +152,27 @@ runner.train(
 
 # Test model on test dataset
 test_data = SegmentationDataset(test_images_path, test_masks_path)
-infer_loader = DataLoader(test_data, batch_size=12, shuffle=False, num_workers=4)
 
+infer_loader = DataLoader(test_data,batch_size=12,shuffle=False,num_workers=4)
 # Get model predictions on test dataset
-predictions = np.vstack(
-    list(
-        map(
-            lambda x: x["logits"].cpu().numpy(),
-            runner.predict_loader(
-                loader=infer_loader, resume=f"content/full_model2/checkpoints/best.pth"
-            ),
-        )
-    )
-)
+predictions = np.vstack(list(map(lambda x: x["logits"].cpu().numpy(), runner.predict_loader(loader=infer_loader, resume=f"content/full_model2/checkpoints/best.pth"))))
+
+print(type(predictions))
+print(predictions.shape)
+
 
 # Display sample prediction results
 pred_results = {}
-rand_nums = np.random.randint(low=1, high=148, size=18)
+low = 1
+high = len(predictions) - 1
+num_results = 20
+rand_nums = np.random.randint(low, high, num_results - 2)
+
+"""
+Images 30 and 141 are specifically added to predictions
+as clear indicators of performance since they both
+contain lines and barrels
+"""
 rand_nums = np.insert(rand_nums, 0, 30)
 rand_nums = np.insert(rand_nums, 0, 141)
 
