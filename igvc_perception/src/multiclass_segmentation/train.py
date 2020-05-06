@@ -153,72 +153,56 @@ runner.train(
 # Test model on test dataset
 test_data = SegmentationDataset(test_images_path, test_masks_path)
 
-infer_loader = DataLoader(test_data,batch_size=12,shuffle=False,num_workers=4)
+infer_loader = DataLoader(test_data, batch_size=12, shuffle=False, num_workers=4)
 # Get model predictions on test dataset
-predictions = np.vstack(list(map(lambda x: x["logits"].cpu().numpy(), runner.predict_loader(loader=infer_loader, resume=f"content/full_model2/checkpoints/best.pth"))))
+predictions = np.vstack(
+    list(
+        map(
+            lambda x: x["logits"].cpu().numpy(),
+            runner.predict_loader(
+                loader=infer_loader, resume=f"content/full_model2/checkpoints/best.pth"
+            ),
+        )
+    )
+)
 
-print(type(predictions))
-print(predictions.shape)
-
-
-# Display sample prediction results
-pred_results = {}
+# Pick sample images to analyze results
 low = 1
 high = len(predictions) - 1
-num_results = 20
-rand_nums = np.random.randint(low, high, num_results - 2)
+num_results = 3
+num_rand_results = num_results - 2
+rand_nums = np.random.randint(low, high, num_rand_results)
 
 """
-Images 30 and 141 are specifically added to predictions
-as clear indicators of performance since they both
-contain lines and barrels
+The results specifically include images 30 and 141 as
+they are images containing multiple lines and barrels.
+Hence, they would be strong indicators of performance.
 """
 rand_nums = np.insert(rand_nums, 0, 30)
 rand_nums = np.insert(rand_nums, 0, 141)
 
+# Save the image, mask, and predicted mask for sample test data
+
 for num in rand_nums:
-    # Show image
+    # Show and save image
     image = np.asarray(test_data[num]["image"])
     image = np.swapaxes(image, 2, 0)
     image = np.swapaxes(image, 1, 0)
     image = image.astype(np.uint8)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_label = "Raw_Image_{}".format(num)
+    plt.imsave(image_label + ".png", image)
 
-    # Show mask
+    # Show and save mask
     mask = np.squeeze(test_data[num]["mask"])
+    mask_label = "Ground_Truth_{}".format(num)
+    plt.imsave(mask_label + ".png", mask)
 
-    # Show predicted mask
+    # Show and save predicted mask
     pred_mask = np.asarray(predictions[num])
     pred_mask = np.swapaxes(pred_mask, 2, 0)
     pred_mask = np.swapaxes(pred_mask, 1, 0)
     pred_mask = pred_mask.astype(np.float64)
     pred_mask = np.argmax(pred_mask, axis=2)
-
-    # Add three images to list
-    images = []
-    images.append(image)
-    images.append(mask)
-    images.append(pred_mask)
-
-    # Show and plot all three images
-    plt.figure(figsize=(30, 30))
-    columns = 5
-    for i, image in enumerate(images):
-        image_plot = plt.subplot(len(images) / columns + 1, columns, i + 1)
-        if i == 0:
-            label = "Raw Image {}".format(num)
-            image_plot.set_title(label)
-            result = plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        elif i == 1:
-            label = "Ground Truth {}".format(num)
-            image_plot.set_title(label)
-            result = plt.imshow(image)
-        elif i == 2:
-            label = "Predicted Mask {}".format(num)
-            image_plot.set_title(label)
-            result = plt.imshow(image)
-        pred_results[label] = result
-
-# Pickle sample test results
-f = open("pred_results.pkl", "wb")
-pickle.dump(pred_results, f)
-f.close()
+    pred_mask_label = "Predicted_Mask_{}".format(num)
+    plt.imsave(pred_mask_label + ".png", pred_mask)
