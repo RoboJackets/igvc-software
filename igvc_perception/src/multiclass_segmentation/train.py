@@ -168,7 +168,7 @@ predictions = np.vstack(
 # Pick sample images to analyze results
 low = 1
 high = len(predictions) - 1
-num_results = 3
+num_results = 30
 num_rand_results = num_results - 2
 rand_nums = np.random.randint(low, high, num_rand_results)
 
