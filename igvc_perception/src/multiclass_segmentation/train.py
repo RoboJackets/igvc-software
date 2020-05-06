@@ -146,7 +146,6 @@ runner.train(
     main_metric="loss",
     minimize_metric=True,
     fp16=None,
-    monitoring_params=None,
     verbose=True,
 )
 
