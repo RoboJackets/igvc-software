@@ -13,12 +13,13 @@ import torch.utils.data as data
 
 class IGVCDataset(data.Dataset):
 
-    def __init__(self, root, im_size, split='train', transform=None, val_samples=1):
+    def __init__(self, root, im_size, split='train', transform=None, val_samples=1, preprocessor = None):
         self.root = root
         self.transform = transform
         self.split = split
         self.im_size = im_size
         self.val_samples = val_samples
+        self.preprocessor = preprocessor
 
         # Root contains a list of images to be used for the dataset.
         with open(root, 'r') as file:
@@ -49,11 +50,26 @@ class IGVCDataset(data.Dataset):
             img = cv2.imread(img_path)
         except:
             pdb.set_trace()
-        target = cv2.imread(target_path)[:,:,2]
-        
+
+        if self.preprocessor is not None:
+            img = self.preprocessor(img)
+
+        target = cv2.imread(target_path)
+
+        # randomly flip the image vertically sometimes
+        if (np.random.randint(2) == 1):
+            img = cv2.flip(img,1)
+            target = cv2.flip(target,1)
+
+        #Access to red color only (OpenCV: BGR) This is because the lines are categorized as red color
+        # And we are interested in lines for the line detection.
+        target = target[:,:,2]
         img = cv2.resize(img, (self.im_size[1],self.im_size[2]))
         target = cv2.resize(target, (self.im_size[1], self.im_size[2]))
         target[target != 0] = 255
+        #cv2.imshow("original image", img)
+        #cv2.imshow("target", target) #Check if the image is collectlly displayed as a binary image
+        #cv2.waitKey(0)
         
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
