@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import argparse
 import pickle
 import cv2
+from tqdm import tqdm
 
 # Import utilities for Torch
 from typing import List
@@ -71,7 +72,6 @@ utils.set_global_seed(SEED)
 utils.prepare_cudnn(deterministic=True)
 
 # Set up U-Net with pretrained EfficientNet backbone
-
 ENCODER = "efficientnet-b3"
 ENCODER_WEIGHTS = "imagenet"
 DEVICE = "cuda"
@@ -151,8 +151,8 @@ runner.train(
 
 # Test model on test dataset
 test_data = SegmentationDataset(test_images_path, test_masks_path)
-
 infer_loader = DataLoader(test_data, batch_size=12, shuffle=False, num_workers=4)
+
 # Get model predictions on test dataset
 predictions = np.vstack(
     list(
@@ -181,27 +181,35 @@ rand_nums = np.insert(rand_nums, 0, 30)
 rand_nums = np.insert(rand_nums, 0, 141)
 
 # Save the image, mask, and predicted mask for sample test data
-
-for num in rand_nums:
+predictions_path = "./predictions"
+Path(predictions_path).mkdir(parents=True, exist_ok=True)
+for num in tqdm(rand_nums):
+    fig = plt.figure(figsize=(10, 4))
     # Show and save image
+    plt.subplot(1, 3, 1)
     image = np.asarray(test_data[num]["image"])
     image = np.swapaxes(image, 2, 0)
     image = np.swapaxes(image, 1, 0)
     image = image.astype(np.uint8)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image_label = "Raw_Image_{}".format(num)
-    plt.imsave(image_label + ".png", image)
+    plt.imshow(image)
+    plt.gca().set_title("Raw Image")
 
     # Show and save mask
+    plt.subplot(1, 3, 2)
     mask = np.squeeze(test_data[num]["mask"])
-    mask_label = "Ground_Truth_{}".format(num)
-    plt.imsave(mask_label + ".png", mask)
+    plt.imshow(mask)
+    plt.gca().set_title("Ground Truth")
 
     # Show and save predicted mask
+    plt.subplot(1, 3, 3)
     pred_mask = np.asarray(predictions[num])
     pred_mask = np.swapaxes(pred_mask, 2, 0)
     pred_mask = np.swapaxes(pred_mask, 1, 0)
-    pred_mask = pred_mask.astype(np.float64)
     pred_mask = np.argmax(pred_mask, axis=2)
-    pred_mask_label = "Predicted_Mask_{}".format(num)
-    plt.imsave(pred_mask_label + ".png", pred_mask)
+    plt.imshow(pred_mask)
+    plt.gca().set_title("Predicted")
+
+    plt.tight_layout()
+    plt.savefig(f"./{predictions_path}/{num}.png")
+    plt.close()
