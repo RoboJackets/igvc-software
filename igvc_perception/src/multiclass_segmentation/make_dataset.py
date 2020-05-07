@@ -67,12 +67,10 @@ images_path = args["images"]
 masks_path = args["masks"]
 
 # Create separate images and masks datasets
-
 images = create_dataset(images_path, "images")
 masks = create_dataset(masks_path, "json")
 
 num_images = len(images)
-
 masks = np.reshape(masks, (num_images, 480, 640, 1))
 
 # Save NumPy arrays as .npy files

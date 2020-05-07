@@ -1,11 +1,9 @@
 # Import dependencies
-
 from sklearn.model_selection import train_test_split
 import numpy as np
 import argparse
 
 # Set size and seed
-
 test_size = 0.2
 random_state = 42
 

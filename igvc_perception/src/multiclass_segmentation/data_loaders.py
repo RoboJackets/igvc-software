@@ -1,4 +1,4 @@
-# import dependencies
+# Import dependencies
 import numpy as np
 from typing import List
 from pathlib import Path
@@ -34,7 +34,6 @@ def get_loaders(
     np_masks = np.array(masks)
 
     # Establish datasets within dataset class
-
     train_dataset = SegmentationDataset(image_arr_path, mask_arr_path)
     train_dataset.images = np_images[train_indices]
     train_dataset.masks = np_masks[train_indices]
