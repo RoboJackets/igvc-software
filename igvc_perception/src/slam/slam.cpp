@@ -31,7 +31,7 @@ Slam::Slam() : pnh_{ "~" }
  */
 void Slam::gpsCallback(const nav_msgs::Odometry &msg)
 {
-  gtsam::Point3 curr_point = Conversion::getPoint3FromOdom(msg);
+  gtsam::Point3 curr_point = Conversion::odomMsgToGtsamPoint3(msg);
   gtsam::GPSFactor gps_factor(X(curr_index_ + 1), curr_point, gps_noise_);
   graph_.add(gps_factor);
 
@@ -109,9 +109,9 @@ void Slam::integrateAndAddIMUFactor()
     newPoseEstimate =
         gtsam::Pose3(accum_.deltaRij() * newPoseEstimate.rotation(), accum_.deltaPij() + newPoseEstimate.translation());
     init_estimate_.insert(X(curr_index_ + 1), newPoseEstimate);
-    Vec3 lastVel = result_.at<gtsam::Vector3>(V(curr_index_));
-    lastVel += accum_.deltaVij();
-    init_estimate_.insert(V(curr_index_ + 1), lastVel);
+    Vec3 last_vel = result_.at<Vec3>(V(curr_index_));
+    last_vel += accum_.deltaVij();
+    init_estimate_.insert(V(curr_index_ + 1), last_vel);
     curr_index_++;
     optimize();
   }
@@ -155,7 +155,9 @@ void Slam::optimize()
   init_estimate_.clear();
 
   auto curr_pose = result_.at<gtsam::Pose3>(X(curr_index_));  // gtsam::Pose3 currPose
-  auto odom_message = Conversion::getOdomFromPose3(curr_pose);
+  Vec3 curr_vel = result_.at<Vec3>(V(curr_index_));
+  Vec3 curr_ang = accum_.deltaRij().rpy()/accum_.deltaTij();
+  auto odom_message = createOdomMsg(curr_pose, curr_vel, curr_ang);
   location_pub_.publish(odom_message);
   updateTransform(odom_message);
 }
@@ -249,4 +251,16 @@ void Slam::initializeDirectionOfLocalMagField()
   local_mag_field_ = gtsam::Unit3(lmg[0], lmg[1], lmg[2]);
   scale_ = Vec3(lmg[0], lmg[1], lmg[2]).norm();
   ROS_INFO_STREAM("Initializing Direction of Local Magnetic Field");
+}
+
+nav_msgs::Odometry Slam::createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang)
+{
+  nav_msgs::Odometry msg;
+  msg.header.stamp = ros::Time::now();
+  msg.child_frame_id = "/base_footprint";
+  msg.header.frame_id = "/odom";
+  msg.pose.pose = Conversion::gtsamPose3ToPose3Msg(pos);
+  msg.twist.twist.linear = Conversion::gtsamVector3ToVector3Msg(vel);
+  msg.twist.twist.angular = Conversion::gtsamVector3ToVector3Msg(ang);
+  return msg;
 }

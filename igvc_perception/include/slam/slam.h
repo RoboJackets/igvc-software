@@ -62,6 +62,7 @@ private:
   void initializeDirectionOfLocalMagField();
   void addMagFactor();
   void updateTransform(const nav_msgs::Odometry &pos);
+  static nav_msgs::Odometry createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang);
 
   // Defining some types
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;

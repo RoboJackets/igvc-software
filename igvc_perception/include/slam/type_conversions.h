@@ -10,9 +10,10 @@
 class Conversion
 {
 public:
-  static gtsam::Pose3 getPose3FromOdom(const nav_msgs::Odometry &msg);
-  static gtsam::Point3 getPoint3FromOdom(const nav_msgs::Odometry &msg);
-  static nav_msgs::Odometry getOdomFromPose3(const gtsam::Pose3 &pos);
+  static gtsam::Pose3 odomMsgToGtsamPose3(const nav_msgs::Odometry &msg);
+  static gtsam::Point3 odomMsgToGtsamPoint3(const nav_msgs::Odometry &msg);
+  static geometry_msgs::Vector3  gtsamVector3ToVector3Msg(const gtsam::Vector3 &vec);
+  static geometry_msgs::Pose gtsamPose3ToPose3Msg(const gtsam::Pose3 &pos);
 };
 
 #endif  // SRC_TYPE_CONVERSIONS_H
