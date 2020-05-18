@@ -17,7 +17,6 @@
 // Custom Mag Factor based around Pose3
 #include <slam/MagPoseFactor.h>
 #include <gtsam/geometry/Rot3.h>
-#include <slam/slam.h>
 #include <tf/transform_listener.h>
 #include <gtsam/inference/Symbol.h>
 #include <gtsam/navigation/ImuBias.h>
@@ -27,6 +26,12 @@
 #include <gtsam/nonlinear/ISAM2.h>
 #include <slam/type_conversions.h>
 #include <sensor_msgs/MagneticField.h>
+#include <tf2/convert.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/message_filter.h>
+#include <tf2/LinearMath/Transform.h>
 
 // Uncomment to enable debugging and have additional print statements
 //#define _DEBUG 1
@@ -56,6 +61,7 @@ private:
   void initializeNoiseMatrices();
   void initializeDirectionOfLocalMagField();
   void addMagFactor();
+  void updateTransform(const nav_msgs::Odometry &pos);
 
   // Defining some types
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;
@@ -68,6 +74,7 @@ private:
 #endif
 
   gtsam::NonlinearFactorGraph graph_;
+  tf2_ros::TransformBroadcaster world_transform_broadcaster_;
   unsigned long curr_index_;
   noiseDiagonal::shared_ptr gps_noise_, bias_noise_, mag_noise_;
   gtsam::Unit3 local_mag_field_;

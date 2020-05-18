@@ -1,9 +1,55 @@
 <?xml version="1.0"?>
 
 <launch>
+
+    <include file="$(find igvc_navigation)/launch/wheel_odometry.launch" />
+
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
+
+        <param name="frequency" value="30"/>
+
+        <!-- delay time could be useful but defaults to 0 -->
+        <param name="delay" value="0"/>
+
+        <!-- does ardupilot account for magnetic declination? -->
+        <param name="magnetic_declination_radians" value="0"/>
+
+        <!-- this assumes we are in a planar environment -->
+        <param name="two_d_mode" value="false"/>
+
+        <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
+        <param name="yaw_offset" value="0"/>
+
+        <!-- sets altitude to 0 -->
+        <param name="zero_altitude" value="false"/>
+
+        <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
+        <param name="broadcast_utm_transform" value="true"/>
+
+        <!-- publishes the lat and long of the robot position -->
+        <param name="publish_filtered_gps" value="true"/>
+
+        <!-- if true uses yaw angle from the input odom source -->
+        <param name="use_odometry_yaw" value="false"/>
+
+        <!-- input remapping -->
+        <remap from="/imu/data" to="/magnetometer"/>
+        <remap from="/gps/fix" to="/fix"/>
+        <remap from="/odometry/filtered" to="/wheel_odometry"/>
+
+        <!-- can do output remapping also -->
+    </node>
+
     <node name="slam" pkg="igvc_perception" type="slam" output="screen">
         <!-- Needs to be updated for each location: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml -->
         <param name="localMagneticField" value="[0.0000227095, 0.0000020783, -0.0000432753]" />
         <param name="magNoiseConstant" value="0.00000005" />
+        <remap from="/slam/position" to="/odometry/filtered"/>
+    </node>
+
+    <node pkg="igvc_utils" type="quaternion_to_rpy" name="odometry_filtered_to_rpy" respawn="true" output="screen">
+        <param name="topics/quaternion" value="/odometry/filtered"/>
+        <param name="topics/rpy" value="/odometry/rpy"/>
+        <param name="message_type" value="odometry"/>
     </node>
 </launch>

@@ -155,7 +155,22 @@ void Slam::optimize()
   init_estimate_.clear();
 
   auto curr_pose = result_.at<gtsam::Pose3>(X(curr_index_));  // gtsam::Pose3 currPose
-  location_pub_.publish(Conversion::getOdomFromPose3(curr_pose));
+  auto odom_message = Conversion::getOdomFromPose3(curr_pose);
+  location_pub_.publish(odom_message);
+  updateTransform(odom_message);
+}
+
+void Slam::updateTransform(const nav_msgs::Odometry &pos){
+  geometry_msgs::TransformStamped tfLink;
+  tfLink.header.stamp = pos.header.stamp;
+  tfLink.header.frame_id = pos.header.frame_id;
+  tfLink.child_frame_id = pos.child_frame_id;
+
+  tfLink.transform.translation.x = pos.pose.pose.position.x;
+  tfLink.transform.translation.y = pos.pose.pose.position.y;
+  tfLink.transform.translation.z = pos.pose.pose.position.z;
+  tfLink.transform.rotation = pos.pose.pose.orientation;
+  world_transform_broadcaster_.sendTransform(tfLink);
 }
 
 /**
