@@ -25,8 +25,6 @@ geometry_msgs::Vector3 Conversion::gtsamVector3ToVector3Msg(const gtsam::Vector3
   return gVec;
 }
 
-
-
 gtsam::Point3 Conversion::odomMsgToGtsamPoint3(const nav_msgs::Odometry &msg)
 {
   return gtsam::Point3(msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z);
