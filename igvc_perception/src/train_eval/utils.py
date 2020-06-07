@@ -29,6 +29,9 @@ def get_args():
         "--batch_size", type=int, default=1, help="input batch size for training."
     )
     parser.add_argument(
+        "--val_size", type=int, default=80, help="input batch size for validation."
+    )
+    parser.add_argument(
         "--epochs", type=int, default=5, help="number of epochs to train"
     )
     parser.add_argument(
