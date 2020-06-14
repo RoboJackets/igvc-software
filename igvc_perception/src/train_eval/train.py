@@ -67,7 +67,7 @@ def train():
                 cv2.waitKey(10)
 
             if batch_idx % args.log_interval == 0:
-                val_loss, val_acc = evaluate("val", args.val_size=80)
+                val_loss, val_acc = evaluate("val", n_batch=args.val_size)
                 train_loss = loss.item()
                 batch_metrics["iters"].append(
                     len(train_loader.dataset) * (epoch - 1) + batch_idx
