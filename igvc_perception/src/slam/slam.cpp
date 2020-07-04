@@ -124,8 +124,8 @@ void Slam::integrateAndAddIMUFactor()
 void Slam::optimize()
 {
   static int iteration = 0;
-  //ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
-                                     << " curr_index: " << curr_index_);
+//  ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
+//                                     << " curr_index: " << curr_index_);
   // Update ISAM graph with new factors and estimates
   isam_.update(graph_, init_estimate_);
 
@@ -158,7 +158,7 @@ void Slam::optimize()
   Vec3 curr_vel = result_.at<Vec3>(V(curr_index_));
 
   // converts linear velocity to the local frame
-  auto global_to_local = curr_pose.rotation().toQuaternion();
+  auto global_to_local = curr_pose.rotation().toQuaternion().inverse();
   curr_vel = global_to_local._transformVector(curr_vel);
 
   Vec3 curr_ang = accum_.deltaRij().rpy()/accum_.deltaTij();
