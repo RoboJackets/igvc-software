@@ -9,4 +9,4 @@ if [ ! -d "/usr/local/include/kindr/" ]; then
     cd ../..
     rm -rf kindr
 fi
-rosdep install -iy --from-paths ../../src --skip-keys='kindr'
+rosdep install -iy --from-paths ../../src --skip-keys='kindr cmake_code_coverage cmake_clang_tools python-serial python-catkin-pkg'
