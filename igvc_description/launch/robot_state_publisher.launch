@@ -1,8 +1,8 @@
 <!-- robot_state_publisher.launch -->
 <!--
-    This file launches the state_publisher node that broadcasts the tf structure of the robot.
+    This file launches the robot_state_publisher node that broadcasts the tf structure of the robot.
     -->
 <launch>
     <param name="robot_description" command="$(find xacro)/xacro $(find igvc_description)/urdf/jessii.urdf.xacro" />
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 </launch>
