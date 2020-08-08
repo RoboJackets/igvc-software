@@ -6,7 +6,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pointcloud_filter/fast_segment_filter/fast_segment_filter_config.h>
 #include <pointcloud_filter/filter.h>
-#include <velodyne_pointcloud/point_types.h>
+#include <velodyne_pcl/point_types.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
@@ -24,7 +24,7 @@ namespace pointcloud_filter
 struct Prototype
 {
   double distance_ = 0.0;
-  velodyne_pointcloud::PointXYZIR point_ = {};
+  velodyne_pcl::PointXYZIRT point_ = {};
 
   bool operator<(const Prototype &p) const
   {
@@ -84,7 +84,7 @@ struct Line
 
 struct Segment
 {
-  std::vector<velodyne_pointcloud::PointXYZIR> raw_points_;
+  std::vector<velodyne_pcl::PointXYZIRT> raw_points_;
   std::vector<Prototype> prototype_points_;
   std::vector<Line> lines_;
 };
@@ -95,8 +95,8 @@ public:
   FastSegmentFilter(const ros::NodeHandle &nh);
 
   std::unordered_map<int, Segment> segments_;
-  pcl::PointCloud<velodyne_pointcloud::PointXYZIR> ground_points_;
-  pcl::PointCloud<velodyne_pointcloud::PointXYZIR> nonground_points_;
+  pcl::PointCloud<velodyne_pcl::PointXYZIRT> ground_points_;
+  pcl::PointCloud<velodyne_pcl::PointXYZIRT> nonground_points_;
 
   ros::Publisher ground_pub_;
   ros::Publisher nonground_pub_;
@@ -140,17 +140,17 @@ public:
    *
    */
 
-  void classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &ground_points,
-                      pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &nonground_points);
+  void classifyPoints(pcl::PointCloud<velodyne_pcl::PointXYZIRT> &ground_points,
+                      pcl::PointCloud<velodyne_pcl::PointXYZIRT> &nonground_points);
   void debugViz();
 
 private:
   FastSegmentFilterConfig config_{};
 
-  int getSegIdFromPoint(const velodyne_pointcloud::PointXYZIR point);
-  double getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point);
-  double getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1,
-                                  const velodyne_pointcloud::PointXYZIR point2);
+  int getSegIdFromPoint(const velodyne_pcl::PointXYZIRT point);
+  double getDistanceFromPoint(const velodyne_pcl::PointXYZIRT point);
+  double getDistanceBetweenPoints(const velodyne_pcl::PointXYZIRT point1,
+                                  const velodyne_pcl::PointXYZIRT point2);
   bool evaluateIsGround(Line &l);
 };
 }  // namespace pointcloud_filter

@@ -21,7 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
     tf2
     pcl_ros
     igvc_utils
-    velodyne_pointcloud
+    ##velodyne_pointcloud
+    velodyne_pcl
     parameter_assertions
     grid_map_core
     grid_map_ros
