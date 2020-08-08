@@ -10,6 +10,7 @@
 [submodule "external/grid_map"]
 	path = external/grid_map
 	url = https://github.com/jspricke/grid_map.git
+	branch = noetic
 [submodule "external/serial"]
 	path = external/serial
 	url = https://github.com/wjwwood/serial.git
