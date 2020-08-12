@@ -195,7 +195,7 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
   Eigen::Quaterniond rotation;
   const auto &translate_vector = camera_to_odom.transform.translation;
   Eigen::Vector3d translation{ translate_vector.x, translate_vector.y, translate_vector.z };
-  tf2::convert(camera_to_odom.transform.rotation, rotation);
+  tf2::fromMsg(camera_to_odom.transform.rotation, rotation);
 
   grid_map::Index camera_index;  // Center of line_buffer_ and freespace_buffer_
   map_.getIndex({ translate_vector.x, translate_vector.y }, camera_index);
