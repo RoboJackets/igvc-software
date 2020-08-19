@@ -3,7 +3,7 @@
 	url = https://github.com/RoboJackets/rj-ros-common
 [submodule "external/elevation_mapping"]
 	path = external/elevation_mapping
-	url = https://github.com/ANYbotics/elevation_mapping
+	url = https://github.com/RoboJackets/elevation_mapping
 [submodule "external/kindr_ros"]
 	path = external/kindr_ros
 	url = https://github.com/ANYbotics/kindr_ros
