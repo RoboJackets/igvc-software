@@ -1,4 +1,4 @@
-FROM ros:melodic
+FROM ros:noetic
 MAINTAINER Matthew Barulic matthew.barulic@gmail.com
 
 # Setup apt to be happy with no console input
@@ -27,4 +27,4 @@ RUN mkdir -p src
 COPY . ./src/igvc-software
 
 # Install all ROS dependencies that can automatically be installed
-RUN /bin/bash -c "rosdep install -iy --from-paths ./src --skip-keys='python-pytorch-pip kindr' && pip install --no-cache-dir torch torchvision"
+RUN /bin/bash -c "rosdep install -iy --from-paths ./src --skip-keys='python-pytorch-pip kindr cmake_code_coverage cmake_clang_tools python-serial python-catkin-pkg' && pip install --no-cache-dir torch torchvision"
