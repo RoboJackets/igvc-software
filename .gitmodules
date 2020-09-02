@@ -31,3 +31,6 @@
 [submodule "external/velodyne_simulator"]
 	path = external/velodyne_simulator
 	url = https://bitbucket.org/DataspeedInc/velodyne_simulator.git
+[submodule "external/robot_localization"]
+	path = external/robot_localization
+	url = https://github.com/cra-ros-pkg/robot_localization.git
