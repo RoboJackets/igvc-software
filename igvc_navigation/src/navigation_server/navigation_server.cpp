@@ -197,6 +197,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
 void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClientGoalState &state,
                                                    const mbf_msgs::GetPathResultConstPtr &result_ptr)
 {
+  ROS_DEBUG_STREAM_NAMED("nav_server", "Replanning done.");
   // check if we are executing path
   if (navigation_state_ == EXE_PATH)
   {

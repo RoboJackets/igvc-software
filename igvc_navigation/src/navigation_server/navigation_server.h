@@ -4,7 +4,8 @@
 #include <ros/ros.h>
 
 #include <actionlib/server/action_server.h>
-#include <actionlib/client/simple_action_client.h>
+//#include <actionlib/client/simple_action_client.h>
+#include "simple_action_client.h"
 
 #include <mbf_msgs/GetPathAction.h>
 #include <mbf_msgs/ExePathAction.h>
