@@ -1,5 +1,6 @@
 <launch>
     <node name="navigation_server" pkg="igvc_navigation" type="navigation_server" output="screen">
+        <param name="connection_timeout" value="3.0"/>
         <param name="replanning_rate" value="2"/>
         <param name="max_replanning_tries" value="10"/>
         <param name="recovery_enabled" value="true"/>

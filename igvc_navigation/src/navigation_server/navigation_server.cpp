@@ -14,6 +14,7 @@ NavigationServer::NavigationServer()
                    boost::bind(&NavigationServer::cancel, this), false)
 {
   ROS_INFO_STREAM_NAMED("nav_server", "Navigation server created.");
+  assertions::getParam(private_nh_, "connection_timeout", connection_timeout_);
   assertions::getParam(private_nh_, "recovery_enabled", recovery_enabled_);
   assertions::getParam(private_nh_, "oscillation_distance", oscillation_distance_);
   assertions::getParam(private_nh_, "max_replanning_tries", max_replanning_tries_);
@@ -77,7 +78,7 @@ void NavigationServer::start(GoalHandle goal_handle)
   igvc_msgs::NavigateWaypointResult navigate_waypoint_result;
 
   // wait for server connections
-  ros::Duration connection_timeout(1.0);
+  ros::Duration connection_timeout(connection_timeout_);
   if (!action_client_get_path_.waitForServer(connection_timeout) ||
       !action_client_exe_path_.waitForServer(connection_timeout) ||
       !action_client_recovery_.waitForServer(connection_timeout))
