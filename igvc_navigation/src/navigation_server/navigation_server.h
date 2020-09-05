@@ -54,6 +54,7 @@ private:
   ros::Publisher current_goal_pose_publisher_;
 
   // action lib
+  double connection_timeout_;
   ActionClientGetPath action_client_get_path_;
   ActionClientExePath action_client_exe_path_;
   ActionClientRecovery action_client_recovery_;
