@@ -100,7 +100,7 @@ void NavigationServer::runGetPath()
 {
   ROS_DEBUG_STREAM_NAMED("nav_server", "nav_server sent goal to get_path client.");
   navigation_state_ = GET_PATH;
-  action_client_get_path_.sendGoal(get_path_goal_, boost::bind(&NavigationServer::actionGetPathDone, this, _1, _2));
+  action_client_get_path_.sendGoal(get_path_goal_, [this](auto && PH1, auto && PH2) { actionGetPathDone(PH1, PH2); });
 }
 
 void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState &state,
@@ -190,7 +190,7 @@ void NavigationServer::actionGetPathDone(const actionlib::SimpleClientGoalState 
     {
       ROS_INFO_STREAM_NAMED("nav_server", "Start replanning, using the 'get_path' action!");
       action_client_get_path_.sendGoal(get_path_goal_,
-                                       boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
+                                       [this](auto && PH1, auto && PH2) { actionGetPathReplanningDone(PH1, PH2); });
     }
   }
 }
@@ -250,7 +250,7 @@ void NavigationServer::actionGetPathReplanningDone(const actionlib::SimpleClient
     {
       ROS_DEBUG_STREAM_NAMED("nav_server", "Next replanning cycle, using the 'get_path' action!");
       action_client_get_path_.sendGoal(get_path_goal_,
-                                       boost::bind(&NavigationServer::actionGetPathReplanningDone, this, _1, _2));
+                                       [this](auto && PH1, auto && PH2) { actionGetPathReplanningDone(PH1, PH2); });
     }
   }
 }
@@ -263,9 +263,9 @@ void NavigationServer::runExePath(nav_msgs::Path path)
     mbf_msgs::ExePathGoal exe_path_goal;
     exe_path_goal.controller = exe_path_controller_;
     exe_path_goal.path = std::move(path);
-    action_client_exe_path_.sendGoal(exe_path_goal, boost::bind(&NavigationServer::actionExePathDone, this, _1, _2),
+    action_client_exe_path_.sendGoal(exe_path_goal, [this](auto && PH1, auto && PH2) { actionExePathDone(PH1, PH2); },
                                      NavigationServer::actionExePathActive,
-                                     boost::bind(&NavigationServer::actionExePathFeedback, this, _1));
+                                     [this](auto && PH1) { actionExePathFeedback(PH1); });
   }
 }
 
@@ -415,7 +415,7 @@ bool NavigationServer::attemptRecovery()
   mbf_msgs::RecoveryGoal recovery_goal;
   recovery_goal.behavior = *current_recovery_behavior_;
   navigation_state_ = RECOVERY;
-  action_client_recovery_.sendGoal(recovery_goal, boost::bind(&NavigationServer::actionRecoveryDone, this, _1, _2));
+  action_client_recovery_.sendGoal(recovery_goal, [this](auto && PH1, auto && PH2) { actionRecoveryDone(PH1, PH2); });
   return true;
 }
 
@@ -485,7 +485,7 @@ void NavigationServer::runNextRecoveryBehavior(const igvc_msgs::NavigateWaypoint
                           "nav_server: Run the next recovery behavior'" << *current_recovery_behavior_ << "'.");
     mbf_msgs::RecoveryGoal recovery_goal;
     recovery_goal.behavior = *current_recovery_behavior_;
-    action_client_recovery_.sendGoal(recovery_goal, boost::bind(&NavigationServer::actionRecoveryDone, this, _1, _2));
+    action_client_recovery_.sendGoal(recovery_goal, [this](auto && PH1, auto && PH2) { actionRecoveryDone(PH1, PH2); });
   }
 }
 
