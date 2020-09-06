@@ -14,6 +14,7 @@
     * [Barrel Segmentation](actual_barrel_segmentation.md)
     * [Raycasting Correction](NM_ray_casting.md)
     * [Slope Detection](slope_detection.md)
+    * [Bird's Eye View Inverse Projection Mapping](birds_eye_view_projection.md)
 
 * **Simulation**
     * [Adding Noise](add_noise_to_simulation.md)
