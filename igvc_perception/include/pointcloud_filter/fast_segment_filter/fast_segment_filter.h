@@ -149,8 +149,7 @@ private:
 
   int getSegIdFromPoint(const velodyne_pcl::PointXYZIRT point);
   double getDistanceFromPoint(const velodyne_pcl::PointXYZIRT point);
-  double getDistanceBetweenPoints(const velodyne_pcl::PointXYZIRT point1,
-                                  const velodyne_pcl::PointXYZIRT point2);
+  double getDistanceBetweenPoints(const velodyne_pcl::PointXYZIRT point1, const velodyne_pcl::PointXYZIRT point2);
   bool evaluateIsGround(Line &l);
 };
 }  // namespace pointcloud_filter
