@@ -486,10 +486,9 @@
 
   <!-- collision range = min sensing distance -->
   <!-- gpu does gpu acceleration -->
-  <VLP-16 parent="base_link" name="lidar" topic="/velodyne_points" hz="${lidar_hz}" samples="${lidar_samples}"
-          gpu="$(arg gpu)">
+  <xacro:VLP-16 parent="base_link" name="lidar" topic="/velodyne_points" hz="${lidar_hz}" samples="${lidar_samples}" gpu="$(arg gpu)">
     <origin xyz="${lidar_x} 0.0 ${lidar_z}" rpy="0 ${lidar_pitch} 0" />
-  </VLP-16>
+  </xacro:VLP-16>
 
   <xacro:wheel lr_prefix="left" lr_reflect="1" tire_diameter="${drive_tire_diameter}"
                wheel_mass="${drive_wheel_mass}" axle_eff_limit="${drive_wheel_eff_limit}" wheel_width="${drive_tire_width}"/>
