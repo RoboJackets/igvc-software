@@ -4,7 +4,8 @@
 #include <ros/ros.h>
 
 #include <actionlib/server/action_server.h>
-#include <actionlib/client/simple_action_client.h>
+//#include <actionlib/client/simple_action_client.h>
+#include "simple_action_client.h"
 
 #include <mbf_msgs/GetPathAction.h>
 #include <mbf_msgs/ExePathAction.h>
@@ -53,6 +54,7 @@ private:
   ros::Publisher current_goal_pose_publisher_;
 
   // action lib
+  double connection_timeout_;
   ActionClientGetPath action_client_get_path_;
   ActionClientExePath action_client_exe_path_;
   ActionClientRecovery action_client_recovery_;

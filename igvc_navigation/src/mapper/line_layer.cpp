@@ -14,10 +14,7 @@ PLUGINLIB_EXPORT_CLASS(line_layer::LineLayer, costmap_2d::Layer)
 
 namespace line_layer
 {
-LineLayer::LineLayer()
-  : GridmapLayer({ logodds_layer, probability_layer })
-  , private_nh_{ "~" }
-  , config_{ private_nh_ }
+LineLayer::LineLayer() : GridmapLayer({ logodds_layer, probability_layer }), private_nh_{ "~" }, config_{ private_nh_ }
 {
   line_buffer_ = cv::Mat(config_.projection.size_x, config_.projection.size_y, CV_8UC1);
   freespace_buffer_ = cv::Mat(config_.projection.size_x, config_.projection.size_y, CV_8UC1);

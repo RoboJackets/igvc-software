@@ -1,9 +1,6 @@
 [submodule "external/rj-ros-common"]
 	path = external/rj-ros-common
 	url = https://github.com/RoboJackets/rj-ros-common
-[submodule "external/elevation_mapping"]
-	path = external/elevation_mapping
-	url = https://github.com/RoboJackets/elevation_mapping
 [submodule "external/kindr_ros"]
 	path = external/kindr_ros
 	url = https://github.com/ANYbotics/kindr_ros
@@ -31,3 +28,9 @@
 [submodule "external/velodyne_simulator"]
 	path = external/velodyne_simulator
 	url = https://bitbucket.org/DataspeedInc/velodyne_simulator.git
+[submodule "external/geometry2"]
+	path = external/geometry2
+	url = https://github.com/ros/geometry2.git
+[submodule "external/elevation_mapping"]
+	path = external/elevation_mapping
+	url = https://github.com/RoboJackets/elevation_mapping.git
