@@ -2,7 +2,7 @@ FROM ros:noetic
 LABEL maintainer="matthew.scott.hannay@gmail.com"
 
 # Setup apt to be happy with no console input
-ENV DEBIAN_FRONTEND noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
 # setup apt tools and other goodies we want
 RUN apt-get update --fix-missing \
