@@ -6,6 +6,7 @@ image: &image
   - image: robojackets/igvc-baseimage:latest
 
 install_deps: &install_deps
+  working_directory: ~/catkin_ws/src/igvc_software
   run: bash install_dependencies.sh
 
 save_src_cache: &save_src_cache
@@ -13,17 +14,20 @@ save_src_cache: &save_src_cache
     key: source-v1-{{ .Branch }}-{{ .Revision }}
     paths:
     - ".git"
+
 load_src_cache: &load_src_cache
   restore_cache:
     keys:
     - source-v1-{{ .Branch }}-{{ .Revision }}
     - source-v1-{{ .Branch }}-
     - source-v1-
+
 save_compile_cache: &save_compile_cache
   save_cache:
     key: ccache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
     paths:
     - ~/.ccache
+
 load_compile_cache: &load_compile_cache
   restore_cache:
     keys:
@@ -31,11 +35,13 @@ load_compile_cache: &load_compile_cache
     - ccache-{{ arch }}-{{ .Branch }}
     - ccache-{{ arch }}
     - ccache-
+
 save_test_cache: &save_test_cache
   save_cache:
     key: ccache-test-{{ arch }}-{{ .Branch }}-{{ .Revision }}
     paths:
     - ~/.ccache
+
 load_test_cache: &load_test_cache
   restore_cache:
     keys:
@@ -50,6 +56,7 @@ save_workspace: &save_workspace
     paths:
     - build/*
     - devel/*
+
 load_workspace: &load_workspace
   attach_workspace:
     at: ~/catkin_ws
