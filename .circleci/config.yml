@@ -6,7 +6,7 @@ image: &image
   - image: robojackets/igvc-baseimage:latest
 
 install_deps: &install_deps
-  run: apt-get update && rosdep update && rosdep install -iy --from-paths ./src --skip-keys='kindr'
+  run: bash install_dependencies.sh
 
 save_src_cache: &save_src_cache
   save_cache:
@@ -70,7 +70,7 @@ jobs:
     - <<: *save_src_cache
     - <<: *install_deps
     - <<: *load_compile_cache
-    - run: source /opt/ros/melodic/setup.sh && catkin_make -j2 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - run: source /opt/ros/noetic/setup.sh && catkin_make -j2 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     - <<: *save_compile_cache
     - <<: *save_workspace
   test:
@@ -85,7 +85,7 @@ jobs:
     - <<: *install_deps
     - <<: *load_workspace
     - <<: *load_test_cache
-    - run: source /opt/ros/melodic/setup.sh && catkin_make run_tests -j2 && catkin_test_results
+    - run: source /opt/ros/noetic/setup.sh && catkin_make run_tests -j2 && catkin_test_results
     - <<: *save_test_cache
   format:
     working_directory: ~/catkin_ws/src/igvc-software
