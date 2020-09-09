@@ -3,59 +3,59 @@ dir: &dir
 
 image: &image
   docker:
-  - image: robojackets/igvc-baseimage:noetic
+    - image: robojackets/igvc-baseimage:noetic
 
 install_deps: &install_deps
-  working_directory: ~/catkin_ws/src/igvc_software
   run: bash install_dependencies.sh
+    - working_directory: src/igvc_software
 
 save_src_cache: &save_src_cache
   save_cache:
     key: source-v1-{{ .Branch }}-{{ .Revision }}
     paths:
-    - ".git"
+      - ".git"
 
 load_src_cache: &load_src_cache
   restore_cache:
     keys:
-    - source-v1-{{ .Branch }}-{{ .Revision }}
-    - source-v1-{{ .Branch }}-
-    - source-v1-
+      - source-v1-{{ .Branch }}-{{ .Revision }}
+      - source-v1-{{ .Branch }}-
+      - source-v1-
 
 save_compile_cache: &save_compile_cache
   save_cache:
     key: ccache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
     paths:
-    - ~/.ccache
+      - ~/.ccache
 
 load_compile_cache: &load_compile_cache
   restore_cache:
     keys:
-    - ccache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-    - ccache-{{ arch }}-{{ .Branch }}
-    - ccache-{{ arch }}
-    - ccache-
+      - ccache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+      - ccache-{{ arch }}-{{ .Branch }}
+      - ccache-{{ arch }}
+      - ccache-
 
 save_test_cache: &save_test_cache
   save_cache:
     key: ccache-test-{{ arch }}-{{ .Branch }}-{{ .Revision }}
     paths:
-    - ~/.ccache
+      - ~/.ccache
 
 load_test_cache: &load_test_cache
   restore_cache:
     keys:
-    - ccache-test-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-    - ccache-test-{{ arch }}-{{ .Branch }}
-    - ccache-test-{{ arch }}
-    - ccache-test-
+      - ccache-test-{{ arch }}-{{ .Branch }}-{{ .Revision }}
+      - ccache-test-{{ arch }}-{{ .Branch }}
+      - ccache-test-{{ arch }}
+      - ccache-test-
 
 save_workspace: &save_workspace
   persist_to_workspace:
     root: ~/catkin_ws
     paths:
-    - build/*
-    - devel/*
+      - build/*
+      - devel/*
 
 load_workspace: &load_workspace
   attach_workspace:
@@ -137,13 +137,13 @@ workflows:
   version: 2
   format:
     jobs:
-    - format
+      - format
   build_and_test:
     jobs:
-    - compile
-    - test:
-        requires:
-        - compile
-    - clang-tidy:
-        requires:
-        - compile
+      - compile
+      - test:
+          requires:
+            - compile
+      - clang-tidy:
+          requires:
+            - compile
