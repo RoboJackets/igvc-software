@@ -7,8 +7,8 @@ image: &image
 
 install_deps: &install_deps
   run:
-    - command: bash install_dependencies.sh
-    - working_directory: src/igvc-software
+    command: bash install_dependencies.sh
+    working_directory: src/igvc-software
 
 save_src_cache: &save_src_cache
   save_cache:
