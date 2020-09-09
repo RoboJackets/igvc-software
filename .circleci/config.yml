@@ -3,7 +3,7 @@ dir: &dir
 
 image: &image
   docker:
-  - image: robojackets/igvc-baseimage:latest
+  - image: robojackets/igvc-baseimage:noetic
 
 install_deps: &install_deps
   working_directory: ~/catkin_ws/src/igvc_software
