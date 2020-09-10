@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<robot name="igvc_platform" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="wheel_mass" value="1" />
+    <xacro:property name="wheel_width" value="1" />
+    <xacro:property name="tire_diameter" value="1" />
+    <material name="blue">
+        <color rgba="0 0 0.8 1"/>
+    </material>
+    <material name="black">
+        <color rgba="0 0 0 1"/>
+    </material>
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <cylinder length="0.6" radius="0.2"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="0.6" radius="0.2"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="10"/>
+            <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
+        </inertial>
+    </link>
+
+    <link name="wheel">
+        <visual>
+            <geometry>
+                <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
+            </geometry>
+            <origin rpy= "1.57075 0 0" xyz = "0 0 0"/>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
+            </geometry>
+            <origin rpy= "1.57075 0 0" xyz = "0 0 0"/>
+        </collision>
+        <inertial>
+            <mass value="1"/>
+            <inertia  ixx="1"
+                      ixy="0.0"
+                      ixz="0.0"
+                      iyy="1"
+                      iyz="0.0"
+                      izz="1" />
+        </inertial>
+    </link>
+
+    <joint name="base_to_wheel" type="continuous">
+
+        <parent link="base_link"/>
+        <child link="wheel"/>
+        <origin xyz="0 -0.25 -0.3"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+
+
+</robot>
