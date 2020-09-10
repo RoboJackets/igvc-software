@@ -105,13 +105,13 @@ jobs:
       - <<: *save_src_cache
       - run: |
           apt-get update -y
-          apt-get install -y clang-format-6.0
-          ln -s /usr/bin/clang-format-6.0 /usr/bin/clang-format
-          clang-format -dump-config
+          apt-get install -y clang-format-10
+          ln -s /usr/bin/clang-format-10 /usr/bin/clang-format
+          clang-format --dump-config
           SOURCE_FILES=`find . -name '*.h' -or -name '*.hpp' -or -name '*.cpp' -not -path "./external/*"`
           for SOURCE_FILE in $SOURCE_FILES
           do
-            export FORMATTING_ISSUE_COUNT=`clang-format -output-replacements-xml $SOURCE_FILE | grep offset | wc -l`
+            export FORMATTING_ISSUE_COUNT=`clang-format --output-replacements-xml $SOURCE_FILE | grep offset | wc -l`
             if [ "$FORMATTING_ISSUE_COUNT" -gt "0" ]; then
               echo "Source file $SOURCE_FILE contains formatting issues. Please use clang-format tool to resolve found issues."
               exit 1
