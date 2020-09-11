@@ -36,12 +36,12 @@ else
 fi
 
 # Check for clang-tidy
-if [ ! "$(command -v clang-tidy-8)" ]; then
-  echo "${error}Couldn't find clang-tidy-8${rs}"
-  echo "Run sudo apt install clang-tidy-8 clang-tools-8"
+if [ ! "$(command -v clang-tidy-10)" ]; then
+  echo "${error}Couldn't find clang-tidy-10${rs}"
+  echo "Run sudo apt install clang-tidy-10 clang-tools-10"
   exit 1
 else
-  echo "${success}Found clang-tidy-8!${rs}"
+  echo "${success}Found clang-tidy-10!${rs}"
 fi
 
 # Check if we want to add '-fix-errors' flag to clang-tidy
@@ -67,7 +67,7 @@ base=$(git merge-base refs/remotes/origin/master HEAD)
 # Create an empty array that will contain all the filepaths of files modified.
 modified_filepaths=()
 
-# To properly handle file names with spaces, we have to do some bash magic.
+# To properly handle file names with spaces, wef have to do some bash magic.
 # We set the Internal Field Separator to nothing and read line by line.
 while IFS='' read -r line
 do
@@ -106,7 +106,7 @@ fi
 # `| tee` specifies that we would like the output of clang-tidy to go to `stdout` and also to capture it in
 # `$build_dir/clang-tidy-output` for later processing.
 build_dir="../../build/"
-parallel -m clang-tidy-8 -p $build_dir ${fix_errors} {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
+parallel -m clang-tidy-10 -p $build_dir ${fix_errors} {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
 
 # ===============================
 # | Convert result to JUnit XML |
