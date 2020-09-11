@@ -25,7 +25,8 @@ class ClangTidyConverter:
     error_regex = re.compile(
         r"^([\w\/\.\-\ ]+):(\d+):(\d+): (.+) (\[[\w\-,\.]+\])$")
 
-    # This identifies the main error line (it has a [the-warning-type] at the end)
+    # This identifies the main error line
+    # (it has a [the-warning-type] at the end)
     # We only create a new error when we encounter one of those.
     main_error_identifier = re.compile(r'\[[\w\-,\.]+\]$')
 
@@ -40,12 +41,14 @@ class ClangTidyConverter:
         sorted_errors = sorted(self.errors, key=lambda x: x.file)
 
         # Iterate through the errors, grouped by file.
-        for file, errorIterator in itertools.groupby(sorted_errors, key=lambda x: x.file):
+        for file, errorIterator in itertools.groupby(sorted_errors,
+                                                     key=lambda x: x.file):
             errors = list(errorIterator)
             error_count = len(errors)
 
             # Each file gets a test-suite
-            output_file.write("""\n    <testsuite errors="{error_count}" name="{file}" tests="{error_count}" 
+            output_file.write("""\n    <testsuite errors="{error_count}"
+            name="{file}" tests="{error_count}" 
             failures="0" time="0">\n """
                               .format(error_count=error_count, file=file))
             for error in errors:
@@ -55,7 +58,8 @@ class ClangTidyConverter:
             <failure message="{message}">
 {htmldata}
             </failure>
-        </testcase>""".format(id="[{}/{}] {}".format(error.line, error.column, error.error_identifier),
+        </testcase>""".format(id="[{}/{}] {}".format(error.line, error.column,
+                                                     error.error_identifier),
                               message=escape(error.error),
                               htmldata=escape(error.description)))
             output_file.write("\n    </testsuite>\n")
@@ -71,7 +75,8 @@ class ClangTidyConverter:
                 'Could not match error_array to regex: %s', error_array)
             return
 
-        # We remove the `basename` from the `file_path` to make prettier filenames in the JUnit file.
+        # We remove the `basename` from the `file_path`
+        # to make prettier filenames in the JUnit file.
         file_path = result.group(1).replace(self.basename, "")
 
         line = int(result.group(2))
@@ -80,7 +85,8 @@ class ClangTidyConverter:
         error_id = result.group(5)
         error_message = "".join(error_array[1:]).strip()
 
-        error = ErrorDescription(file_path, line, column, error_type, error_id, error_message)
+        error = ErrorDescription(file_path, line, column,
+                                 error_type, error_id, error_message)
         self.errors.append(error)
 
     def convert(self, input_file, output_file):
@@ -93,14 +99,16 @@ class ClangTidyConverter:
                 if self.main_error_identifier.search(line, re.M):
                     # If so, process any `current_error` we might have
                     self.process_error(current_error)
-                    # Initialize `current_error` with the first line of the error.
+                    # Initialize `current_error`
+                    # with the first line of the error.
                     current_error = [line]
                 else:
                     # Otherwise, append the line to the error.
                     current_error.append(line)
             elif len(current_error) > 0:
-                # If the line didn't start with a `/` and we have a `current_error`, we simply append
-                # the line as additional information.
+                # If the line didn't start with a `/`
+                # and we have a `current_error`,
+                # we simply append the line as additional information.
                 current_error.append(line)
             else:
                 pass
@@ -118,7 +126,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         logging.error("Usage: %s base-filename-path", sys.argv[0])
         logging.error(
-            "  base-filename-path: Removed from the filenames to make nicer paths.")
+            "  base-filename-path:"
+            " Removed from the filenames to make nicer paths.")
         sys.exit(1)
     converter = ClangTidyConverter(sys.argv[1])
     converter.convert(sys.stdin, sys.stdout)
