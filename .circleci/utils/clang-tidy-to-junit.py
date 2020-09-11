@@ -48,7 +48,7 @@ class ClangTidyConverter:
 
             # Each file gets a test-suite
             output_file.write("""\n    <testsuite errors="{error_count}"
-            name="{file}" tests="{error_count}" 
+            name="{file}" tests="{error_count}"
             failures="0" time="0">\n """
                               .format(error_count=error_count, file=file))
             for error in errors:
