@@ -45,7 +45,8 @@ class ClangTidyConverter:
             error_count = len(errors)
 
             # Each file gets a test-suite
-            output_file.write("""\n    <testsuite errors="{error_count}" name="{file}" tests="{error_count}" failures="0" time="0">\n"""
+            output_file.write("""\n    <testsuite errors="{error_count}" name="{file}" tests="{error_count}" 
+            failures="0" time="0">\n """
                               .format(error_count=error_count, file=file))
             for error in errors:
                 # Write each error as a test case.
@@ -54,7 +55,8 @@ class ClangTidyConverter:
             <failure message="{message}">
 {htmldata}
             </failure>
-        </testcase>""".format(id="[{}/{}] {}".format(error.line, error.column, error.error_identifier), message=escape(error.error),
+        </testcase>""".format(id="[{}/{}] {}".format(error.line, error.column, error.error_identifier),
+                              message=escape(error.error),
                               htmldata=escape(error.description)))
             output_file.write("\n    </testsuite>\n")
         output_file.write("</testsuites>\n")
