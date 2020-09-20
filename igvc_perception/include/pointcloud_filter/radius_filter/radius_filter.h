@@ -2,7 +2,7 @@
 #define SRC_RADIUS_FILTER_H
 
 #include <pcl/point_cloud.h>
-#include <velodyne_pcl/point_types.h>
+#include "pointcloud_filter/point_types.h"
 
 #include <pointcloud_filter/filter.h>
 #include <pointcloud_filter/radius_filter/radius_filter_config.h>

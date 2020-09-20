@@ -6,7 +6,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pointcloud_filter/fast_segment_filter/fast_segment_filter_config.h>
 #include <pointcloud_filter/filter.h>
-#include <velodyne_pcl/point_types.h>
+#include "pointcloud_filter/point_types.h"
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 

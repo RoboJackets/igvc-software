@@ -2,7 +2,7 @@
 #define SRC_POINTCLOUD_BUNDLE_H
 
 #include <pcl/point_cloud.h>
-#include <velodyne_pcl/point_types.h>
+#include "pointcloud_filter/point_types.h"
 
 namespace pointcloud_filter
 {

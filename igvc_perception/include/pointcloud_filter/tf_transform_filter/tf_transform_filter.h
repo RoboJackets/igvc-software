@@ -4,7 +4,7 @@
 
 #include <pcl/point_cloud.h>
 #include <tf2_ros/buffer.h>
-#include <velodyne_pcl/point_types.h>
+#include "pointcloud_filter/point_types.h"
 
 #include <pointcloud_filter/filter.h>
 #include <tf2_ros/transform_listener.h>
