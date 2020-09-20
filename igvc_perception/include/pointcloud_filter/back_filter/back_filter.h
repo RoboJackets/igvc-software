@@ -2,7 +2,7 @@
 #define SRC_BACK_FILTER_H
 
 #include <pcl/point_cloud.h>
-#include <velodyne_pcl/point_types.h>
+#include "pointcloud_filter/point_types.h"
 
 #include <pointcloud_filter/back_filter/back_filter_config.h>
 #include <pointcloud_filter/filter.h>
