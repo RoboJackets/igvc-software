@@ -25,9 +25,6 @@
 [submodule "external/velodyne_simulator"]
 	path = external/velodyne_simulator
 	url = https://bitbucket.org/DataspeedInc/velodyne_simulator.git
-[submodule "external/geometry2"]
-	path = external/geometry2
-	url = https://github.com/ros/geometry2.git
 [submodule "external/nmea_navsat_driver"]
 	path = external/nmea_navsat_driver
 	url = https://github.com/RoboJackets/nmea_navsat_driver.git
