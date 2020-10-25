@@ -9,5 +9,7 @@ if [ ! -d "/usr/local/include/kindr/" ]; then
     cd ../..
     rm -rf kindr
 fi
-rosdep install -iy --from-paths ../../src --skip-keys='kindr'
+# manually install nmea-navsat-driver because it won't work otherwise. FIX EVENTUALLY.
+sudo apt-get install ros-noetic-nmea-navsat-driver
+rosdep install -iy --from-paths ../../src --skip-keys='kindr nmea-navsat-driver'
 pip3 install --no-cache-dir torch torchvision
