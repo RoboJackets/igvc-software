@@ -59,7 +59,7 @@
         <param name="message_type" value="odometry"/>
     </node>
 
-    <node name="mag_republisher" pkg="igvc_gazebo" type="mag_republisher" output="screen">
+    <node name="mag_republisher" pkg="igvc_gazebo" type="mag_republisher" output="screen" required="true">
         <param name="mag_sub_topic" value="/magnetometer/vector"/>
         <param name="mag_pub_topic" value="/magnetometer_mag"/>
         <param name="mag_field_variance" value = "0.000001"/>
