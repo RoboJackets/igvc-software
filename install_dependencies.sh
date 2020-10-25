@@ -9,5 +9,5 @@ if [ ! -d "/usr/local/include/kindr/" ]; then
     cd ../..
     rm -rf kindr
 fi
-rosdep install -iy --from-paths ../../src --skip-keys='kindr cmake_code_coverage cmake_clang_tools python-serial python-catkin-pkg python-pytorch-pip'
+rosdep install -iy --from-paths ../../src --skip-keys='kindr'
 pip3 install --no-cache-dir torch torchvision
