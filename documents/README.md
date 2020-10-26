@@ -22,3 +22,4 @@ This folder contains research and design documents for the repo.
 * [Slope Detection](design/slope_detection.md)
 * [Testing Library](design/testing_library.md)
 * [Waypoint Orientation for TEB](design/waypoint_orientation.md)
+* [OpenCV Based Line Detection](design/opencv_line_detection.md)
