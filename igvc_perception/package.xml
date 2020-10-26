@@ -53,8 +53,6 @@
   <build_depend>pcl_ros</build_depend>
   <build_depend>image_geometry</build_depend>
   <build_depend>laser_geometry</build_depend>
-  <!--<build_depend>velodyne_pointcloud</build_depend>-->
-  <build_depend>velodyne_pcl</build_depend>
   <build_depend>igvc_utils</build_depend>
 
   <!-- Run dependencies -->
