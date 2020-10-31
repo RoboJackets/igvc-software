@@ -1,6 +1,6 @@
 <!-- odometer.launch -->
 <launch>
-    <node name="odometer" pkg="igvc_navigation" type="odometer" output="screen">
+    <node name="odometer" pkg="igvc_navigation" type="odometer" output="screen" required="true">
     <param name="wheel_sep" type="double" value="0.556"/>
     </node>
 </launch>
