@@ -35,7 +35,7 @@
     <include file="$(find igvc_utils)/launch/system_stats.launch" />
 
     <node pkg="diagnostic_aggregator" type="aggregator_node"
-          name="diagnostic_aggregator" >
+          name="diagnostic_aggregator" required="true" >
         <!-- Load the file you made above -->
         <rosparam command="load"
                   file="$(find igvc_platform)/config/analyzers.yaml" />
