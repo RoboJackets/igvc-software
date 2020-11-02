@@ -14,8 +14,8 @@ pointcloud_filter:
         radius_squared: 225
     # ground_filter performs some naive ground filtering based on the z-value of the points
     ground_filter:
-        height_min: 0.4                     # Min z-value of the point to be considered, ie. not ignore (m)
-        height_max: 1.2                     # Max z-value of the point to be considered, ie. not ignore (m)
+        height_min: -2.0                     # Min z-value of the point to be considered, ie. not ignore (m)
+        height_max: 2.0                     # Max z-value of the point to be considered, ie. not ignore (m)
     # raycast_filter computes the free points by performing a raycasting for each occupied lidar point.
     # For each "ray", it produces two points (one starting, one ending)
     raycast_filter:

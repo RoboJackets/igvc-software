@@ -42,6 +42,8 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
 
   back_filter_.filter(bundle);
 
+  ground_filter_.filter(bundle); // remove ground plane from original point cloud
+
   filtered_pointcloud_pub_.publish(bundle.pointcloud);
 
   fast_segment_filter_.filter(bundle);
