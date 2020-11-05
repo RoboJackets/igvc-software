@@ -48,7 +48,7 @@
         <rosparam command="load" file="$(find igvc_navigation)/config/ekf_localization_node_params.yaml"/>
     </node>
 
-    <node pkg="igvc_utils" type="quaternion_to_rpy" name="odometry_filtered_to_rpy" respawn="true" output="screen" required="true">
+    <node pkg="igvc_utils" type="quaternion_to_rpy" name="odometry_filtered_to_rpy"  output="screen" required="true">
         <param name="topics/quaternion" value="/odometry/filtered"/>
         <param name="topics/rpy" value="/odometry/rpy"/>
         <param name="message_type" value="odometry"/>
