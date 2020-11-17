@@ -3,7 +3,7 @@
 <!-- map.launch -->
 <launch>
 
-    <node name="differential_drive" pkg="igvc_navigation" type="differential_drive" output="screen" >
+    <node name="differential_drive" pkg="igvc_navigation" type="differential_drive" output="screen" required="true">
         <param name="axle_length" value="0.52"/>
         <param name="max_vel" value="2.0"/>
     </node>

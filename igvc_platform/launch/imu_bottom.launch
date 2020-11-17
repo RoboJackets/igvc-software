@@ -1,7 +1,7 @@
 <launch>
     <arg name="calibrate_imu" default="false"/>
     <!-- Bottom IMU -->
-    <node pkg="igvc_platform" name="imu_bottom" type="imu" output="screen" >
+    <node pkg="igvc_platform" name="imu_bottom" type="imu" output="screen" required="true">
         <param name="SERIAL_PORT" type="string" value="/dev/imu_bottom" />
         <param name="frame_id" type="string" value="imu"/>
         <param name="calibrate_imu" value="$(arg calibrate_imu)" />

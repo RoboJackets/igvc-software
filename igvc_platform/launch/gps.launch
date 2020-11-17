@@ -5,7 +5,7 @@
     GPS model.
     -->
 <launch>
-    <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver">
+    <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" required="true">
         <param name="port" type="str" value="/dev/igvc_gps" />
         <param name="baud" type="int" value="19200" />
     </node>
