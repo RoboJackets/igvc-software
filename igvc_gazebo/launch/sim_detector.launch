@@ -2,7 +2,7 @@
 
 <launch>
 
-  <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector" output="screen">
+  <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector" output="screen" required="true">
       <!-- names of cameras to subscribe to -->
       <rosparam param="camera_names">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
       <rosparam param="semantic_topic_prefix">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
