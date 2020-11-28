@@ -15,6 +15,7 @@
     * [Raycasting Correction](NM_ray_casting.md)
     * [Slope Detection](slope_detection.md)
     * [Bird's Eye View Inverse Projection Mapping](birds_eye_view_projection.md)
+    * [OpenCV Based Line Detection](design/opencv_line_detection.md)
 
 * **Simulation**
     * [Adding Noise](add_noise_to_simulation.md)
