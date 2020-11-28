@@ -2,7 +2,7 @@
     <arg name="calibrate_imu" default="false"/>
 
     <!-- Top IMU -->
-    <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
+    <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" required="true">
         <!--value="/dev/imu_top"-->
         <param name="SERIAL_PORT" type="string" value="/dev/imu_top" />
 

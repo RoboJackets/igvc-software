@@ -4,7 +4,7 @@
 	<arg name="camera" default="center" />
 
 	<group if="$(eval 'center' in arg('camera'))">
-		<node name="usb_cam_center" pkg="usb_cam" type="usb_cam_node">
+		<node name="usb_cam_center" pkg="usb_cam" type="usb_cam_node" required="true">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
 		    <param name="video_device" type="string" value="/dev/igvc_usb_cam_center" />
 		    <param name="pixel_format" type="string" value="yuyv" />
@@ -16,7 +16,7 @@
 	</group>
 
 	<group if="$(eval 'right' in arg('camera'))">
-		<node name="usb_cam_right" pkg="usb_cam" type="usb_cam_node">
+		<node name="usb_cam_right" pkg="usb_cam" type="usb_cam_node" required="true">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
 		    <param name="video_device" type="string" value="/dev/igvc_usb_cam_right" />
 		    <param name="pixel_format" type="string" value="yuyv" />
@@ -28,7 +28,7 @@
 	</group>
 
 	<group if="$(eval 'left' in arg('camera'))">
-		<node name="usb_cam_left" pkg="usb_cam" type="usb_cam_node">
+		<node name="usb_cam_left" pkg="usb_cam" type="usb_cam_node" required="true">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
 		    <param name="video_device" type="string" value="/dev/igvc_usb_cam_left" />
 		    <param name="pixel_format" type="string" value="yuyv" />
