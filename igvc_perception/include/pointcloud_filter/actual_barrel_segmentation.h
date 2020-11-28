@@ -16,7 +16,7 @@ namespace pointcloud_filter
 class PointcloudFilter
 {
 public:
-  using PointCloud = pcl::PointCloud<velodyne_pointcloud::PointXYZIR>;
+  using PointCloud = pcl::PointCloud<velodyne_pcl::PointXYZIRT>;
 
   PointcloudFilter(const ros::NodeHandle& nh = {}, const ros::NodeHandle& private_nh = { "~" });
 
