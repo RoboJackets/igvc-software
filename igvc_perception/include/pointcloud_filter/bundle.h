@@ -2,13 +2,13 @@
 #define SRC_POINTCLOUD_BUNDLE_H
 
 #include <pcl/point_cloud.h>
-#include <velodyne_pointcloud/point_types.h>
+#include "pointcloud_filter/point_types.h"
 
 namespace pointcloud_filter
 {
 struct Bundle
 {
-  using PointCloud = pcl::PointCloud<velodyne_pointcloud::PointXYZIR>;
+  using PointCloud = pcl::PointCloud<velodyne_pcl::PointXYZIRT>;
 
   PointCloud::Ptr pointcloud;
   PointCloud::Ptr occupied_pointcloud;

@@ -40,6 +40,8 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>tf</depend>
+  <depend>tf2</depend>
+  <depend>tf2_eigen</depend>
   <depend>image_transport</depend>
   <depend>image_geometry</depend>
   <depend>robot_localization</depend>
