@@ -44,11 +44,7 @@
       <!-- can do output remapping also -->
     </node>
 
-<<<<<<< HEAD
-    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" output="screen">
-=======
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" output="screen" required="true">
->>>>>>> master
         <rosparam command="load" file="$(find igvc_navigation)/config/ekf_localization_node_params.yaml"/>
     </node>
 
