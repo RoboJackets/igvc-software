@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+
+<robot name="Swervi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- constants -->
+    <xacro:property name="M_PI" value="3.1415926535897931" />
+
+    <!-- geometry params -->
+    <xacro:property name="wheel_mass" value="15" />
+    <xacro:property name="wheel_width" value="0.0762" />
+    <xacro:property name="wheel_diameter" value="0.305"/>
+    <xacro:property name="swivel_radius" value="0.1375" />
+    <xacro:property name="swivel_length" value="0.17272" />
+    <xacro:property name="swivel_mass" value="1" />
+    <xacro:property name="wheel_swivel_offset" value="0.02" />
+
+    <!-- wheel acuator limits -->
+    <xacro:property name="drive_wheel_eff_limit" value="8"/>
+    <xacro:property name="drive_wheel_vel_limit" value="10"/>
+
+    <!-- drive shock params-->
+    <!-- how far the drive wheel shock can move (m)-->
+    <xacro:property name="drive_wheel_travel" value="0.1"/>
+    <xacro:property name="drive_shock_eff_limit" value="500.0"/>
+    <xacro:property name="drive_shock_vel_limit" value="0.1"/>
+    
+    <!-- gives small geometry so it show up in rviz -->
+    <xacro:macro name="null_link">
+        <inertial>
+            <mass value="0.001"/>
+            <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+        </inertial>
+        <visual>
+            <geometry>
+                <box size="0.01 0.01 0.01"/>
+            </geometry>
+        </visual>
+    </xacro:macro>
+
+    <!-- makes shock for drive wheel -->
+    <xacro:macro name="drive_shock" params="prefix x_pos y_pos">
+        <joint name="${prefix}_drive_shock" type="prismatic">
+            <parent link="base_link"/>
+            <child link="${prefix}_swerve_base"/>
+            <origin xyz="${x_pos} ${y_pos} 0 "
+                    rpy="0 0 0"/>
+            <axis xyz="0 0 -1"/>
+            <limit lower="${-drive_wheel_travel / 2}" upper="${drive_wheel_travel / 2}"
+                    effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
+            <dynamics damping="100" friction="1.0"
+                        spring_stiffness="113832.44275" spring_reference="0.08"/>
+        </joint>
+        <transmission name="${prefix}_drive_shock_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_drive_shock">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_drive_shock_act">
+                <!-- This hardwareInterface element exists for compatibility
+                    with ROS Hydro. -->
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <!-- TODO parameterize to make consistent PID values work -->
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <xacro:macro name="swerve_module" params="prefix x_pos y_pos">
+        <link name="${prefix}_swerve_base">
+            <xacro:null_link/>
+        </link>
+
+        <joint name="${prefix}_swivel_offset" type="fixed">
+            <parent link="${prefix}_swerve_base"/>
+            <child link="${prefix}_swivel_axle"/>
+            <origin xyz="0 0 ${-swivel_length/2}" rpy="0 0 0"/>
+        </joint>
+
+        <link name="${prefix}_swivel_axle">
+            <xacro:null_link/>
+        </link>
+
+        <joint name="${prefix}_swivel_rev" type="continuous">
+            <parent link="${prefix}_swivel_axle"/>
+            <child link="${prefix}_swerve_swivel"/>
+            <axis xyz="0 0 -1"/>
+            <limit effort="${drive_wheel_eff_limit}" velocity="${drive_wheel_vel_limit}"/>
+            <dynamics damping="0.001" friction="0.5"/>
+        </joint> 
+
+        <link name="${prefix}_swerve_swivel">
+            <visual>
+                <geometry>
+                    <cylinder length="${swivel_length}" radius="${swivel_radius}"/>
+                </geometry>
+            </visual>
+            <inertial>
+                <mass value="${swivel_mass}"/>
+                <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
+            </inertial>
+        </link>
+
+        <transmission name="${prefix}_swivel_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_swivel_rev">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_swivel_act">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+
+        <joint name="${prefix}_wheel_offset" type="fixed">
+            <parent link="${prefix}_swivel_axle"/>
+            <child link="${prefix}_wheel_axle"/>
+            <origin xyz="0 0 ${-swivel_length/2}" rpy="0 0 0"/>
+        </joint>
+
+        <link name="${prefix}_wheel_axle">
+            <xacro:null_link/>
+        </link>
+
+        <!-- The left and right axles have the same axis so that identical
+         rotation values cause the wheels to rotate in the same direction. -->
+        <joint name="${prefix}_wheel_axle" type="continuous">
+            <parent link="${prefix}_wheel_axle"/>
+            <child link="${prefix}_wheel"/>
+            <origin xyz="0 0 0" rpy="${M_PI / 2} 0 0"/>
+            <axis xyz="0 0 0"/>
+            <limit effort="${drive_wheel_eff_limit}" velocity="${drive_wheel_vel_limit}"/>
+            <dynamics damping="0.001" friction="0.5"/>
+        </joint>
+
+        <transmission name="${prefix}_axle_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_wheel_axle">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_axle_act">
+                <!--This hardwareInterface element exists for compatibility
+                    with ROS Hydro-->
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+
+        <link name="${prefix}_wheel">
+            <visual>
+                <geometry>
+                    <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
+                </geometry>
+            </visual>
+            <collision>
+                <geometry>
+                    <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
+                </geometry>
+                <max_contacts>10</max_contacts>
+                <surface>
+                    <contact>
+                        <ode>
+                            <soft_cfm>0.000000001</soft_cfm>
+                            <soft_erp>0.2</soft_erp>
+                            <kp>1e+10</kp>
+                            <kd>10</kd>
+                            <max_vel>0.01</max_vel>
+                            <min_depth>0.005</min_depth>
+                        </ode>
+                    </contact>
+                </surface>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" />
+                <mass value="${wheel_mass}"/>
+                <inertia  ixx="${1 / 12 * wheel_mass * wheel_width**2 + 1/4 * wheel_mass * (wheel_diameter / 2)**2}"
+                        ixy="0.0"
+                        ixz="0.0"
+                        iyy="${1 / 12 * wheel_mass * wheel_width**2 + 1/4 * wheel_mass * (wheel_diameter / 2)**2}"
+                        iyz="0.0"
+                        izz="${1/2 * wheel_mass * (wheel_diameter / 2)**2}" />
+            </inertial>
+        </link>
+
+        <gazebo reference="${prefix}_wheel">
+            <mu1>0.7</mu1>
+            <mu2>0.75</mu2>
+        </gazebo>
+
+        <xacro:drive_shock prefix="${prefix}" x_pos="${x_pos}" y_pos="${y_pos}"/>
+        
+    </xacro:macro>
+</robot>

@@ -1,69 +1,60 @@
 <?xml version="1.0"?>
 
-<robot name="igvc_platform" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:property name="wheel_mass" value="1" />
-    <xacro:property name="wheel_width" value="1" />
-    <xacro:property name="tire_diameter" value="1" />
-    <material name="blue">
-        <color rgba="0 0 0.8 1"/>
-    </material>
-    <material name="black">
-        <color rgba="0 0 0 1"/>
-    </material>
-    <material name="white">
-        <color rgba="1 1 1 1"/>
-    </material>
+<robot name="Swervi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <xacro:include filename="swerve_module.urdf.xacro"/>
+
+    <xacro:property name="wheel_diameter" value="0.275" />
+
+    <!-- base of the robot, should be ground level, centered on the robot -->
     <link name="base_link">
-        <visual>
-            <geometry>
-                <cylinder length="0.6" radius="0.2"/>
-            </geometry>
-            <material name="blue"/>
-        </visual>
-        <collision>
-            <geometry>
-                <cylinder length="0.6" radius="0.2"/>
-            </geometry>
-        </collision>
-        <inertial>
-            <mass value="10"/>
-            <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
-        </inertial>
+        <xacro:null_link/>
     </link>
 
-    <link name="wheel">
-        <visual>
-            <geometry>
-                <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
-            </geometry>
-            <origin rpy= "1.57075 0 0" xyz = "0 0 0"/>
-        </visual>
-        <collision>
-            <geometry>
-                <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
-            </geometry>
-            <origin rpy= "1.57075 0 0" xyz = "0 0 0"/>
-        </collision>
-        <inertial>
-            <mass value="1"/>
-            <inertia  ixx="1"
-                      ixy="0.0"
-                      ixz="0.0"
-                      iyy="1"
-                      iyz="0.0"
-                      izz="1" />
-        </inertial>
+    <gazebo reference="base_link">
+        <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <link name="base_footprint">
+        <xacro:null_link/>
     </link>
 
-    <joint name="base_to_wheel" type="continuous">
+    <gazebo reference="base_footprint">
+        <material>Gazebo/Grey</material>
+    </gazebo>
 
-        <parent link="base_link"/>
-        <child link="wheel"/>
-        <origin xyz="0 -0.25 -0.3"/>
-        <axis xyz="0 1 0"/>
+    <joint name="base_footprint_to_base_link" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0.0 0.0 ${wheel_diameter / 2}" rpy="0 0 0"/>
     </joint>
 
+    <xacro:swerve_module prefix="tl" x_pos="0" y_pos="0"/> -->
 
+    <!-- Just Used for testing -->
+    <link name="world"/>
+    <joint name="world_to_base_footprint" type="fixed">
+        <parent link="world"/>
+        <child link="base_footprint"/>
+    </joint>
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+
+        <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>200.0</updateRate>
+            <bodyName>base_footprint</bodyName>
+            <topicName>ground_truth/state_raw</topicName>
+            <gaussianNoise>0.00</gaussianNoise>
+            <frameName>world</frameName>
+            <!-- origin is at spawn location -->
+            <xyzOffset>0 0 0</xyzOffset>
+            <rpyOffset>0 0 0</rpyOffset>
+        </plugin>
+
+    </gazebo>
 
 </robot>

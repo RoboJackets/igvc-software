@@ -1,14 +1,6 @@
 <?xml version="1.0"?>
 
 <launch>
-    <!-- Vehicle pose -->
-    <arg name="x" default="0"/>
-    <arg name="y" default="0"/>
-    <arg name="z" default="0"/>
-    <arg name="roll" default="0.0"/>
-    <arg name="pitch" default="0.0"/>
-    <arg name="yaw" default="0"/>
-
     <!-- Create the world. -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find gazebo_ros)/launch/empty_world.launch"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
@@ -19,15 +11,7 @@
         <arg name="debug" value="false"/>
     </include>
 
-    <include file="$(find igvc_description)/launch/spawn_swervi.launch">
-        <arg name="x" value="$(arg x)"/>
-        <arg name="y" value="$(arg y)"/>
-        <arg name="z" value="$(arg z)"/>
-        <arg name="roll" value="$(arg roll)"/>
-        <arg name="pitch" value="$(arg pitch)"/>
-        <arg name="yaw" value="$(arg yaw)"/>
-
-    </include>
-
+    <!-- Spawn model -->
+    <include file="$(find igvc_description)/launch/spawn_swervi.launch"/>
 
 </launch>
