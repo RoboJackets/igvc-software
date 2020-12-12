@@ -1,4 +1,4 @@
-add_executable(mag_republisher main.cpp)
+add_executable(mag_republisher Magnetometer.cpp)
 add_dependencies(mag_republisher ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mag_republisher ${catkin_LIBRARIES})
 
