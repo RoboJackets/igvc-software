@@ -22,6 +22,12 @@
 typedef pcl::PointCloud<pcl::PointXYZ> PC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PCRGB;
 
+struct cloud_info {
+  Eigen::Vector4f centroid;
+  Eigen::Vector4f min;
+  Eigen::Vector4f max;
+};
+
 ClusteringNode::ClusteringNode() 
 {
     private_nh_ = ros::NodeHandle("~");
@@ -30,31 +36,25 @@ ClusteringNode::ClusteringNode()
     marker_pub_ = private_nh_.advertise<visualization_msgs::MarkerArray>("/markers",1);
 };
 
-bool check_threshold(PCRGB::Ptr cloud) {
-  Eigen::Vector4f centroid;
-  Eigen::Vector4f min;
-  Eigen::Vector4f max;
+cloud_info get_cloud_info (PCRGB::Ptr cloud) {
+  cloud_info output_msg;
+  pcl::compute3DCentroid (*cloud, output_msg.centroid);
+  pcl::getMinMax3D (*cloud, output_msg.min, output_msg.max);
+  return output_msg;
+};
 
-  pcl::compute3DCentroid (*cloud, centroid);
-  pcl::getMinMax3D (*cloud, min, max);
-  float diff_x = max[0] - min[0];
-  float diff_y = max[1] - min[1];
-  float diff_z = max[2] - min[2];
+bool check_threshold(cloud_info cloud, int cloud_size) {
+  float diff_x = cloud.max[0] - cloud.min[0];
+  float diff_y = cloud.max[1] - cloud.min[1];
+  float diff_z = cloud.max[2] - cloud.min[2];
 
-  bool within_thresholds = diff_z > 0.1 && diff_x < 0.9 && diff_y < 0.9 && cloud->size() > 20;
+  bool within_thresholds = diff_z > 0.1 && diff_x < 0.9 && diff_y < 0.9 && cloud_size > 20;
   if (within_thresholds) return true;
   else return false;
 };
 
-visualization_msgs::Marker mark_cluster(PCRGB::Ptr cloud, int id)
+visualization_msgs::Marker mark_cluster(cloud_info cloud, int id)
 {
-  Eigen::Vector4f centroid;
-  Eigen::Vector4f min;
-  Eigen::Vector4f max;
-
-  pcl::compute3DCentroid (*cloud, centroid);
-  pcl::getMinMax3D (*cloud, min, max);
-  
   visualization_msgs::Marker msg;
   msg.header.frame_id = "base_link";
   msg.type = visualization_msgs::Marker::LINE_LIST;
@@ -70,12 +70,12 @@ visualization_msgs::Marker mark_cluster(PCRGB::Ptr cloud, int id)
   msg.points.clear();
   
   geometry_msgs::Point p1, p2, p3, p4, p5, p6, p7, p8;
-  p1.x = p2.x = p5.x = p6.x = min[0];
-  p3.x = p4.x = p7.x = p8.x = max[0];
-  p1.y = p3.y = p5.y = p7.y = min[1];
-  p2.y = p4.y = p6.y = p8.y = max[1];
-  p1.z = p2.z = p3.z = p4.z = min[2];
-  p5.z = p6.z = p7.z = p8.z = max[2];
+  p1.x = p2.x = p5.x = p6.x = cloud.min[0];
+  p3.x = p4.x = p7.x = p8.x = cloud.max[0];
+  p1.y = p3.y = p5.y = p7.y = cloud.min[1];
+  p2.y = p4.y = p6.y = p8.y = cloud.max[1];
+  p1.z = p2.z = p3.z = p4.z = cloud.min[2];
+  p5.z = p6.z = p7.z = p8.z = cloud.max[2];
   msg.points.push_back(p1); msg.points.push_back(p2);
   msg.points.push_back(p1); msg.points.push_back(p3);
   msg.points.push_back(p2); msg.points.push_back(p4);
@@ -113,27 +113,14 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   PC::Ptr cloud (new PC);
   PCRGB::Ptr cloud_filtered (new PCRGB);
   PCRGB::Ptr curr_cloud (new PCRGB);
-  pcl::fromROSMsg(*cloud_msg, *cloud);
-  /*
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);  
-  tree->setInputCloud (cloud);
-  std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
   
-  // Euclidean clustering
-  ec.setClusterTolerance (0.25);
-  ec.setMinClusterSize (20);
-  ec.setMaxClusterSize (500);
-  ec.setSearchMethod (tree);
-  ec.setInputCloud (cloud);
-  ec.extract (cluster_indices);
-  */
+  pcl::fromROSMsg(*cloud_msg, *cloud);
 
-  std::vector<pcl::PointIndices> cluster_indices = euclidean_clustering(cloud);
-  // declare the output variable instances
   sensor_msgs::PointCloud2 output_msg;
   visualization_msgs::MarkerArray clusters_vis;
   int counter = 0;
+
+  std::vector<pcl::PointIndices> cluster_indices = euclidean_clustering(cloud);
 
   for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it) 
   {
@@ -149,9 +136,11 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
       curr_cloud->points.push_back(p);
       cloud_filtered->points.push_back(p);
     }
-    //ool threshold = check_threshold(curr_cloud);
-    if (check_threshold(curr_cloud)) {
-      visualization_msgs::Marker marker  = mark_cluster(curr_cloud, counter);
+    // obtain min, max, and centroid
+    cloud_info curr_cloud_info = get_cloud_info (curr_cloud);
+    
+    if (check_threshold(curr_cloud_info, curr_cloud->size())) {
+      visualization_msgs::Marker marker  = mark_cluster(curr_cloud_info, counter);
       clusters_vis.markers.push_back(marker);
     }
     
