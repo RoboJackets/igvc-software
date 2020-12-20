@@ -20,13 +20,13 @@ void GroundFilterNode::groundFilterCallback(const sensor_msgs::PointCloud2ConstP
   PC::Ptr cloud (new PC);
   PC::Ptr cloud_filtered (new PC);
   pcl::fromROSMsg(*cloud_msg, *cloud);
-  const auto& x = 5.0;
-  const auto& y = 5.0;
+  const auto& x = 3.0;
+  const auto& y = 3.0;
   const auto& z = 2.0;
   
   for (unsigned int i = 0; i < cloud->points.size(); i++) {
       pcl::PointXYZ p = cloud->points[i];
-      bool within_thresholds = -x <= p.x && p.x <= x && -y <= p.y && p.y <= y && 0.4 <= p.z && p.z <= z;
+      bool within_thresholds = -x <= p.x && p.x <= x && -y <= p.y && p.y <= y && 0.3 <= p.z && p.z <= z;
       if (within_thresholds) {
           cloud_filtered->push_back(p);
       }

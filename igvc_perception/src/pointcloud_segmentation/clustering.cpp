@@ -19,6 +19,12 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/common/common.h>
 
+#include <pcl/search/search.h>
+#include <pcl/search/kdtree.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/segmentation/region_growing.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+
 typedef pcl::PointCloud<pcl::PointXYZ> PC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PCRGB;
 
@@ -48,9 +54,9 @@ bool check_threshold(cloud_info cloud, int cloud_size) {
   float diff_y = cloud.max[1] - cloud.min[1];
   float diff_z = cloud.max[2] - cloud.min[2];
 
-  bool within_thresholds = diff_z > 0.1 && diff_x < 0.9 && diff_y < 0.9 && cloud_size > 20;
-  if (within_thresholds) return true;
-  else return false;
+  bool within_thresholds = diff_z > 0.1 && diff_x < 1.0 && diff_y < 1.0 && cloud_size > 20;
+  //if (within_thresholds) ? return true : return false;
+  return within_thresholds;
 };
 
 visualization_msgs::Marker mark_cluster(cloud_info cloud, int id)
@@ -108,6 +114,49 @@ std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud) {
   return cluster_indices;
 };
 
+std::vector<pcl::PointIndices> region_growing_clustering (PC::Ptr input_cloud) {
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);  
+  tree->setInputCloud (input_cloud);
+  pcl::PointCloud <pcl::Normal>::Ptr normals (new pcl::PointCloud <pcl::Normal>);
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
+  normal_estimator.setSearchMethod (tree);
+  normal_estimator.setInputCloud (input_cloud);
+  normal_estimator.setKSearch (30);
+  normal_estimator.compute (*normals);
+
+  pcl::RegionGrowing<pcl::PointXYZ, pcl::Normal> reg;
+  reg.setMinClusterSize (20);
+  reg.setMaxClusterSize (500);
+  reg.setSearchMethod (tree);
+  reg.setNumberOfNeighbours (30);
+  reg.setInputCloud (input_cloud);
+  //reg.setIndices (indices);
+  reg.setInputNormals (normals);
+  reg.setSmoothnessThreshold (3.0 / 180.0 * M_PI);
+  reg.setCurvatureThreshold (1.0);
+
+  std::vector <pcl::PointIndices> clusters;
+  reg.extract (clusters);
+
+  return clusters;
+};
+
+void remove_outlier (PC::Ptr input_cloud) {
+  pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+  sor.setInputCloud (input_cloud);
+  sor.setMeanK (50);
+  sor.setStddevMulThresh (1.0);
+  sor.filter (*input_cloud);
+};
+
+sensor_msgs::PointCloud2 format_output_msg (PCRGB::Ptr input_cloud) {
+  sensor_msgs::PointCloud2 output_msg;
+  pcl::toROSMsg(*input_cloud, output_msg);
+  output_msg.header.frame_id = "base_link";
+  output_msg.header.stamp = ros::Time::now();
+  return output_msg;
+};
+
 void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
 {
   PC::Ptr cloud (new PC);
@@ -116,44 +165,52 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   
   pcl::fromROSMsg(*cloud_msg, *cloud);
 
-  sensor_msgs::PointCloud2 output_msg;
-  visualization_msgs::MarkerArray clusters_vis;
-  int counter = 0;
-
-  std::vector<pcl::PointIndices> cluster_indices = euclidean_clustering(cloud);
-
-  for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it) 
-  {
-    // create a pcl object to hold the extracted cluster
-    unsigned int r = (unsigned int)(rand() % 255);
-    unsigned int g = (unsigned int)(rand() % 255);
-    unsigned int b = (unsigned int)(rand() % 255);
-    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit)
-    {
-      pcl::PointXYZRGB p;
-      p.x = cloud->points[*pit].x; p.y = cloud->points[*pit].y; p.z = cloud->points[*pit].z;
-      p.r = r; p.g = g; p.b = b;
-      curr_cloud->points.push_back(p);
-      cloud_filtered->points.push_back(p);
-    }
-    // obtain min, max, and centroid
-    cloud_info curr_cloud_info = get_cloud_info (curr_cloud);
-    
-    if (check_threshold(curr_cloud_info, curr_cloud->size())) {
-      visualization_msgs::Marker marker  = mark_cluster(curr_cloud_info, counter);
-      clusters_vis.markers.push_back(marker);
-    }
-    
-    counter++;
-    curr_cloud->clear();
+  if (cloud->size() == 0) {
+    sensor_msgs::PointCloud2 output_msg = format_output_msg (cloud_filtered);
+    visualization_msgs::MarkerArray clusters_vis;
+    clustering_pub_.publish (output_msg);
+    marker_pub_.publish (clusters_vis);
   }
   
-  std::cout << " number of clusters: " << counter << std::endl;
-  pcl::toROSMsg(*cloud_filtered, output_msg);
-  output_msg.header.frame_id = "base_link";
-  output_msg.header.stamp = ros::Time::now();
-  clustering_pub_.publish (output_msg);
-  marker_pub_.publish (clusters_vis);
+  else {
+    visualization_msgs::MarkerArray clusters_vis;
+    int counter = 0;
+    std::cout << "cloud before removing outlier: " << cloud->size() << std::endl;
+    remove_outlier(cloud);
+    std::cout << "cloud after removing outlier: " << cloud->size() << std::endl;
+    std::vector<pcl::PointIndices> cluster_indices = euclidean_clustering(cloud);
+    //std::vector<pcl::PointIndices> cluster_indices = region_growing_clustering(cloud);
+
+    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it) 
+    {
+      // create a pcl object to hold the extracted cluster
+      unsigned int r = (unsigned int)(rand() % 255);
+      unsigned int g = (unsigned int)(rand() % 255);
+      unsigned int b = (unsigned int)(rand() % 255);
+      for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit)
+      {
+        pcl::PointXYZRGB p;
+        p.x = cloud->points[*pit].x; p.y = cloud->points[*pit].y; p.z = cloud->points[*pit].z;
+        p.r = r; p.g = g; p.b = b;
+        curr_cloud->points.push_back(p);
+      }
+      // obtain min, max, and centroid
+      cloud_info curr_cloud_info = get_cloud_info (curr_cloud);
+
+      if (check_threshold(curr_cloud_info, curr_cloud->size())) {
+        visualization_msgs::Marker marker  = mark_cluster(curr_cloud_info, counter);
+        clusters_vis.markers.push_back(marker);
+        *cloud_filtered += *curr_cloud;
+      }
+      
+      counter++;
+      curr_cloud->clear();
+    }
+
+    sensor_msgs::PointCloud2 output_msg = format_output_msg(cloud_filtered);
+    clustering_pub_.publish (output_msg);
+    marker_pub_.publish (clusters_vis);
+  }
 };
 
 int main (int argc, char** argv)
