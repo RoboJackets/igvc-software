@@ -13,8 +13,14 @@ This system uses the [PCL Library](https://pcl.readthedocs.io/projects/tutorials
 + **clustering.cpp**: implements a publisher and a subscriber for running clustering algorithms.
 + **clustering.h**: defines a header file for clustering.cpp
 + **ground_filter.cpp**: implements a ground plane segmentation algorithm to remove the ground plane
-+ **ground_filter.h**: defines multiple operations used for loss and metric calculations
++ **ground_filter.h**: defines a header file for ground_filter.cpp
 + **utils.h**: defines utility functions used in the clustering.cpp
+
+## Build Instructions 
+
+1. Download a bag file (e.g. JESSII_RUN_SUN_2_2019-06-10-15-30-13.bag) from the robojacket cloud
+2. Modify `ptseg.launch` and add your file path
+3. Run the following command to visualize the point cloud segmentation `roslaunch igvc_perception ptseg.launch` 
 
 ## Reference 
 [1] Region Growing Segmentation (https://pcl.readthedocs.io/projects/tutorials/en/latest/region_growing_segmentation.html) 
