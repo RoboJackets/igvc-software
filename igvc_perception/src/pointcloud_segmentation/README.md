@@ -6,7 +6,7 @@ Region growing [1] and Euclidean clustering segmentation [2] are two types of cl
 This system uses the [PCL Library](https://pcl.readthedocs.io/projects/tutorials/en/latest/index.html) and a part of the PCL tutorial listed in the reference section.
 
 <h1 align="center">
-<img src="https://github.com/RoboJackets/igvc-software/blob/feat/pointcloud_clustering/igvc_perception/src/pointcloud_segmentation/Screenshot%20from%202020-12-20%2000-09-30.png" width="45%" /> <img src="https://github.com/RoboJackets/igvc-software/blob/feat/pointcloud_clustering/igvc_perception/src/pointcloud_segmentation/Screenshot%20from%202020-12-20%2000-10-31.png" width="45%" />
+<img src="https://github.com/RoboJackets/igvc-software/blob/feat/pointcloud_clustering/igvc_perception/src/pointcloud_segmentation/example/example.png" width="45%" /> <img src="https://github.com/RoboJackets/igvc-software/blob/feat/pointcloud_clustering/igvc_perception/src/pointcloud_segmentation/example/raw_lidar%20points.png" width="45%" />
 </h1>
 
 ## Folder Structure 
