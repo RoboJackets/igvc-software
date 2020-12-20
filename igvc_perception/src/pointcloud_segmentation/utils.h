@@ -47,7 +47,7 @@ bool check_threshold(cloud_info cloud, int cloud_size) {
   float diff_z = cloud.max[2] - cloud.min[2];
 
   bool within_thresholds = diff_z > 0.1 && diff_x < 1.0 && diff_y < 1.0 && cloud_size > 20;
-  //if (within_thresholds) ? return true : return false;
+  
   return within_thresholds;
 };
 

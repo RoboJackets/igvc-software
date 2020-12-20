@@ -32,9 +32,9 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   else {
     visualization_msgs::MarkerArray clusters_vis;
     int counter = 0;
-    std::cout << "cloud before removing outlier: " << cloud->size() << std::endl;
+    //std::cout << "cloud before removing outlier: " << cloud->size() << std::endl;
     utils::remove_outlier(cloud);
-    std::cout << "cloud after removing outlier: " << cloud->size() << std::endl;
+    //std::cout << "cloud after removing outlier: " << cloud->size() << std::endl;
     std::vector<pcl::PointIndices> cluster_indices = utils::euclidean_clustering(cloud);
     //std::vector<pcl::PointIndices> cluster_indices = region_growing_clustering(cloud);
 

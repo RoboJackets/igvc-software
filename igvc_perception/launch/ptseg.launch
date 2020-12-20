@@ -1,7 +1,7 @@
 <launch>
     <node pkg="igvc_perception" type="ground_filter" name="ground_filter_node" output="screen"/>
     <node pkg="igvc_perception" type="clustering" name="clustering_node" output="screen"/>
-    <node pkg="rosbag" type="play" name="play" output="screen" args="-q $(find igvc_perception)/data/JESSII_RUN_SUN_2_2019-06-10-15-30-13.bag"/>
-    <!--<node pkg="rviz" type="rviz" name="rviz_orig" args="-d $(find igvc_perception)/rviz/pt_filter_orig.rviz"/>-->
-    <node pkg="rviz" type="rviz" name="rviz_seg" args="-d $(find igvc_perception)/rviz/pt_filter_seg.rviz"/>
+    <node pkg="rosbag" type="play" name="play" output="screen" args="-q $(find igvc_perception)/data/JESSII_RUN_SUN_3_2019-06-10-16-06-21.bag"/>
+    <node pkg="rviz" type="rviz" name="rviz_seg1" args="-d $(find igvc_perception)/rviz/pt_filter_seg1.rviz"/>
+    <!--<node pkg="rviz" type="rviz" name="rviz_seg2" args="-d $(find igvc_perception)/rviz/pt_filter_seg2.rviz"/>-->
 </launch>

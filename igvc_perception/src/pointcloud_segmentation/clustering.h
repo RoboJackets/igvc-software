@@ -18,4 +18,4 @@ private:
   void clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& input_cloud);
 };
 
-#endif // GroundFilterNode_H
+#endif // Clustering_H

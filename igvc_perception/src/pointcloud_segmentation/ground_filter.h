@@ -17,4 +17,4 @@ private:
   void groundFilterCallback(const sensor_msgs::PointCloud2ConstPtr& input_cloud);
 };
 
-#endif // GroundFilterNode_H
+#endif // GroundFilter_H
