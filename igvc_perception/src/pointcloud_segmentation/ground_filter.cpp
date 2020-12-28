@@ -10,7 +10,7 @@ typedef pcl::PointCloud<pcl::PointXYZ> PC;
 GroundFilterNode::GroundFilterNode()
 {
   private_nh_ = ros::NodeHandle("~");
-  raw_pts_sub_ = private_nh_.subscribe("/velodyne_points", 1, &GroundFilterNode::groundFilterCallback, this);
+  raw_pts_sub_ = private_nh_.subscribe("/lidar/transformed", 1, &GroundFilterNode::groundFilterCallback, this);
   ground_filter_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("ground_segmentation", 1);
 };
 
@@ -19,8 +19,8 @@ void GroundFilterNode::groundFilterCallback(const sensor_msgs::PointCloud2ConstP
   PC::Ptr cloud(new PC);
   PC::Ptr cloud_filtered(new PC);
   pcl::fromROSMsg(*cloud_msg, *cloud);
-  const auto& x = 3.0;
-  const auto& y = 3.0;
+  const auto& x = 5.0;
+  const auto& y = 5.0;
   const auto& z = 2.0;
 
   for (unsigned int i = 0; i < cloud->points.size(); i++)
