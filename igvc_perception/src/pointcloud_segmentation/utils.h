@@ -25,7 +25,8 @@
 typedef pcl::PointCloud<pcl::PointXYZ> PC;
 typedef pcl::PointCloud<pcl::PointXYZRGB> PCRGB;
 
-struct cloud_info {
+struct cloud_info
+{
   Eigen::Vector4f centroid;
   Eigen::Vector4f min;
   Eigen::Vector4f max;
@@ -33,21 +34,22 @@ struct cloud_info {
 
 namespace utils
 {
-
-cloud_info get_cloud_info (PCRGB::Ptr cloud) {
+cloud_info get_cloud_info(PCRGB::Ptr cloud)
+{
   cloud_info output_msg;
-  pcl::compute3DCentroid (*cloud, output_msg.centroid);
-  pcl::getMinMax3D (*cloud, output_msg.min, output_msg.max);
+  pcl::compute3DCentroid(*cloud, output_msg.centroid);
+  pcl::getMinMax3D(*cloud, output_msg.min, output_msg.max);
   return output_msg;
 };
 
-bool check_threshold(cloud_info cloud, int cloud_size) {
+bool check_threshold(cloud_info cloud, int cloud_size)
+{
   float diff_x = cloud.max[0] - cloud.min[0];
   float diff_y = cloud.max[1] - cloud.min[1];
   float diff_z = cloud.max[2] - cloud.min[2];
 
   bool within_thresholds = diff_z > 0.1 && diff_x < 1.0 && diff_y < 1.0 && cloud_size > 20;
-  
+
   return within_thresholds;
 };
 
@@ -66,7 +68,7 @@ visualization_msgs::Marker mark_cluster(cloud_info cloud, int id)
   msg.scale.x = 0.05;
   msg.pose.orientation.w = 1.0;
   msg.points.clear();
-  
+
   geometry_msgs::Point p1, p2, p3, p4, p5, p6, p7, p8;
   p1.x = p2.x = p5.x = p6.x = cloud.min[0];
   p3.x = p4.x = p7.x = p8.x = cloud.max[0];
@@ -74,77 +76,93 @@ visualization_msgs::Marker mark_cluster(cloud_info cloud, int id)
   p2.y = p4.y = p6.y = p8.y = cloud.max[1];
   p1.z = p2.z = p3.z = p4.z = cloud.min[2];
   p5.z = p6.z = p7.z = p8.z = cloud.max[2];
-  msg.points.push_back(p1); msg.points.push_back(p2);
-  msg.points.push_back(p1); msg.points.push_back(p3);
-  msg.points.push_back(p2); msg.points.push_back(p4);
-  msg.points.push_back(p3); msg.points.push_back(p4);
-  msg.points.push_back(p1); msg.points.push_back(p5);
-  msg.points.push_back(p2); msg.points.push_back(p6);
-  msg.points.push_back(p3); msg.points.push_back(p7);
-  msg.points.push_back(p4); msg.points.push_back(p8);
-  msg.points.push_back(p5); msg.points.push_back(p6);
-  msg.points.push_back(p5); msg.points.push_back(p7);
-  msg.points.push_back(p6); msg.points.push_back(p8);
-  msg.points.push_back(p7); msg.points.push_back(p8);
+  msg.points.push_back(p1);
+  msg.points.push_back(p2);
+  msg.points.push_back(p1);
+  msg.points.push_back(p3);
+  msg.points.push_back(p2);
+  msg.points.push_back(p4);
+  msg.points.push_back(p3);
+  msg.points.push_back(p4);
+  msg.points.push_back(p1);
+  msg.points.push_back(p5);
+  msg.points.push_back(p2);
+  msg.points.push_back(p6);
+  msg.points.push_back(p3);
+  msg.points.push_back(p7);
+  msg.points.push_back(p4);
+  msg.points.push_back(p8);
+  msg.points.push_back(p5);
+  msg.points.push_back(p6);
+  msg.points.push_back(p5);
+  msg.points.push_back(p7);
+  msg.points.push_back(p6);
+  msg.points.push_back(p8);
+  msg.points.push_back(p7);
+  msg.points.push_back(p8);
 
   return msg;
 };
 
-std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud) {
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);  
-  tree->setInputCloud (input_cloud);
+std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud)
+{
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+  tree->setInputCloud(input_cloud);
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  
-  ec.setClusterTolerance (0.25);
-  ec.setMinClusterSize (20);
-  ec.setMaxClusterSize (300);
-  ec.setSearchMethod (tree);
-  ec.setInputCloud (input_cloud);
-  ec.extract (cluster_indices);
+
+  ec.setClusterTolerance(0.25);
+  ec.setMinClusterSize(20);
+  ec.setMaxClusterSize(300);
+  ec.setSearchMethod(tree);
+  ec.setInputCloud(input_cloud);
+  ec.extract(cluster_indices);
   return cluster_indices;
 };
 
-std::vector<pcl::PointIndices> region_growing_clustering (PC::Ptr input_cloud) {
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);  
-  tree->setInputCloud (input_cloud);
-  pcl::PointCloud <pcl::Normal>::Ptr normals (new pcl::PointCloud <pcl::Normal>);
+std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud)
+{
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+  tree->setInputCloud(input_cloud);
+  pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
   pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
-  normal_estimator.setSearchMethod (tree);
-  normal_estimator.setInputCloud (input_cloud);
-  normal_estimator.setKSearch (30);
-  normal_estimator.compute (*normals);
+  normal_estimator.setSearchMethod(tree);
+  normal_estimator.setInputCloud(input_cloud);
+  normal_estimator.setKSearch(30);
+  normal_estimator.compute(*normals);
 
   pcl::RegionGrowing<pcl::PointXYZ, pcl::Normal> reg;
-  reg.setMinClusterSize (20);
-  reg.setMaxClusterSize (300);
-  reg.setSearchMethod (tree);
-  reg.setNumberOfNeighbours (30);
-  reg.setInputCloud (input_cloud);
-  reg.setInputNormals (normals);
-  reg.setSmoothnessThreshold (3.0 / 180.0 * M_PI);
-  reg.setCurvatureThreshold (1.0);
+  reg.setMinClusterSize(20);
+  reg.setMaxClusterSize(300);
+  reg.setSearchMethod(tree);
+  reg.setNumberOfNeighbours(30);
+  reg.setInputCloud(input_cloud);
+  reg.setInputNormals(normals);
+  reg.setSmoothnessThreshold(3.0 / 180.0 * M_PI);
+  reg.setCurvatureThreshold(1.0);
 
-  std::vector <pcl::PointIndices> clusters;
-  reg.extract (clusters);
+  std::vector<pcl::PointIndices> clusters;
+  reg.extract(clusters);
 
   return clusters;
 };
 
-void remove_outlier (PC::Ptr input_cloud) {
+void remove_outlier(PC::Ptr input_cloud)
+{
   pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-  sor.setInputCloud (input_cloud);
-  sor.setMeanK (50);
-  sor.setStddevMulThresh (1.0);
-  sor.filter (*input_cloud);
+  sor.setInputCloud(input_cloud);
+  sor.setMeanK(50);
+  sor.setStddevMulThresh(1.0);
+  sor.filter(*input_cloud);
 };
 
-sensor_msgs::PointCloud2 format_output_msg (PCRGB::Ptr input_cloud) {
+sensor_msgs::PointCloud2 format_output_msg(PCRGB::Ptr input_cloud)
+{
   sensor_msgs::PointCloud2 output_msg;
   pcl::toROSMsg(*input_cloud, output_msg);
   output_msg.header.frame_id = "base_link";
   output_msg.header.stamp = ros::Time::now();
   return output_msg;
 };
-}
-# endif
+}  // namespace utils
+#endif

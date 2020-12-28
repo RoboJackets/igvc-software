@@ -8,14 +8,14 @@ class ClusteringNode
 {
 public:
   ClusteringNode();
-    
+
 private:
   ros::NodeHandle private_nh_;
   ros::Subscriber ground_filter_sub_;
   ros::Publisher clustering_pub_;
   ros::Publisher marker_pub_;
-  
+
   void clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& input_cloud);
 };
 
-#endif // Clustering_H
+#endif  // Clustering_H

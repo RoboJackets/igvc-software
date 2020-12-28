@@ -8,13 +8,13 @@ class GroundFilterNode
 {
 public:
   GroundFilterNode();
-    
+
 private:
   ros::NodeHandle private_nh_;
   ros::Subscriber raw_pts_sub_;
   ros::Publisher ground_filter_pub_;
-  
+
   void groundFilterCallback(const sensor_msgs::PointCloud2ConstPtr& input_cloud);
 };
 
-#endif // GroundFilter_H
+#endif  // GroundFilter_H
