@@ -7,11 +7,7 @@
 
   <!-- passed in parameters -->
   <xacro:arg name="gpu" default="false" />
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 14ba3d98b59a524fa7b9a74cc4600acc3ed979f5
+    
   <!-- constants -->
   <xacro:property name="M_PI" value="3.1415926535897931" />
 
