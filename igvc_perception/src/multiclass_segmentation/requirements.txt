@@ -1,6 +1,6 @@
 segmentation-models-pytorch==0.1.0
 tensorboard==1.14.0
-torchvision==0.3.0
+torchvision==0.5.0
 torch==1.4.0
 catalyst==20.4.2
 numpy==1.18.2

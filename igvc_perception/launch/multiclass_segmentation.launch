@@ -1,0 +1,27 @@
+<launch>
+
+    <node name="multiclass_segmentation" pkg="igvc_perception" type="multiclass_segmentation.py" output="screen" />
+
+    <rosparam param="camera_names">["usb_cam_center", "usb_cam_left", "usb_cam_right"]</rosparam>
+<!--    <rosparam param="camera_names">["cam/center/raw", "cam/left/raw", "cam/right/raw"]</rosparam>-->
+
+    <!-- These sizes must match the model input dimensions. -->
+    <param name="image_resize_width" value="400" />
+    <param name="image_resize_height" value="400" />
+
+    <param name="model_path" value="$(find igvc_sandbox)/models/MC_model.pth" />
+
+    <!-- Use cpu instead of GPU (will run very slowly). -->
+    <param name="force_cpu" value="true" />
+
+    <!-- Threshold to determine if a network prediction is a line (values between 0 and 1) -->
+    <param name="line_thresh" value="0.95" />
+
+    <param name="output_segmentation_topic" value="/semantic_segmentation" />
+
+    <!-- Use a pre-existic segmented image such as an output segmentation from a different node.
+         If true, the "segmented_image_topics" rosparam must be set with one topic for each camera -->
+    <param name="use_preexisting_segmentation" value="false"/>
+    <rosparam param="segmented_image_topics">["/center_cam/detected_lines", "/left_cam/detected_lines", "/right_cam/detected_lines"]</rosparam>
+
+</launch>

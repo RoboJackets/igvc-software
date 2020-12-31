@@ -150,7 +150,6 @@ class SegmentationModel(object):
         else:
             img_tensor = Variable(img_tensor.unsqueeze(0))
 
-        # Inference.
         output = self.graph(img_tensor)
         output_data = output.cpu().data.numpy()[0][0]
 

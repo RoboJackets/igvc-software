@@ -28,3 +28,6 @@
 [submodule "external/elevation_mapping"]
 	path = external/elevation_mapping
 	url = https://github.com/RoboJackets/elevation_mapping.git
+[submodule "external/nmea_navsat_driver"]
+	path = external/nmea_navsat_driver
+	url = https://github.com/ros-drivers/nmea_navsat_driver.git
