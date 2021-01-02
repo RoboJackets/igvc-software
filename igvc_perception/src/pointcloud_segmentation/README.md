@@ -20,7 +20,9 @@ This system uses the [PCL Library](https://pcl.readthedocs.io/projects/tutorials
 
 1. Download a bag file (e.g. JESSII_RUN_SUN_2_2019-06-10-15-30-13.bag) from the robojacket cloud
 2. Modify `ptseg.launch` and add your file path
-3. Run the following command to visualize the point cloud segmentation `roslaunch igvc_perception ptseg.launch` 
+3. Run the following command to visualize the point cloud segmentation 
++ `roslaunch igvc_perception pointcloud_filter.launch`
++ `roslaunch igvc_perception ptseg.launch` 
 
 ## Reference 
 [1] Region Growing Segmentation (https://pcl.readthedocs.io/projects/tutorials/en/latest/region_growing_segmentation.html) 
