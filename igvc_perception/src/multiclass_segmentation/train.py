@@ -35,10 +35,10 @@ from catalyst.dl.callbacks import (
 )
 
 # Import dataset and data loaders
-from segmentation_dataset import SegmentationDataset
-from data_loaders import get_loaders
-import helper_operations
-from helper_operations import CrossentropyND, DC_and_CE_loss
+from data_utils.segmentation_dataset import SegmentationDataset
+from data_utils.data_loaders import get_loaders
+import igvc_utils.helper_operations
+from igvc_utils.helper_operations import CrossentropyND, DC_and_CE_loss
 
 # Enable argument parsing for file paths
 ap = argparse.ArgumentParser()
