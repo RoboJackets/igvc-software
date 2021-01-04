@@ -7,6 +7,32 @@ Using transfer learning, we can simultaneously classify lines and barrels in ima
 </p>
 
 ## Folder Structure 
+```
+multiclass_segmentation
+├── config
+│   └── igvc.yaml
+├── data_utils
+│   ├── __init__.py
+│   ├── data_loaders.py
+│   ├── make_dataset.py
+│   ├── segmentation_dataset.py
+│   └── split_data.py
+├── example
+│   └── model_prediction.png
+├── jupyter_notebook
+│   ├── UNetWithEfficientNet.ipynb
+│   └── UNetWithEfficientNet.pdf
+├── train_utils
+│   ├── __init__.py
+│   ├── get_args.py
+│   ├── helper_operations.py
+│   └── save.py
+├── .gitignore
+├── README.md
+├── __init__.py
+├── requirements.txt
+└── train.py
+```
 + **UNetWithEfficientNet.ipynb**: implements the training and testing of the neural network in a notebook
 + **UNetWithEfficientNet.pdf**: provides a PDF version of the aforementioned notebook for readability
 + **data_loaders.py**: defines the Torch data loaders
