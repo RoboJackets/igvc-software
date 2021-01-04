@@ -21,7 +21,7 @@ train:
   fp16: null
   verbose: True
 
-# training parameters
+# testing parameters
 test:
   batch_size: 3
   shuffle: False

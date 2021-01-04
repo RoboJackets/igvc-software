@@ -59,7 +59,9 @@ class CrossentropyND(nn.CrossEntropyLoss):
         inp = inp.contiguous()
         inp = inp.view(-1, num_classes)
 
-        target = target.view(-1,)
+        target = target.view(
+            -1,
+        )
 
         return super(CrossentropyND, self).forward(inp, target)
 
@@ -67,8 +69,8 @@ class CrossentropyND(nn.CrossEntropyLoss):
 def get_tp_fp_fn(net_output, gt, axes=None, mask=None, square=False):
     """
     net_output must be (b, c, x, y(, z)))
-    gt must be a label map (shape (b, 1, x, y(, z)) 
-     or shape (b, x, y(, z))) 
+    gt must be a label map (shape (b, 1, x, y(, z))
+     or shape (b, x, y(, z)))
      or one hot encoding (b, c, x, y(, z))
     if mask is provided it must have shape (b, 1, x, y(, z)))
     :param net_output:
