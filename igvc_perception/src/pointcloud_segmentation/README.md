@@ -1,8 +1,8 @@
 # Real-Time Clustering for Lidar Point Cloud Data
 
-This repository contains a point cloud clustering package that clusters raw point cloud data into sevral objects.
+This repository contains a point cloud clustering package that clusters raw point cloud data into several objects.
 The clustered objects can be used to identify depth distance between the robot and the objects near the robot for obstacle avoidance.
-Region growing [1] and Euclidean clustering segmentation [2] are two types of clustering algorithms that clusters raw point cloud data in this package. 
+Region growing [1] and Euclidean clustering segmentations [2] are two types of clustering algorithms that cluster raw point cloud data in this package. 
 This system uses the [PCL Library](https://pcl.readthedocs.io/projects/tutorials/en/latest/index.html) and a part of the PCL tutorial listed in the reference section.
 
 <h1 align="center">
