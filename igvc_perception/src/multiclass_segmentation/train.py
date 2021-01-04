@@ -39,10 +39,10 @@ from catalyst.dl.callbacks import (
 # Import dataset and data loaders
 from data_utils.segmentation_dataset import SegmentationDataset
 from data_utils.data_loaders import get_loaders
-import igvc_utils.helper_operations
-from igvc_utils.helper_operations import CrossentropyND, DC_and_CE_loss
-from igvc_utils.get_args import get_args
-from igvc_utils.save import save_result
+import train_utils.helper_operations
+from train_utils.helper_operations import CrossentropyND, DC_and_CE_loss
+from train_utils.get_args import get_args
+from train_utils.save import save_result
 
 
 def main():
