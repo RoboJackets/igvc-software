@@ -6,7 +6,11 @@ from torch.utils.data import Dataset
 
 class SegmentationDataset(Dataset):
     # Define a dataset class
-    def __init__(self, image_arr_path, mask_arr_path,) -> None:
+    def __init__(
+        self,
+        image_arr_path,
+        mask_arr_path,
+    ) -> None:
         self.images = np.load(image_arr_path)
         self.masks = np.load(mask_arr_path)
 
@@ -27,6 +31,3 @@ class SegmentationDataset(Dataset):
             mask = torch.from_numpy(mask).float()
             result["mask"] = mask
         return result
-
-
-# dset = SegmentationDataset(image_arr_path="", mask_arr_path="")

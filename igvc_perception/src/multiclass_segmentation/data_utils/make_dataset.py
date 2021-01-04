@@ -29,7 +29,7 @@ def json_to_numpy_mask(shapes, width, height):
 def create_dataset(path_to_folder, file_type):
     """Organizes a collection of images or JSON files into a NumPy array"""
     all_data = []
-    #files = glob.glob(os.path.join(path_to_folder, "*.png"))
+
     if file_type == "images":
         files = glob.glob(os.path.join(path_to_folder, "*.png"))
     elif file_type == "json":

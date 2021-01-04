@@ -17,26 +17,26 @@ args = vars(ap.parse_args())
 
 # Load images and masks as numpy arrays
 for dir_name in os.listdir(args["dir"]):
-    data_path = os.path.join(args["dir"],dir_name)
-    
+    data_path = os.path.join(args["dir"], dir_name)
+
     for data_name in os.listdir(data_path):
         if data_name == "masks.npy":
-            masks_path = os.path.join(data_path,data_name)
+            masks_path = os.path.join(data_path, data_name)
             data_npy = np.load(masks_path)
             if X.shape[0] == 0:
                 X = data_npy
             else:
-                X = np.vstack((X,data_npy))
-                #X = np.concatenate((X,data_npy),axis=0)
+                X = np.vstack((X, data_npy))
+                # X = np.concatenate((X,data_npy),axis=0)
 
         elif data_name == "images.npy":
-            images_path = os.path.join(data_path,data_name)
+            images_path = os.path.join(data_path, data_name)
             data_npy = np.load(images_path)
             if Y.shape[0] == 0:
                 Y = data_npy
             else:
-                Y = np.vstack((Y,data_npy))
-                #Y = np.concatenate((Y,data_npy),axis=0)
+                Y = np.vstack((Y, data_npy))
+                # Y = np.concatenate((Y,data_npy),axis=0)
 
 # Split the numpy arrays and save as .npy files
 labels_train, labels_test, images_train, images_test = train_test_split(
