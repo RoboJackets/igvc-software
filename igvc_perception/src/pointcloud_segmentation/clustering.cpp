@@ -23,6 +23,7 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   std::string option, frame_id;
   int cluster_min, cluster_max, kSearch, numberOfNeighbours, meanK;
   float tolerance, smoothnessThreshold, curvatureThreshold, stdDevMulThresh; 
+  
   private_nh_.getParam("/clustering_node/option", option);
   private_nh_.getParam("/clustering_node/frame_id", frame_id);
   private_nh_.getParam("/clustering_node/outlier_filter/meanK", meanK);
@@ -88,7 +89,7 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
 
       if (utils::check_threshold(curr_cloud_info, curr_cloud->size()))
       {
-        visualization_msgs::Marker marker = utils::mark_cluster(curr_cloud_info, counter);
+        visualization_msgs::Marker marker = utils::mark_cluster(curr_cloud_info, counter, frame_id);
         clusters_vis.markers.push_back(marker);
         *cloud_filtered += *curr_cloud;
       }

@@ -53,10 +53,10 @@ bool check_threshold(cloud_info cloud, int cloud_size)
   return within_thresholds;
 };
 
-visualization_msgs::Marker mark_cluster(cloud_info cloud, int id)
+visualization_msgs::Marker mark_cluster(cloud_info cloud, int id, std::string frame_id)
 {
   visualization_msgs::Marker msg;
-  msg.header.frame_id = "base_link";
+  msg.header.frame_id = frame_id;
   msg.type = visualization_msgs::Marker::LINE_LIST;
   msg.lifetime = ros::Duration(0.1);
   msg.id = id;
