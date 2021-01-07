@@ -20,6 +20,10 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   PC::Ptr cloud(new PC);
   PCRGB::Ptr cloud_filtered(new PCRGB);
   PCRGB::Ptr curr_cloud(new PCRGB);
+  float tolerance; int cluster_min, cluster_max;
+  private_nh_.getParam("/clustering_node/euclidean/tolerance", tolerance);
+  private_nh_.getParam("/clustering_node/euclidean/min", cluster_min);
+  private_nh_.getParam("/clustering_node/euclidean/max", cluster_max);
 
   pcl::fromROSMsg(*cloud_msg, *cloud);
 
@@ -38,7 +42,7 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
     // std::cout << "cloud before removing outlier: " << cloud->size() << std::endl;
     utils::remove_outlier(cloud);
     // std::cout << "cloud after removing outlier: " << cloud->size() << std::endl;
-    std::vector<pcl::PointIndices> cluster_indices = utils::euclidean_clustering(cloud);
+    std::vector<pcl::PointIndices> cluster_indices = utils::euclidean_clustering(cloud, tolerance, cluster_max, cluster_min);
     // std::vector<pcl::PointIndices> cluster_indices = region_growing_clustering(cloud);
 
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)

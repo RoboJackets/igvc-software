@@ -1,0 +1,4 @@
+euclidean:
+    tolerance: 0.25
+    min: 20
+    max: 300

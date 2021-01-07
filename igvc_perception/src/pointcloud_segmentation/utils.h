@@ -104,16 +104,16 @@ visualization_msgs::Marker mark_cluster(cloud_info cloud, int id)
   return msg;
 };
 
-std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud)
+std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud, float tolerance, int max, int min)
 {
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud(input_cloud);
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
 
-  ec.setClusterTolerance(0.25);
-  ec.setMinClusterSize(20);
-  ec.setMaxClusterSize(300);
+  ec.setClusterTolerance(tolerance);
+  ec.setMinClusterSize(min);
+  ec.setMaxClusterSize(max);
   ec.setSearchMethod(tree);
   ec.setInputCloud(input_cloud);
   ec.extract(cluster_indices);
