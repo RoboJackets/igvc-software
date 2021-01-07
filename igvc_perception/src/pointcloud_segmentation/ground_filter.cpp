@@ -10,6 +10,9 @@ typedef pcl::PointCloud<pcl::PointXYZ> PC;
 GroundFilterNode::GroundFilterNode()
 {
   private_nh_ = ros::NodeHandle("~");
+  std::string input_topic, filtered_topic;
+  //private_nh_.getParam("/ground_filter_node/topic/input", input_topic);
+  //private_nh_.getParam("/ground_filter_node/topic/filtered", filtered_topic);
   raw_pts_sub_ = private_nh_.subscribe("/lidar/transformed", 1, &GroundFilterNode::groundFilterCallback, this);
   ground_filter_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("ground_segmentation", 1);
 };
@@ -19,14 +22,18 @@ void GroundFilterNode::groundFilterCallback(const sensor_msgs::PointCloud2ConstP
   PC::Ptr cloud(new PC);
   PC::Ptr cloud_filtered(new PC);
   pcl::fromROSMsg(*cloud_msg, *cloud);
-  const auto& x = 5.0;
-  const auto& y = 5.0;
-  const auto& z = 2.0;
+  
+  float x, y, z_min, z_max; std::string frame_id;
+  private_nh_.getParam("/ground_filter_node/range/x", x);
+  private_nh_.getParam("/ground_filter_node/range/y", y);
+  private_nh_.getParam("/ground_filter_node/range/height_min", z_min);
+  private_nh_.getParam("/ground_filter_node/range/height_max", z_max);
+  private_nh_.getParam("/ground_filter_node/frame_id", frame_id);
 
   for (unsigned int i = 0; i < cloud->points.size(); i++)
   {
     pcl::PointXYZ p = cloud->points[i];
-    bool within_thresholds = -x <= p.x && p.x <= x && -y <= p.y && p.y <= y && 0.3 <= p.z && p.z <= z;
+    bool within_thresholds = -x <= p.x && p.x <= x && -y <= p.y && p.y <= y && z_min <= p.z && p.z <= z_max;
     if (within_thresholds)
     {
       cloud_filtered->push_back(p);
@@ -35,7 +42,7 @@ void GroundFilterNode::groundFilterCallback(const sensor_msgs::PointCloud2ConstP
 
   sensor_msgs::PointCloud2 output_msg;
   pcl::toROSMsg(*cloud_filtered, output_msg);
-  output_msg.header.frame_id = "base_link";
+  output_msg.header.frame_id = frame_id;
   output_msg.header.stamp = ros::Time::now();
   ground_filter_pub_.publish(output_msg);
 };
