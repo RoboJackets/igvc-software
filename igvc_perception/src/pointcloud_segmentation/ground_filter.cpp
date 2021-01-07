@@ -19,8 +19,9 @@ void GroundFilterNode::groundFilterCallback(const sensor_msgs::PointCloud2ConstP
   PC::Ptr cloud(new PC);
   PC::Ptr cloud_filtered(new PC);
   pcl::fromROSMsg(*cloud_msg, *cloud);
-  
-  float x, y, z_min, z_max; std::string frame_id;
+
+  float x, y, z_min, z_max;
+  std::string frame_id;
   private_nh_.getParam("/ground_filter_node/range/x", x);
   private_nh_.getParam("/ground_filter_node/range/y", y);
   private_nh_.getParam("/ground_filter_node/range/height_min", z_min);

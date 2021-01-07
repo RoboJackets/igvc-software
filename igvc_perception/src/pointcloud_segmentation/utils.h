@@ -120,7 +120,9 @@ std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud, float t
   return cluster_indices;
 };
 
-std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud, int kSearch, int min, int max, int numberOfNeighbours, float smoothnessThreshold, float curvatureThreshold)
+std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud, int kSearch, int min, int max,
+                                                         int numberOfNeighbours, float smoothnessThreshold,
+                                                         float curvatureThreshold)
 {
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud(input_cloud);
