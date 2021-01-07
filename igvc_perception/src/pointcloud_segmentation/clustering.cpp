@@ -21,11 +21,12 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   PCRGB::Ptr cloud_filtered(new PCRGB);
   PCRGB::Ptr curr_cloud(new PCRGB);
   std::string option, frame_id;
+  int cluster_min, cluster_max, kSearch, numberOfNeighbours, meanK;
+  float tolerance, smoothnessThreshold, curvatureThreshold, stdDevMulThresh; 
   private_nh_.getParam("/clustering_node/option", option);
   private_nh_.getParam("/clustering_node/frame_id", frame_id);
-  
-  float tolerance, smoothnessThreshold, curvatureThreshold; 
-  int cluster_min, cluster_max, kSearch, numberOfNeighbours;
+  private_nh_.getParam("/clustering_node/outlier_filter/meanK", meanK);
+  private_nh_.getParam("/clustering_node/soutlier_filter/stdDevMulThresh", stdDevMulThresh);
 
   if (option == "euclidean") {
     private_nh_.getParam("/clustering_node/euclidean/tolerance", tolerance);
@@ -56,7 +57,7 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   {
     visualization_msgs::MarkerArray clusters_vis;
     int counter = 0;
-    utils::remove_outlier(cloud);
+    utils::remove_outlier(cloud, meanK, stdDevMulThresh);
     std::vector<pcl::PointIndices> cluster_indices;
 
     if (option == "euclidean") {

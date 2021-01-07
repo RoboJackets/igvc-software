@@ -1,7 +1,12 @@
 <launch>
-    <node pkg="igvc_perception" type="ground_filter" name="ground_filter_node" output="screen"/>
-    <node pkg="igvc_perception" type="clustering" name="clustering_node" output="screen"/>
-    <node pkg="rosbag" type="play" name="play" output="screen" args="-q $(find igvc_perception)/data/JESSII_RUN_SUN_3_2019-06-10-16-06-21.bag"/>
+    <node pkg="igvc_perception" type="ground_filter" name="ground_filter_node" output="screen">
+      <rosparam command="load" file="$(find igvc_perception)/config/ground_filter.yaml" />
+    </node>
+    <node pkg="igvc_perception" type="clustering" name="clustering_node" output="screen">
+      <rosparam command="load" file="$(find igvc_perception)/config/pointcloud_segmentation.yaml" />
+    </node>
+    <!--Add your bag file path here-->
+    <node pkg="rosbag" type="play" name="play" output="screen" args="-q /add your path here"/>
     <node pkg="rviz" type="rviz" name="rviz_seg1" args="-d $(find igvc_perception)/rviz/pt_filter_seg1.rviz"/>
     <!--<node pkg="rviz" type="rviz" name="rviz_seg2" args="-d $(find igvc_perception)/rviz/pt_filter_seg2.rviz"/>-->
 </launch>

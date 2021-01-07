@@ -147,12 +147,12 @@ std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud, in
   return clusters;
 };
 
-void remove_outlier(PC::Ptr input_cloud)
+void remove_outlier(PC::Ptr input_cloud, int meanK, float stdDevMulThresh)
 {
   pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
   sor.setInputCloud(input_cloud);
-  sor.setMeanK(50);
-  sor.setStddevMulThresh(1.0);
+  sor.setMeanK(meanK);
+  sor.setStddevMulThresh(stdDevMulThresh);
   sor.filter(*input_cloud);
 };
 
