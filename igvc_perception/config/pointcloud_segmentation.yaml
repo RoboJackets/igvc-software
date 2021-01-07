@@ -1,4 +1,15 @@
+option: "euclidean" # option ["euclidean" or "region_growing"]
+
 euclidean:
     tolerance: 0.25
     min: 20
     max: 300
+
+region_growing:
+    kSearch: 30
+    min: 20
+    max: 300
+    numberOfNeighbours: 30
+    smoothnessThreshold: 3.0
+    curvatureThreshold: 1.0
+frame_id: "base_link"

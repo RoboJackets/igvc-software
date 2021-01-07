@@ -120,7 +120,7 @@ std::vector<pcl::PointIndices> euclidean_clustering(PC::Ptr input_cloud, float t
   return cluster_indices;
 };
 
-std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud)
+std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud, int kSearch, int min, int max, int numberOfNeighbours, float smoothnessThreshold, float curvatureThreshold)
 {
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud(input_cloud);
@@ -128,18 +128,18 @@ std::vector<pcl::PointIndices> region_growing_clustering(PC::Ptr input_cloud)
   pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
   normal_estimator.setSearchMethod(tree);
   normal_estimator.setInputCloud(input_cloud);
-  normal_estimator.setKSearch(30);
+  normal_estimator.setKSearch(kSearch);
   normal_estimator.compute(*normals);
 
   pcl::RegionGrowing<pcl::PointXYZ, pcl::Normal> reg;
-  reg.setMinClusterSize(20);
-  reg.setMaxClusterSize(300);
+  reg.setMinClusterSize(min);
+  reg.setMaxClusterSize(max);
   reg.setSearchMethod(tree);
-  reg.setNumberOfNeighbours(30);
+  reg.setNumberOfNeighbours(numberOfNeighbours);
   reg.setInputCloud(input_cloud);
   reg.setInputNormals(normals);
-  reg.setSmoothnessThreshold(3.0 / 180.0 * M_PI);
-  reg.setCurvatureThreshold(1.0);
+  reg.setSmoothnessThreshold(smoothnessThreshold / 180.0 * M_PI);
+  reg.setCurvatureThreshold(curvatureThreshold);
 
   std::vector<pcl::PointIndices> clusters;
   reg.extract(clusters);
@@ -156,11 +156,11 @@ void remove_outlier(PC::Ptr input_cloud)
   sor.filter(*input_cloud);
 };
 
-sensor_msgs::PointCloud2 format_output_msg(PCRGB::Ptr input_cloud)
+sensor_msgs::PointCloud2 format_output_msg(PCRGB::Ptr input_cloud, std::string frame_id)
 {
   sensor_msgs::PointCloud2 output_msg;
   pcl::toROSMsg(*input_cloud, output_msg);
-  output_msg.header.frame_id = "base_link";
+  output_msg.header.frame_id = frame_id;
   output_msg.header.stamp = ros::Time::now();
   return output_msg;
 };

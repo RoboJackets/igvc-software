@@ -20,16 +20,33 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   PC::Ptr cloud(new PC);
   PCRGB::Ptr cloud_filtered(new PCRGB);
   PCRGB::Ptr curr_cloud(new PCRGB);
-  float tolerance; int cluster_min, cluster_max;
-  private_nh_.getParam("/clustering_node/euclidean/tolerance", tolerance);
-  private_nh_.getParam("/clustering_node/euclidean/min", cluster_min);
-  private_nh_.getParam("/clustering_node/euclidean/max", cluster_max);
+  std::string option, frame_id;
+  private_nh_.getParam("/clustering_node/option", option);
+  private_nh_.getParam("/clustering_node/frame_id", frame_id);
+  
+  float tolerance, smoothnessThreshold, curvatureThreshold; 
+  int cluster_min, cluster_max, kSearch, numberOfNeighbours;
+
+  if (option == "euclidean") {
+    private_nh_.getParam("/clustering_node/euclidean/tolerance", tolerance);
+    private_nh_.getParam("/clustering_node/euclidean/min", cluster_min);
+    private_nh_.getParam("/clustering_node/euclidean/max", cluster_max);
+  } 
+  
+  else if (option == "region_growing") {
+    private_nh_.getParam("/clustering_node/region_growing/kSearch", kSearch);
+    private_nh_.getParam("/clustering_node/region_growing/min", cluster_min);
+    private_nh_.getParam("/clustering_node/region_growing/max", cluster_max);
+    private_nh_.getParam("/clustering_node/region_growing/numberOfNeighbours", numberOfNeighbours);
+    private_nh_.getParam("/clustering_node/region_growing/smoothnessThreshold", smoothnessThreshold);
+    private_nh_.getParam("/clustering_node/region_growing/curvatureThreshold", curvatureThreshold);
+  }
 
   pcl::fromROSMsg(*cloud_msg, *cloud);
 
   if (cloud->size() == 0)
   {
-    sensor_msgs::PointCloud2 output_msg = utils::format_output_msg(cloud_filtered);
+    sensor_msgs::PointCloud2 output_msg = utils::format_output_msg(cloud_filtered, frame_id);
     visualization_msgs::MarkerArray clusters_vis;
     clustering_pub_.publish(output_msg);
     marker_pub_.publish(clusters_vis);
@@ -39,11 +56,14 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
   {
     visualization_msgs::MarkerArray clusters_vis;
     int counter = 0;
-    // std::cout << "cloud before removing outlier: " << cloud->size() << std::endl;
     utils::remove_outlier(cloud);
-    // std::cout << "cloud after removing outlier: " << cloud->size() << std::endl;
-    std::vector<pcl::PointIndices> cluster_indices = utils::euclidean_clustering(cloud, tolerance, cluster_max, cluster_min);
-    // std::vector<pcl::PointIndices> cluster_indices = region_growing_clustering(cloud);
+    std::vector<pcl::PointIndices> cluster_indices;
+
+    if (option == "euclidean") {
+      cluster_indices = utils::euclidean_clustering(cloud, tolerance, cluster_max, cluster_min);
+    } else if (option == "region_growing") {
+      cluster_indices = utils::region_growing_clustering(cloud, kSearch, cluster_min, cluster_max, numberOfNeighbours, smoothnessThreshold, curvatureThreshold);
+    }
 
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     {
@@ -76,7 +96,7 @@ void ClusteringNode::clusteringCallback(const sensor_msgs::PointCloud2ConstPtr& 
       curr_cloud->clear();
     }
 
-    sensor_msgs::PointCloud2 output_msg = utils::format_output_msg(cloud_filtered);
+    sensor_msgs::PointCloud2 output_msg = utils::format_output_msg(cloud_filtered, frame_id);
     clustering_pub_.publish(output_msg);
     marker_pub_.publish(clusters_vis);
   }

@@ -10,9 +10,6 @@ typedef pcl::PointCloud<pcl::PointXYZ> PC;
 GroundFilterNode::GroundFilterNode()
 {
   private_nh_ = ros::NodeHandle("~");
-  std::string input_topic, filtered_topic;
-  //private_nh_.getParam("/ground_filter_node/topic/input", input_topic);
-  //private_nh_.getParam("/ground_filter_node/topic/filtered", filtered_topic);
   raw_pts_sub_ = private_nh_.subscribe("/lidar/transformed", 1, &GroundFilterNode::groundFilterCallback, this);
   ground_filter_pub_ = private_nh_.advertise<sensor_msgs::PointCloud2>("ground_segmentation", 1);
 };
