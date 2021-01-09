@@ -2,65 +2,127 @@
 
 <robot name="Swervi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <!-- constants -->
+    <!-- CONSTANTS -->
     <xacro:property name="M_PI" value="3.1415926535897931" />
 
-    <!-- geometry params -->
+    <!-- WHEEL PARAMS -->
+    <!-- Outer diameter of the wheel [m] -->
     <xacro:property name="wheel_radius" value="0.1375" />
+    <!-- Width of the tire [m] -->
     <xacro:property name="wheel_width" value="0.04826" />
+    <!-- Mass of the wheel (including shaft and hub motor) [kg] -->
     <xacro:property name="wheel_mass" value="4.4" />
+    <!-- The inertia about the x and y axes, with the wheel axle pointing along 
+         the z direction. This should be the smaller of the two inertias. [kg*m^2] -->
     <xacro:property name="wheel_Ixx_Iyy" value="0.00942" />
+    <!-- The inertia about the z axis, with the wheel axle pointing along the z
+         direction. This should be the larger of the two inertias. [kg*m^2] -->
     <xacro:property name="wheel_Izz" value="0.0182"/>
+    <!-- The damping within the hub motor/bearings [N*m*s/rad] -->
     <xacro:property name="wheel_damping" value="0.001"/>
+    <!-- The static friction within the hub motor/bearings [N*m] -->
     <xacro:property name="wheel_friction" value="0.5"/>
 
+    <!-- SWIVEL -->
+    <!-- Distance from center of wheel to top of swivel [m] -->
     <xacro:property name="swivel_height" value="0.17272"/>
+    <!-- The distance from the center of rotation of the swivel to the point
+         sticking out the furthest from the central axis. This is equal to the
+         wheel diameter at minimum. [m] -->
     <xacro:property name="swivel_radius" value="0.1" />
+    <!-- The mass of the support structure that rotates with the wheel (not
+         including the wheel) [kg] -->
     <xacro:property name="swivel_mass" value="1" />
+    <!-- The inertia of the frame that swivels with the wheel about the x axis.
+         The x-axis is the axis alligned with the shaft of the hub motor. [kg*m^2] -->
     <xacro:property name="swivel_Ixx" value="0.4" />
+    <!-- The inertia of the frame that swivels with the wheel about the y axis.
+         The y-axis is the remaining axis in a right handed coordinate system. [kg*m^2] -->
     <xacro:property name="swivel_Iyy" value="0.4" />
+    <!-- The inertia of the frame that swivels with the wheel about the xzaxis.
+         The z-axis is the axis about which the swivel turns. [kg*m^2] -->
     <xacro:property name="swivel_Izz" value="0.2" />
+    <!-- The damping within the swivel (including any from gearbox) [N*m*s/rad] -->
     <xacro:property name="swivel_damping" value="0.001"/>
+    <!-- The static friction within the swivel (including any from gearbox) [N*m] -->
     <xacro:property name="swivel_friction" value="0.5"/>
-    <xacro:property name="wheel_swivel_offset" value="0.02" />
 
-    <!-- wheel acuator limits -->
+    <!-- ACTUATORS LIMITS -->
+    <!-- Max torque of the hub motor [N*m] -->
     <xacro:property name="max_torque_hub" value="23.76"/>
+    <!-- Max speed of the hub motor [rad/s] -->
     <xacro:property name="max_vel_hub" value="22.2"/>
+    <!-- Max torque of the swivel motor (this should take into account any
+         gearing) [N*m] -->
     <xacro:property name="max_torque_swivel" value="37.5"/>
+    <!-- Max speed of the swivel motor (this should take into account any
+         gearing) [rad/s] -->
     <xacro:property name="max_vel_swivel" value="59.44"/>
 
-    <!-- drive shock params-->
-    <!-- how far the drive wheel shock can move (m)-->
+    <!-- DRIVE SHOCK PARAMS -->
+    <!-- The max distance that the wheel can travel in the vertical direction
+         due to shock absobtion. If there are no shock absorbers, try to estimate
+         the max compression of the tire and sweve module assembly. [m] -->
     <xacro:property name="drive_wheel_travel" value="0.01"/>
+    <!-- Max force that the shock obsorber can output. If there are no shock
+         obsorbers, choose large value. [N] -->
     <xacro:property name="drive_shock_eff_limit" value="500.0"/>
+    <!-- Max speed at which shocks can compress. If there are no shocks, estimate
+         for the tire [m/s] -->
     <xacro:property name="drive_shock_vel_limit" value="0.1"/>
+    <!-- The damping in the shock absorbers [N*s/m] -->
     <xacro:property name="drive_shock_damping" value="100"/>
+    <!-- The static friction within the shock absorbers [N] -->
     <xacro:property name="drive_shock_friction" value="1.0"/>
+    <!-- The spring stiffness of the drive shock. If there is no drive shock,
+         this should be the spring stiffness of the entire swerve submodule,
+         including wheel. [N/m] -->
     <xacro:property name="drive_spring_stiffness" value="113832.44275"/>
+    <!-- The equilibrium position of the spring. Typically 0 as this is based off
+         the joint position. [m] -->
     <xacro:property name="drive_shock_spring_ref" value="0.00"/>
     
-    <!-- chassis params-->
+    <!-- CHASSIS PARAMS -->
+    <!-- Position of the center of mass of robot excluding the swivels and wheels,
+         measured based off a world coordinate system with x and y in the center
+         of the robot, and z on the floor. x is pointing forward and z is up. [m] -->
     <xacro:property name="chassis_com_z" value="0.29"/>
+    <!-- The distance in the x direction from the center of each wheel to the
+         center of the chassis [m] -->
     <xacro:property name="wheel_offset_x" value="0.362"/>
-    <xacro:property name="chassis_mass" value="20" />
-    <xacro:property name="chassis_Ixx" value="5" />
-    <xacro:property name="chassis_Iyy" value="5" />
-    <xacro:property name="chassis_Izz" value="5" />
+    <!-- The distance in the y direction from the center of each wheel to the
+         center of the chassis [m] -->
     <xacro:property name="wheel_offset_y" value="0.188"/>
+    <!-- Mass of everything excluding swivels and wheels [kg] -->
+    <xacro:property name="chassis_mass" value="20" />
+    <!-- Inertia of the robot about center of mass (x points forward) [kg*m^2] -->
+    <xacro:property name="chassis_Ixx" value="5" />
+    <!-- Inertia of the robot about center of mass (y points left) [kg*m^2] -->
+    <xacro:property name="chassis_Iyy" value="5" />
+    <!-- Inertia of the robot about center of mass (z points up) [kg*m^2] -->
+    <xacro:property name="chassis_Izz" value="5" />
+    <!-- The distance from the ground to the chassis origin [m] -->
     <xacro:property name="chassis_offset_z" value="0.318"/>
 
-    <!-- Lidar -->
+    <!-- lIDAR PARAMS -->
+    <!-- The pitch angle of the lidar, where flat is 0 radians [rad] -->
     <xacro:property name="lidar_pitch" value="0.0"/>
+    <!-- Offset in x direction of the lidar relative to chassis [m] -->
     <xacro:property name="lidar_x" value="0.127"/>
+    <!-- Offset in z direction of the lidar relative to the ground [m] -->
     <xacro:property name="lidar_z" value="0.8486"/>
+    <!-- Lidar frequency [Hz] -->
     <xacro:property name="lidar_hz" value="10"/>
+    <!-- Number of points that the lidar samples per revolution [#/rev] -->
     <xacro:property name="lidar_samples" value="500"/>
+    <!-- The length of the lidar support platform [m] -->
     <xacro:property name="lidar_support_x_dim" value="0.2"/>
+    <!-- The width of the lidar support platform [m] -->
     <xacro:property name="lidar_support_y_dim" value="0.08"/>
+    <!-- The thickness of the lidar support platform [m] -->
     <xacro:property name="lidar_support_z_dim" value="0.01"/>
 
-    <!-- gives small geometry so it show up in rviz -->
+    <!-- GIVES A SMALL GEOMETRY SO IT SHOWS UP IN RVIZ -->
     <xacro:macro name="null_link">
         <inertial>
             <mass value="0.001"/>
