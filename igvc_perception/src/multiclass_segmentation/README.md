@@ -46,9 +46,13 @@ multiclass_segmentation
 ## Build Instructions 
 
 1. Download the dependencies in requirements.txt manually or using `pip install -r requirements.txt`. 
-2. Obtain a dataset containing the images (PNGs) and masks (JSONs). Skip steps #2 and #3 if using .npy files. 
+2. Obtain a dataset containing the images (PNGs) and masks (JSONs) [here](https://cloud.robojackets.org/apps/files/?dir=/RoboNav/Software/dataset/robonav_dataset&fileid=351245). Skip steps #2 and #3 if using .npy files.
 3. Run `python make_dataset.py -images /path_to_images(png) -masks /path_to_masks(json)`to generate .npy files. Example: `python make_dataset.py -images 'annotations/**/*.png' -masks 'annotations/**/*.json'`
 4. Establish train_images.npy, train_masks.npy, test_images.npy, and test_masks.npy files with `python split_data.py -images '/path_to_images.npy' -masks '/path_to_masks.npy'` 
 5. Run `python train.py -train_images '/path_to_train_images' -train_masks '/path_to_train_masks' -test_images '/path_to_test_images' -test_masks '/path_to_test_masks'` to train and test the neural network.
+
+## Visualize results
+The training result can be visualized with TensorBoard using following commands.
+`tensorboard --logdir=content`
 
 Alternatively, download **UNetWithEfficientNet.ipynb**, and run it in [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) or a local Jupyter environment. 
