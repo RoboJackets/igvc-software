@@ -22,6 +22,7 @@ import segmentation_models_pytorch as smp
 from torch import nn
 from catalyst.contrib.nn import DiceLoss, IoULoss
 from torch import optim
+import catalyst
 from catalyst import utils
 from torch.optim import AdamW
 
@@ -105,6 +106,7 @@ def main():
 
     device = utils.get_device()
     print("Using device: {}".format(device))
+    print(f"torch: {torch.__version__}, catalyst: {catalyst.__version__}")
 
     runner = SupervisedRunner(device=device, input_key="image", input_target_key="mask")
 
