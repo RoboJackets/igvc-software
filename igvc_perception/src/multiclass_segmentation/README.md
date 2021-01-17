@@ -55,4 +55,10 @@ multiclass_segmentation
 The training result can be visualized with TensorBoard using following commands.
 `tensorboard --logdir=content`
 
+## Train a model using Google Colab
+You can alternatively use a google colab to train your model. Here is a brief instruction about setting up google colab environment.
+1. First visit to google colab webstite and upload the **igvc_multinet.ipynb**.
+2. Download the required dataset shown in the Build Instruction above. 
+3. Follow the instruction on the **igvc_multinet.ipynb**
+
 Alternatively, download **UNetWithEfficientNet.ipynb**, and run it in [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) or a local Jupyter environment. 
