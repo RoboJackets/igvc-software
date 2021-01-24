@@ -6,7 +6,6 @@ import sys
 from timeit import default_timer as timer
 import torch
 from torch.autograd import Variable
-from torchvision import transforms
 import segmentation_models_pytorch as smp
 
 import os
@@ -22,12 +21,7 @@ from image_geometry import PinholeCameraModel
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image as ImMsg
-from sensor_msgs.msg import PointCloud2
-from sensor_msgs.msg import PointField
 
-transform = transforms.Compose([
-    transforms.ToTensor(),
-])
 
 class SegmentationModel(object):
     """
@@ -72,7 +66,6 @@ class SegmentationModel(object):
         self.world_point_arrays = {}
         self.subscribers = []
         self.im_publishers = {}
-        self.cloud_publishers = {}
 
         for camera_name in camera_names:
             rospy.loginfo('Setting up %s.' % camera_name)
@@ -83,23 +76,6 @@ class SegmentationModel(object):
                 rospy.logerr('Camera info for %s not available.' % camera_name)
                 sys.exit()
             rospy.loginfo(camera_info)
-            # width and height adjust factors.
-            waf = float(resize_width) / camera_info.width
-            haf = float(resize_height) / camera_info.height
-            camera_info.height = resize_height
-            camera_info.width = resize_width
-
-            # adjust the camera matrix.
-            K = camera_info.K
-            camera_info.K = (K[0]*waf,         0.,  K[2]*waf,
-                             0.,  K[4]*haf,  K[5]*haf,
-                             0.,        0.,         1.)
-
-            # adjust the projection matrix.
-            P = camera_info.P
-            camera_info.P = (P[0]*waf,        0.,  P[2]*waf,  0.,
-                             0.,  P[5]*haf,  P[6]*haf,  0.,
-                             0.,        0.,        1.,  0.)
 
             self.camera_models[camera_name] = PinholeCameraModel()
             self.camera_models[camera_name].fromCameraInfo(camera_info)
@@ -114,15 +90,10 @@ class SegmentationModel(object):
             # cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform('/base_footprint', cam_frame_name, rospy.Time(0))
             # self.cam_transform_rotation_matrices[camera_name] = ros_tf.transformations.quaternion_matrix(cam_transform_rotation)[:-1,:-1]
             # self.cam_transform_translations[camera_name] = np.asarray(cam_transform_translation)
-            # print(self.cam_transform_translations[camera_name])
-            # print(self.cam_transform_rotation_matrices[camera_name])
 
-            # Create a mapping between image pixels and world coordinates (flat plane assumption).
-            # self.init_point_cloud_array(camera_name)
 
-            # Create image and pointcloud publishers.
+            # Create image publishers.
             self.im_publishers[camera_name] = rospy.Publisher('%s/%s' % (publisher_topic, camera_name), ImMsg, queue_size=1)
-            # self.cloud_publishers[camera_name] = rospy.Publisher('%s/%s' % ("/semantic_segmentation_cloud", camera_name), PointCloud2, queue_size=1)
 
             print('Finished setting up %s.' % camera_name)
 
@@ -152,29 +123,25 @@ class SegmentationModel(object):
         image_np = np.swapaxes(image_np, 2, 0)
         image_np = np.swapaxes(image_np, 2, 1)
         #Convert to tensor
+
+
         img_to_tensor = torch.from_numpy(image_np).float()
 
         if not self.force_cpu:
             img_to_tensor = Variable(img_to_tensor.unsqueeze(0)).cuda()
         else:
             img_to_tensor = Variable(img_to_tensor.unsqueeze(0))
-
         output = self.graph(img_to_tensor)
         pred_mask = output.cpu().data.numpy()[0]
 
         #Convert back to image dimensions
         pred_mask = np.swapaxes(pred_mask, 2, 0)
         pred_mask = np.swapaxes(pred_mask, 1, 0)
-        # pred_mask = pred_mask.astype(np.float64)
         pred_mask = np.argmax(pred_mask, axis=2)
 
 
         # Network output values above threshold are lines.
-        im_threshold = pred_mask
 
-        # Get world coordinates of detected lines.
-        # world_points = self.world_point_arrays[camera_name][im_threshold]
-        # Publish segmentation map.
         colorImg = cv2.cvtColor(pred_mask.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         lineMask = np.all(colorImg==[2,2,2],axis=2)
         colorImg[lineMask] = [255,0,0]
@@ -183,23 +150,6 @@ class SegmentationModel(object):
         msg_out = self.bridge.cv2_to_imgmsg(colorImg, 'bgr8')
         msg_out.header.stamp = data.header.stamp
         self.im_publishers[camera_name].publish(msg_out)
-
-        # Publish pointcloud.
-        # cloud_msg = PointCloud2()
-        # cloud_msg.header.stamp = data.header.stamp
-        # cloud_msg.header.frame_id = 'base_footprint'
-        # cloud_msg.height = 1
-        # cloud_msg.width = len(world_points)
-        # cloud_msg.fields = [
-        #     PointField('x', 0, PointField.FLOAT32, 1),
-        #     PointField('y', 4, PointField.FLOAT32, 1),
-        #     PointField('z', 8, PointField.FLOAT32, 1)]
-        # cloud_msg.is_bigendian = False
-        # cloud_msg.point_step = 12
-        # cloud_msg.row_step = 3 * len(world_points)
-        # cloud_msg.data = world_points.tostring()
-        #
-        # self.cloud_publishers[camera_name].publish(cloud_msg)
 
         end = timer()
         #print end - start
@@ -223,40 +173,10 @@ class SegmentationModel(object):
         msg_out.header.stamp = data.header.stamp
         self.im_publishers[camera_name].publish(msg_out)
 
-        # Publish pointcloud.
-        # cloud_msg = PointCloud2()
-        # cloud_msg.header.stamp = data.header.stamp
-        # cloud_msg.header.frame_id = 'base_footprint'
-        # cloud_msg.height = 1
-        # cloud_msg.width = len(world_points)
-        # cloud_msg.fields = [
-        #     PointField('x', 0, PointField.FLOAT32, 1),
-        #     PointField('y', 4, PointField.FLOAT32, 1),
-        #     PointField('z', 8, PointField.FLOAT32, 1)]
-        # cloud_msg.is_bigendian = False
-        # cloud_msg.point_step = 12
-        # cloud_msg.row_step = 3 * len(world_points)
-        # cloud_msg.data = world_points.tostring()
-        #
-        # self.cloud_publishers[camera_name].publish(cloud_msg)
 
         end = timer()
         #print end - start
 
-    # This function projects image pixels into world coordinates using a flat plane assumption.
-    # def init_point_cloud_array(self, camera_name):
-    #     camera_model = self.camera_models[camera_name]
-    #     cam_transform_translation = self.cam_transform_translations[camera_name]
-    #     cam_transform_rotation_matrix = self.cam_transform_rotation_matrices[camera_name]
-    #
-    #     world_points_array = np.empty( (self.resize_height,self.resize_width,3), dtype=np.float32)
-    #     for r,c in np.ndindex(self.resize_height,self.resize_width):
-    #         ray = np.asarray(camera_model.projectPixelTo3dRay((c,r)))
-    #         ray_in_world = np.matmul(cam_transform_rotation_matrix, ray)
-    #         scale = -cam_transform_translation[2] / ray_in_world[2]
-    #         world_point = scale * ray_in_world + cam_transform_translation
-    #         world_points_array[r,c] = [world_point[0], world_point[1], world_point[2]]
-    #     self.world_point_arrays[camera_name] = world_points_array
 
 
 if __name__ == '__main__':
