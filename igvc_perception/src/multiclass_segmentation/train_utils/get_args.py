@@ -23,6 +23,9 @@ def get_args():
         help="path to test images .npy file",
     )
     ap.add_argument(
-        "-test_masks", "--test_masks", required=True, help="path to test mask .npy file"
+        "-test_masks",
+        "--test_masks",
+        required=True,
+        help="path to test mask .npy file",
     )
     return ap.parse_args()

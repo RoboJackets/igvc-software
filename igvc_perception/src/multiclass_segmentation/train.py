@@ -108,7 +108,9 @@ def main():
     print("Using device: {}".format(device))
     print(f"torch: {torch.__version__}, catalyst: {catalyst.__version__}")
 
-    runner = SupervisedRunner(device=device, input_key="image", input_target_key="mask")
+    runner = SupervisedRunner(
+        device=device, input_key="image", input_target_key="mask"
+    )
 
     # Use Catalyst callbacks for metric calculations during training
     callbacks = [
