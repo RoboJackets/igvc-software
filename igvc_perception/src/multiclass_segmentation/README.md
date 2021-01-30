@@ -55,4 +55,12 @@ multiclass_segmentation
 The training result can be visualized with TensorBoard using following commands.
 `tensorboard --logdir=content`
 
+## Train a model using Google Colab
+You can alternatively use a google colab to train your model. Here is a brief instruction about setting up google colab environment.
+1. First visit to [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) and upload the **igvc_multinet.ipynb**.
+2. Download the required dataset [here](https://cloud.robojackets.org/apps/files/?dir=/RoboNav/Software/dataset/robonav_dataset&fileid=351245). 
+3. Follow the instruction on the **igvc_multinet.ipynb**
+
+## Archived notebook
+If you like to run an old version of jupyter notebook, please follor the instruction below.
 Alternatively, download **UNetWithEfficientNet.ipynb**, and run it in [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) or a local Jupyter environment. 
