@@ -48,18 +48,18 @@
 
     <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
 
-    <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen">
+    <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen" required="true">
         <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>
         <param name="ground_truth_pub_topic" value="/ground_truth"/>
     </node>
 
-    <node name="mag_republisher" pkg="igvc_gazebo" type="mag_republisher" output="screen">
+    <node name="mag_republisher" pkg="igvc_gazebo" type="mag_republisher" output="screen" required="true">
         <param name="mag_sub_topic" value="/magnetometer/vector"/>
         <param name="mag_pub_topic" value="/magnetometer_mag"/>
         <param name="mag_field_variance" value = "0.000001"/>
     </node>
 
-    <node pkg="igvc_utils" type="quaternion_to_rpy" name="ground_truth_to_rpy" respawn="true" output="screen">
+    <node name="ground_truth_to_rpy" pkg="igvc_utils" type="quaternion_to_rpy" output="screen" required="true">
         <param name="topics/quaternion" value="/ground_truth"/>
         <param name="topics/rpy" value="/ground_truth_rpy"/>
         <param name="message_type" value="odometry"/>
