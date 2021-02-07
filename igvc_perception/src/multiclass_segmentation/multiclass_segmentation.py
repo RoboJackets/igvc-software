@@ -86,10 +86,10 @@ class SegmentationModel(object):
             cam_frame_name = "cam/" + camera_name.replace("usb_cam_", "")
             # cam_frame_name = camera_name.replace("/raw","") + "_optical"
             rospy.loginfo(cam_frame_name)
-            # transform_listener.waitForTransform('/base_footprint', cam_frame_name, rospy.Time(0), rospy.Duration(5.0))
-            # cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform('/base_footprint', cam_frame_name, rospy.Time(0))
-            # self.cam_transform_rotation_matrices[camera_name] = ros_tf.transformations.quaternion_matrix(cam_transform_rotation)[:-1,:-1]
-            # self.cam_transform_translations[camera_name] = np.asarray(cam_transform_translation)
+            transform_listener.waitForTransform('/base_footprint', cam_frame_name, rospy.Time(0), rospy.Duration(5.0))
+            cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform('/base_footprint', cam_frame_name, rospy.Time(0))
+            self.cam_transform_rotation_matrices[camera_name] = ros_tf.transformations.quaternion_matrix(cam_transform_rotation)[:-1,:-1]
+            self.cam_transform_translations[camera_name] = np.asarray(cam_transform_translation)
 
 
             # Create image publishers.
