@@ -104,7 +104,7 @@
               rpy="0 0 0"/>
       <axis xyz="0 0 -1"/>
       <limit lower="${-drive_wheel_travel / 2}" upper="${drive_wheel_travel / 2}"
-             effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
+              effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
       <!-- TODO tune for actual shocks -->
       <!-- damping = viscous dampening coeff -->
       <!-- friction, physical static friction -->
@@ -456,7 +456,7 @@
   </gazebo>
 
 
-    <!-- base of the robot, should be ground level directly below center points of wheels -->
+  <!-- base of the robot, should be ground level directly below center points of wheels -->
   <link name="base_link">
     <xacro:null_link/>
   </link>

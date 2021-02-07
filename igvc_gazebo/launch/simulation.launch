@@ -59,7 +59,7 @@
         <param name="mag_field_variance" value = "0.000001"/>
     </node>
 
-    <node name="ground_truth_to_rpy" pkg="igvc_utils" type="quaternion_to_rpy" respawn="true" output="screen" required="true">
+    <node name="ground_truth_to_rpy" pkg="igvc_utils" type="quaternion_to_rpy" output="screen" required="true">
         <param name="topics/quaternion" value="/ground_truth"/>
         <param name="topics/rpy" value="/ground_truth_rpy"/>
         <param name="message_type" value="odometry"/>
