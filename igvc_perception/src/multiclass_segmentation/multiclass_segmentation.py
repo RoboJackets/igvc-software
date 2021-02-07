@@ -99,10 +99,12 @@ class SegmentationModel(object):
                 cam_frame_name,
                 rospy.Time(0),
                 rospy.Duration(5.0))
-            cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform(
-                '/base_footprint', cam_frame_name, rospy.Time(0))
-            self.cam_transform_rotation_matrices[camera_name] = ros_tf.transformations.quaternion_matrix(
-                cam_transform_rotation)[:-1, :-1]
+            cam_transform_translation, cam_transform_rotation = \
+                transform_listener.lookupTransform(
+                    '/base_footprint', cam_frame_name, rospy.Time(0))
+            self.cam_transform_rotation_matrices[camera_name] = \
+                ros_tf.transformations.quaternion_matrix(
+                    cam_transform_rotation)[:-1, :-1]
             self.cam_transform_translations[camera_name] = np.asarray(
                 cam_transform_translation)
 
@@ -148,7 +150,8 @@ class SegmentationModel(object):
         # Convert Buffer to Image
         np_arr = np.frombuffer(data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        # image_np = cv2.resize(image_np, dsize=(self.resize_width,self.resize_height))
+        # image_np = cv2.resize(image_np, dsize=(
+        # self.resize_width,self.resize_height))
         # Swap dimensions around to the dimensions the model expects
         image_np = np.swapaxes(image_np, 2, 0)
         image_np = np.swapaxes(image_np, 2, 1)
