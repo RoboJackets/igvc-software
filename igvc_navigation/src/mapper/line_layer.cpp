@@ -126,7 +126,7 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
 
   cv::Mat segmented_mat = convertToMat(segmented_image);
 
-  projectImage(segmented_mat, camera_to_odom, camera_index);
+  projectImage(segmented_mat, camera_to_odom, camera_index, *segmented_info);
   cleanupProjections();
   insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
 
@@ -181,7 +181,7 @@ cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const
 }
 
 void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom,
-                             size_t camera_idx)
+                             size_t camera_idx, const sensor_msgs::CameraInfo &info)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
   freespace_buffer_.setTo(cv::Scalar(0.0));
@@ -199,38 +199,89 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
   map_.getIndex({ translate_vector.x, translate_vector.y }, camera_index);
 
   constexpr uchar true_val = 255U;
+  cv::Mat transformationMat = getPerspectiveTransformMat(info);
+  cv::Mat transformationMat_inv = transformationMat.inv();
+  cv::Size dstSize = line_buffer_.size();
+  cv::Mat transformedImage = cv::Mat(dstSize, CV_64F);
+  cv::Mat m_mapX, m_mapY;
+  createMap(dstSize, m_mapX, m_mapY, transformationMat_inv);
+  cv::remap(segmented_mat, transformedImage, m_mapX, m_mapY, CV_INTER_LINEAR, cv::BORDER_CONSTANT);
 
-  for (int i = 0; i < rows; i++)
+  for (int i = 0; i < dstSize.height; i++)
   {
-    const auto *row_ptr = segmented_mat.ptr<uchar>(i);
-    for (int j = 0; j < cols; j++)
+    const auto *row_ptr = transformedImage.ptr<uchar>(i);
+    for (int j = 0; j < dstSize.width; j++)
     {
-      // TODO: Mask using barrels
-      const int ray_idx = i * cols + j;
-      Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
-
-      double scale = -translation[2] / eigen_ray[2];
-      Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
-
       bool is_line = row_ptr[j] == true_val;
-      grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
-      if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
-      {
         if (is_line)
         {
-          line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
+          line_buffer_.at<uchar>(i, j) = true_val;
           //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
         }
         else
         {
-          freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
+          freespace_buffer_.at<uchar>(i, j) = true_val;
           //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
           //        projected_point.z()));
         }
-      }
     }
   }
+//  for (grid_map::GridMapIterator iterator(map_); !iterator.isPastEnd(); ++iterator)
+//  {
+//      const int i = iterator.getLinearIndex();
+//
+//      const Eigen::Array2i idx = iterator.getUnwrappedIndex();
+//      int x = idx(0);
+//      int y = idx(1);
+//
+//      cv::Point2d pt = applyHomography(cv::Point2d(x, y), transformationMat_inv);
+//      bool is_line = segmented_mat.at<uchar>(x, y) == true_val;
+//      if (is_line)
+//      {
+//          line_buffer_.at<uchar>(x, y) = true_val;
+//          //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
+//          //        projected_point.z()));
+//      }
+//      else
+//      {
+//          freespace_buffer_.at<uchar>(x, y) = true_val;
+//          //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
+//          //        projected_point.z()));
+//      }
+//  }
+
+//  for (int i = 0; i < rows; i++)
+//  {
+//    const auto *row_ptr = segmented_mat.ptr<uchar>(i);
+//    for (int j = 0; j < cols; j++)
+//    {
+//      // TODO: Mask using barrels
+//      const int ray_idx = i * cols + j;
+//      Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
+//
+//      double scale = -translation[2] / eigen_ray[2];
+//      Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
+//
+//      bool is_line = row_ptr[j] == true_val;
+//      grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
+//      if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
+//      {
+//        if (is_line)
+//        {
+//          line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
+//          //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
+//          //        projected_point.z()));
+//        }
+//        else
+//        {
+//          freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = true_val;
+//          //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
+//          //        projected_point.z()));
+//        }
+//      }
+//    }
+//  }
 }
 
 grid_map::Index LineLayer::calculateBufferIndex(const Eigen::Vector3f &point, const grid_map::Index &camera_index) const
@@ -600,6 +651,107 @@ void LineLayer::publishCostmap()
   }
 
   costmap_pub_.publish(msg);
+}
+
+cv::Mat getPerspectiveTransformMat(const sensor_msgs::CameraInfo &info) {
+
+    // Image Height and Width
+    const int h = info.height;
+    const int w = info.width;
+
+    // Euler Angles
+    const int alpha = 24, beta = 90, gamma = 90;
+
+    // Camera is 1.4097 meters high
+    const float height = 1.4097 * 1000;
+
+    // Projection matrix 2D -> 3D
+    cv::Mat A1 = (cv::Mat_<float>(4, 3)<<
+            1, 0, -w/2,
+            0, 1, -h/2,
+            0, 0, 0,
+            0, 0, 1 );
+
+    // Rotation matrices Rx, Ry, Rz
+
+    cv::Mat RX = (cv::Mat_<float>(4, 4) <<
+            1, 0, 0, 0,
+            0, std::cos(alpha), -std::sin(alpha), 0,
+            0, std::sin(alpha), std::cos(alpha), 0,
+            0, 0, 0, 1 );
+
+    cv::Mat RY = (cv::Mat_<float>(4, 4) <<
+            std::cos(beta), 0, -std::sin(beta), 0,
+            0, 1, 0, 0,
+            std::sin(beta), 0, std::cos(beta), 0,
+            0, 0, 0, 1	);
+
+    cv::Mat RZ = (cv::Mat_<float>(4, 4) <<
+            std::cos(gamma), -std::sin(gamma), 0, 0,
+            std::sin(gamma), std::cos(gamma), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1	);
+
+
+    // R - rotation matrix
+    cv::Mat R = RX * RY * RZ;
+
+    // T - translation matrix
+    cv::Mat T = (cv::Mat_<float>(4, 4) <<
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, -height/std::sin(alpha),
+            0, 0, 0, 1);
+
+    // K - intrinsic matrix
+    // Mat K = (Mat_<float>(3, 4) <<
+    // 	focalLength, 0, w/2, 0,
+    // 	0, focalLength, h/2, 0,
+    // 	0, 0, 1, 0
+    // 	);
+
+    cv::Mat intrK(3, 3, CV_64FC1, (void *) info.K.data());
+
+
+    cv::Mat transformationMat = intrK * (T * (R * A1));
+    // Mat transformationMat = K1 * ((R * A1));
+    // Mat transformationMat = K1 * R.inv() * K1.inv();
+    // Hr = K * R.inv() * K.inv()
+
+    return transformationMat;
+}
+
+cv::Point2d applyHomography(const cv::Point2d& _point, const cv::Mat& _H)
+{
+    cv::Point2d ret = cv::Point2d( -1, -1 );
+
+    const double u = _H.at<double>(0,0) * _point.x + _H.at<double>(0,1) * _point.y + _H.at<double>(0,2);
+    const double v = _H.at<double>(1,0) * _point.x + _H.at<double>(1,1) * _point.y + _H.at<double>(1,2);
+    const double s = _H.at<double>(2,0) * _point.x + _H.at<double>(2,1) * _point.y + _H.at<double>(2,2);
+    if ( s != 0 )
+    {
+        ret.x = ( u / s );
+        ret.y = ( v / s );
+    }
+    return ret;
+}
+
+void createMap(cv::Size &dstSize, cv::Mat &m_mapX, cv::Mat &m_mapY, cv::Mat &transformationMat_inv)
+{
+    // Create remap images
+    m_mapX.create(dstSize, CV_32F);
+    m_mapY.create(dstSize, CV_32F);
+    for( int j = 0; j < dstSize.height; ++j )
+    {
+        float* ptRowX = m_mapX.ptr<float>(j);
+        float* ptRowY = m_mapY.ptr<float>(j);
+        for( int i = 0; i < dstSize.width; ++i )
+        {
+            cv::Point2f pt = applyHomography(cv::Point2f( static_cast<float>(i), static_cast<float>(j) ), transformationMat_inv);
+            ptRowX[i] = pt.x;
+            ptRowY[i] = pt.y;
+        }
+    }
 }
 
 }  // namespace line_layer

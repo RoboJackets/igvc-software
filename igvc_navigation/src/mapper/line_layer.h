@@ -97,7 +97,7 @@ private:
   cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image) const;
 
   void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom,
-                    size_t camera_idx);
+                    size_t camera_idx, const sensor_msgs::CameraInfo &info);
   void cleanupProjections();
   void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
   void matchCostmapDims(const costmap_2d::Costmap2D& master_grid);
@@ -117,6 +117,9 @@ private:
 
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
+  cv::Mat getPerspectiveTransformMat(const sensor_msgs::CameraInfo &info);
+  cv::Point2d applyHomography(const cv::Point2d& _point, const cv::Mat& _H);
+  void createMap(cv::Size &dstSize, cv::Mat &m_mapX, cv::Mat &m_mapY, cv::Mat &transformationMat_inv);
 };
 }  // namespace line_layer
 
