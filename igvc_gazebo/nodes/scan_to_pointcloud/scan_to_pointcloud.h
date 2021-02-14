@@ -10,19 +10,18 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
-
 class ScanToPointcloud
 {
-	public:
-		ScanToPointcloud();
-		
-	private:
-		void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
-		ros::NodeHandle nh;
-		ros::Publisher _pointcloud_pub;
-		laser_geometry::LaserProjection projection;
+public:
+  ScanToPointcloud();
 
-		double min_dist, neighbor_dist;
-		double offset;
+private:
+  void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
+  ros::NodeHandle nh;
+  ros::Publisher _pointcloud_pub;
+  laser_geometry::LaserProjection projection;
+
+  double min_dist, neighbor_dist;
+  double offset;
 };
 #endif
