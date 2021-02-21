@@ -1,3 +1,5 @@
+#include "control.h"
+
 #include <igvc_msgs/velocity_pair.h>
 #include <parameter_assertions/assertions.h>
 #include <ros/ros.h>
@@ -7,50 +9,13 @@
 #include <algorithm>
 #include <chrono>
 
-double speed_set_point_left = 0.0;
-double speed_set_point_right = 0.0;
-double speed_measured_left = 0.0;
-double speed_measured_right = 0.0;
-double wheel_radius;
 
-void speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
+Control::Control()
 {
-  if (msg->left_velocity == msg->left_velocity)
-  {
-    speed_set_point_left = msg->left_velocity;
-  }
-  if (msg->right_velocity == msg->right_velocity)
-  {
-    speed_set_point_right = msg->right_velocity;
-  }
-}
-
-void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
-{
-  auto iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "left_axle" });
-
-  if (iter != msg->name.end())
-  {
-    auto index = std::distance(msg->name.begin(), iter);
-
-    speed_measured_left = (msg->velocity[index]) * (wheel_radius);
-  }
-
-  iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "right_axle" });
-
-  if (iter != msg->name.end())
-  {
-    auto index = std::distance(msg->name.begin(), iter);
-
-    speed_measured_right = (msg->velocity[index]) * (wheel_radius);
-  }
-
-  // ROS_INFO_STREAM("right speed: " << speed_measured_right << " left speed: " << speed_measured_left);
-}
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "jessii_controller");
+  speed_set_point_left = 0.0;
+  speed_set_point_right = 0.0;
+  speed_measured_left = 0.0;
+  speed_measured_right = 0.0;
 
   ros::NodeHandle handle;
   ros::NodeHandle pNh("~");
@@ -91,9 +56,9 @@ int main(int argc, char **argv)
   enabled_msg.data = true;
   enabled_pub.publish(enabled_msg);
 
-  ros::Subscriber speed_sub = handle.subscribe("/motors", 1, speedCallback);
+  ros::Subscriber speed_sub = handle.subscribe("/motors", 1, &Control::speedCallback, this);
 
-  ros::Subscriber state_sub = handle.subscribe("/joint_states", 1, jointStateCallback);
+  ros::Subscriber state_sub = handle.subscribe("/joint_states", 1, &Control::jointStateCallback, this);
 
   ros::Time prev, now;
   prev = ros::Time::now();
@@ -171,6 +136,48 @@ int main(int argc, char **argv)
     rate.sleep();
     prev = now;
   }
+}
+
+void Control::speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
+{
+  if (msg->left_velocity == msg->left_velocity)
+  {
+    speed_set_point_left = msg->left_velocity;
+  }
+  if (msg->right_velocity == msg->right_velocity)
+  {
+    speed_set_point_right = msg->right_velocity;
+  }
+}
+
+void Control::jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
+{
+  auto iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "left_axle" });
+
+  if (iter != msg->name.end())
+  {
+    auto index = std::distance(msg->name.begin(), iter);
+
+    speed_measured_left = (msg->velocity[index]) * (wheel_radius);
+  }
+
+  iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "right_axle" });
+
+  if (iter != msg->name.end())
+  {
+    auto index = std::distance(msg->name.begin(), iter);
+
+    speed_measured_right = (msg->velocity[index]) * (wheel_radius);
+  }
+
+  // ROS_INFO_STREAM("right speed: " << speed_measured_right << " left speed: " << speed_measured_left);
+}
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "jessii_controller");
+
+  Control c;
 
   return 0;
 }

@@ -1,4 +1,4 @@
-add_executable(control main.cpp)
+add_executable(control control.cpp)
 add_dependencies(control ${catkin_EXPORTED_TARGETS})
 target_link_libraries(control ${catkin_LIBRARIES})
 
