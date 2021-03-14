@@ -7,6 +7,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
 
 #include <costmap_2d/GenericPluginConfig.h>
@@ -61,6 +62,7 @@ private:
 
   ros::Publisher gridmap_pub_;
   ros::Publisher costmap_pub_;
+  ros::Publisher ipm_img_pub_;
   std::vector<int8_t> cost_translation_table_;
   struct DebugPublishers
   {
