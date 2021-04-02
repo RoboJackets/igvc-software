@@ -97,7 +97,8 @@ bool MockSubscriber<M>::waitForPublisher(const ros::Duration& timeout) const
 }
 
 template <typename M>
-[[nodiscard]] bool MockSubscriber<M>::waitForSubscriber(const ros::Publisher& mock_pub) const {
+[[nodiscard]] bool MockSubscriber<M>::waitForSubscriber(const ros::Publisher& mock_pub) const
+{
   const double timeout = 5.0;
   const double sleep_time = 1.0;
   ros::Time end = ros::Time::now() + ros::Duration(timeout);

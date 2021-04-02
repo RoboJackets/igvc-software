@@ -93,7 +93,7 @@ void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm
       enabled = false;
       return;
     }
-    br.sendTransform(tf::StampedTransform(odom_to_utm, ros::Time(0), "odom", "utm"));
+    br.sendTransform(tf::StampedTransform(odom_to_utm, event.current_real, "odom", "utm"));
   }
 }
 

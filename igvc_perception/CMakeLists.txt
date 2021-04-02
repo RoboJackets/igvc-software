@@ -21,7 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
     tf2
     pcl_ros
     igvc_utils
-    velodyne_pointcloud
     parameter_assertions
     grid_map_core
     grid_map_ros
@@ -176,3 +175,5 @@ add_subdirectory(src/slam)
 add_subdirectory(src/pointcloud_filter)
 add_subdirectory(src/robot_pose_type_converter)
 add_subdirectory(src/slope_filter)
+add_subdirectory(src/elevation_map_height_node)
+add_subdirectory(src/pointcloud_segmentation)

@@ -104,7 +104,7 @@
               rpy="0 0 0"/>
       <axis xyz="0 0 -1"/>
       <limit lower="${-drive_wheel_travel / 2}" upper="${drive_wheel_travel / 2}"
-             effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
+              effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
       <!-- TODO tune for actual shocks -->
       <!-- damping = viscous dampening coeff -->
       <!-- friction, physical static friction -->
@@ -456,7 +456,7 @@
   </gazebo>
 
 
-    <!-- base of the robot, should be ground level directly below center points of wheels -->
+  <!-- base of the robot, should be ground level directly below center points of wheels -->
   <link name="base_link">
     <xacro:null_link/>
   </link>
@@ -486,10 +486,9 @@
 
   <!-- collision range = min sensing distance -->
   <!-- gpu does gpu acceleration -->
-  <VLP-16 parent="base_link" name="lidar" topic="/velodyne_points" hz="${lidar_hz}" samples="${lidar_samples}"
-          gpu="$(arg gpu)">
+  <xacro:VLP-16 parent="base_link" name="lidar" topic="/velodyne_points" hz="${lidar_hz}" samples="${lidar_samples}" gpu="$(arg gpu)">
     <origin xyz="${lidar_x} 0.0 ${lidar_z}" rpy="0 ${lidar_pitch} 0" />
-  </VLP-16>
+  </xacro:VLP-16>
 
   <xacro:wheel lr_prefix="left" lr_reflect="1" tire_diameter="${drive_tire_diameter}"
                wheel_mass="${drive_wheel_mass}" axle_eff_limit="${drive_wheel_eff_limit}" wheel_width="${drive_tire_width}"/>

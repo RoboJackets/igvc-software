@@ -108,8 +108,8 @@ void Line::getSlopeIntercept(const Eigen::MatrixXd &A, const Eigen::MatrixXd &me
 
 FastSegmentFilter::FastSegmentFilter(const ros::NodeHandle &nh) : private_nh_{ nh }, config_{ nh }
 {
-  ground_pub_ = private_nh_.advertise<pcl::PointCloud<velodyne_pointcloud::PointXYZIR>>(config_.ground_topic, 1);
-  nonground_pub_ = private_nh_.advertise<pcl::PointCloud<velodyne_pointcloud::PointXYZIR>>(config_.nonground_topic, 1);
+  ground_pub_ = private_nh_.advertise<pcl::PointCloud<velodyne_pcl::PointXYZIRT>>(config_.ground_topic, 1);
+  nonground_pub_ = private_nh_.advertise<pcl::PointCloud<velodyne_pcl::PointXYZIRT>>(config_.nonground_topic, 1);
   marker_pub_ = private_nh_.advertise<visualization_msgs::MarkerArray>("Lines_array", 1);
   ;
 }
@@ -118,14 +118,14 @@ void FastSegmentFilter::computePrototypePoints()
 {
   for (const auto &seg : segments_)
   {
-    std::map<int, std::vector<velodyne_pointcloud::PointXYZIR>> bins_raw;
+    std::map<int, std::vector<velodyne_pcl::PointXYZIRT>> bins_raw;
     for (const auto &point : seg.second.raw_points_)
     {
       bins_raw[point.ring].emplace_back(point);
     }
     for (const auto &bin : bins_raw)
     {
-      velodyne_pointcloud::PointXYZIR prototype_pt = bin.second[0];
+      velodyne_pcl::PointXYZIRT prototype_pt = bin.second[0];
       for (const auto &point : bin.second)
       {
         if (point.z < prototype_pt.z)
@@ -163,8 +163,8 @@ void FastSegmentFilter::getLinesFromSegments()
   }
 }
 
-void FastSegmentFilter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &ground_points,
-                                       pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &nonground_points)
+void FastSegmentFilter::classifyPoints(pcl::PointCloud<velodyne_pcl::PointXYZIRT> &ground_points,
+                                       pcl::PointCloud<velodyne_pcl::PointXYZIRT> &nonground_points)
 {
   for (const auto &[segment_id, segment] : segments_)
   {
@@ -196,19 +196,19 @@ void FastSegmentFilter::classifyPoints(pcl::PointCloud<velodyne_pointcloud::Poin
   }
 }
 
-int FastSegmentFilter::getSegIdFromPoint(const velodyne_pointcloud::PointXYZIR point)
+int FastSegmentFilter::getSegIdFromPoint(const velodyne_pcl::PointXYZIRT point)
 {
   double angle = atan2(point.y, point.x) + M_PI;
   return angle * config_.num_segments / (2 * M_PI);
 }
 
-double FastSegmentFilter::getDistanceFromPoint(const velodyne_pointcloud::PointXYZIR point)
+double FastSegmentFilter::getDistanceFromPoint(const velodyne_pcl::PointXYZIRT point)
 {
   return std::hypot(point.x, point.y, point.z);
 }
 
-double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pointcloud::PointXYZIR point1,
-                                                   const velodyne_pointcloud::PointXYZIR point2)
+double FastSegmentFilter::getDistanceBetweenPoints(const velodyne_pcl::PointXYZIRT point1,
+                                                   const velodyne_pcl::PointXYZIRT point2)
 {
   return std::hypot(point1.x - point2.x, point1.y - point2.y, point1.z - point2.z);
 }

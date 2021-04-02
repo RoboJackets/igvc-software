@@ -3,7 +3,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
-#include <cv.hpp>
+#include <opencv2/opencv.hpp>
 #include <opencv2/core/mat.hpp>
 
 int main(int argc, char** argv)

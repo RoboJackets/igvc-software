@@ -1,0 +1,11 @@
+segmentation-models-pytorch
+tensorboard
+torchvision
+torch
+catalyst
+numpy
+opencv-python
+scikit-learn
+matplotlib
+
+# Make sure to install the dependencies for each. 

@@ -1,6 +1,6 @@
 find_package(Git QUIET)
 
-set(EXTERNAL_PACKAGES rj-ros-common)
+set(EXTERNAL_PACKAGES rj-ros-common kindr_ros elevation_mapping)
 set(EXTERNAL_PACKAGES_FOUND True)
 
 if(NOT WIN32)
