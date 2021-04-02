@@ -124,6 +124,11 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   geometry_msgs::TransformStamped camera_to_odom =
       getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
 
+//  std::string bl("base_link");
+//  geometry_msgs::TransformStamped camera_to_baselink = getTransform(raw_image->header.frame_id, bl, raw_image->header.stamp);
+//  const auto bl_vector = camera_to_baselink.transform.translation;
+//  ROS_INFO("Base Link x: %f, y: %f, z: %f", bl_vector.x, bl_vector.y, bl_vector.z);
+
   cv::Mat segmented_mat = convertToMat(segmented_image);
 
   std::string &center_cam_name_string = config_.cameras[0].base_topic;
@@ -135,11 +140,11 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   bool x = curr_cam_name_string.find(center_name) != std::string::npos;
 //  ROS_INFO("comp: %s", x ? "true" : "false");
 
-//  if (x) {
+  if (x) {
       projectImage(segmented_mat, camera_to_odom, camera_index, *segmented_info);
       cleanupProjections();
       insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
-//  }
+  }
 
   debugPublishPC(debug_publishers_[camera_index].debug_line_pub_, line_buffer_, camera_to_odom);
   debugPublishPC(debug_publishers_[camera_index].debug_nonline_pub_, freespace_buffer_, camera_to_odom);
@@ -212,16 +217,23 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
 
   constexpr uchar true_val = 255U;
 
-  cv::Mat transformationMat = getPerspectiveTransformMat(info);
-  cv::Size dstSize = line_buffer_.size();
-  cv::Mat transformedImage = cv::Mat(dstSize, CV_64F);
+  float cam_height = translate_vector.z;
 
-  cv::warpPerspective(segmented_mat, transformedImage, transformationMat, dstSize, CV_INTER_CUBIC | CV_WARP_INVERSE_MAP);
+  cv::Mat transformationMat = getPerspectiveTransformMat(info, rotation, cam_height);
+  cv::Size dstSize = line_buffer_.size();
+  cv::Size srcSize = segmented_mat.size();
+  cv::Mat transformedImage = cv::Mat(srcSize, CV_64F);
+
+  cv::warpPerspective(segmented_mat, transformedImage, transformationMat, srcSize, CV_INTER_CUBIC | CV_WARP_INVERSE_MAP);
+  cv::resize(transformedImage, transformedImage, dstSize);
+//  cv::dilate(transformedImage, transformedImage, cv::Mat(), cv::Point(-1,-1));
 
     //    std::cout << "M = " << std::endl << " "  << transformationMat << std::endl << std::endl;
     //    ROS_INFO("Transformation Mat: %s", transStr.c_str());
-    ROS_INFO("dstSize height: %d, dstSize width: %d", dstSize.height, dstSize.width);
+
+    ROS_INFO("dstSize height: %d, dstSize width: %d", transformedImage.size().height, transformedImage.size().width);
     ROS_INFO("srcSize height: %d, srcSize width: %d", segmented_mat.size().height, segmented_mat.size().width);
+    ROS_INFO("Odom x: %f, y: %f, z: %f", translate_vector.x, translate_vector.y, translate_vector.z);
 
   for (int i = 0; i < dstSize.height; i++)
   {
@@ -281,7 +293,7 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
     ipm_img.encoding = "mono8";                        // or which enconding your data has
     ipm_img.header.stamp = ros::Time::now();          //  or whatever timestamp suits here;
     ipm_img.header.frame_id = "whatever_frame";       // frame id as neededby you
-    ipm_img.image = line_buffer_;                          // point cv_bridge to your object
+    ipm_img.image = transformedImage;                          // point cv_bridge to your object
 
     // publishing data
     ipm_img_pub_.publish( ipm_img.toImageMsg() );
@@ -469,7 +481,7 @@ void LineLayer::cleanupProjections()
   {
     const auto size = config_.projection.line_closing_kernel_size;
     cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2 * size + 1, 2 * size + 1));
-//    cv::morphologyEx(line_buffer_, line_buffer_, cv::MORPH_CLOSE, kernel);
+    cv::morphologyEx(line_buffer_, line_buffer_, cv::MORPH_CLOSE, kernel);
   }
   // Close freespace
   {
@@ -656,25 +668,32 @@ void LineLayer::publishCostmap()
   costmap_pub_.publish(msg);
 }
 
-cv::Mat LineLayer::getPerspectiveTransformMat(const sensor_msgs::CameraInfo &info)
+cv::Mat LineLayer::getPerspectiveTransformMat(const sensor_msgs::CameraInfo &info, Eigen::Quaterniond &rotation, const float cam_height)
 {
   // Image Height and Width
   const int h = info.height;
   const int w = info.width;
 
-  // PI constant
-  const double pi = 3.14159265358979323846;
+  Eigen::Vector3d rpy = rotation.toRotationMatrix().eulerAngles(2,1,0);
 
   // Euler Angles
-  const double alpha_ = 24, beta_ = 91, gamma_ = 90;
+//  const double alpha_ = 24, beta_ = 91, gamma_ = 90;
   double alpha, beta, gamma;
 
-  alpha = (alpha_ - 90) * (pi / 180);
-  beta = (beta_ - 90) * (pi / 180);
-  gamma = (gamma_ - 90) * (pi / 180);
+//  alpha = (alpha_ - 90) * (M_PI / 180);
+//  beta = (beta_ - 90) * (M_PI / 180);
+//  gamma = (gamma_ - 90) * (M_PI / 180);
+
+  alpha = -1 * rpy(2);
+  beta =  -1 * rpy(1) - M_PI;
+  gamma = rpy(0) - M_PI/2; // off by PI/2 idk why
+
+  ROS_INFO("Euler angles: alpha: %f, beta: %f, gamma: %f", alpha, beta, gamma);
+//  ROS_INFO("rot angles: X: %f, Y: %f, Z: %f", rpyX, rpyY, rpyZ);
 
   // Camera is 1.4097 meters high
-  const float height = 48;
+//  const float height = 42;
+  const float height = cam_height * 39.37;
 
   // Projection matrix 2D -> 3D
   cv::Mat A1 = (cv::Mat_<float>(4, 3) <<

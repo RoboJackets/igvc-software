@@ -119,9 +119,7 @@ private:
 
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
-  cv::Mat getPerspectiveTransformMat(const sensor_msgs::CameraInfo& info);
-  cv::Point2d applyHomography(const cv::Point2d& _point, const cv::Mat& _H);
-  void createMap(cv::Size& dstSize, cv::Mat& m_mapX, cv::Mat& m_mapY, cv::Mat& transformationMat_inv);
+  cv::Mat getPerspectiveTransformMat(const sensor_msgs::CameraInfo &info, Eigen::Quaterniond &rotation, const float cam_height);
 };
 }  // namespace line_layer
 
