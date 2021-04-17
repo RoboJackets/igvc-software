@@ -163,6 +163,7 @@ void Slam::optimize()
 
   Vec3 curr_ang = accum_.deltaRij().rpy()/accum_.deltaTij();
   auto odom_message = createOdomMsg(curr_pose, curr_vel, curr_ang);
+//  ROS_INFO_STREAM("IMU MSG: x: " << odom_message.pose.pose.position.x);
   location_pub_.publish(odom_message);
   updateTransform(odom_message);
 }
@@ -262,8 +263,8 @@ nav_msgs::Odometry Slam::createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vec
 {
   nav_msgs::Odometry msg;
   msg.header.stamp = ros::Time::now();
-  msg.child_frame_id = "/base_footprint";
-  msg.header.frame_id = "/odom";
+  msg.child_frame_id = "base_footprint";
+  msg.header.frame_id = "odom";
   msg.pose.pose = Conversion::gtsamPose3ToPose3Msg(pos);
   msg.twist.twist.linear = Conversion::gtsamVector3ToVector3Msg(vel);
   msg.twist.twist.angular = Conversion::gtsamVector3ToVector3Msg(ang);

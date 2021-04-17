@@ -43,8 +43,8 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
 
     // set up the correct header
     result.header = msg->header;
-    result.child_frame_id = "/base_footprint";
-    result.header.frame_id = "/odom";
+    result.child_frame_id = "base_footprint";
+    result.header.frame_id = "odom";
 
     tf::Quaternion quat;
     tf::Vector3 pos;
