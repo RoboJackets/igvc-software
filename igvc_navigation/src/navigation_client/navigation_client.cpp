@@ -5,6 +5,8 @@
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/StringUtils.hpp>
 
+
+
 NavigationClient::NavigationClient()
 {
   ros::NodeHandle private_nh("~");
@@ -30,6 +32,8 @@ NavigationClient::NavigationClient()
   {
     ROS_INFO_STREAM("Waiting for waypoints from rviz.");
   }
+  back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("back_circle");
+  
 }
 
 void NavigationClient::waitForTransform()
@@ -177,6 +181,12 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
   goal.target_pose = pose;
   goal.fix_goal_orientation = false;
 
+  // Make this another line instead of condition
+  // Because we don't care if the call succeeded or not.
+  // We need to send the goal anyway.
+  // if (back_circle_client.call(bc))
+  // {
+  
   if (waiting)
   {
     client.sendGoalAndWait(goal);
@@ -185,6 +195,19 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
   {
     client.sendGoal(goal);
   }
+  srv.request.pose = pose;
+  bool confirm = back_circle_client.call(srv);
+  if (confirm)
+  {
+    ROS_INFO_STREAM("Calling service back_circle");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("Failed to call service back_circle");
+  }
+  // }
+  // Give back circle at current location, create action_lib msg, creates info where we are, set info where we are
+  
 }
 
 void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool waiting)
@@ -200,6 +223,10 @@ void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool w
   goal.target_pose = pose;
   goal.fix_goal_orientation = true;
 
+  // Make this another line instead of condition
+  // Because we don't care if the call succeeded or not
+  // We need to send the goal anyway.
+
   if (waiting)
   {
     client.sendGoalAndWait(goal);
@@ -208,6 +235,17 @@ void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool w
   {
     client.sendGoal(goal);
   }
+  srv.request.pose = pose;
+  bool confirm = back_circle_client.call(srv);
+  if (confirm)
+  {
+    ROS_INFO_STREAM("Calling service back_circle");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("Failed to call service back_circle");
+  }
+  
 }
 
 void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& pose)
@@ -221,6 +259,8 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
     sendGoal(pose, false);
   }
 }
+
+
 
 int main(int argc, char** argv)
 {

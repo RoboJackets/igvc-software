@@ -5,6 +5,7 @@
 
 #include <actionlib/client/simple_action_client.h>
 #include <igvc_msgs/NavigateWaypointAction.h>
+#include <igvc_msgs/BackCircle.h>
 #include <tf/transform_listener.h>
 
 #include <fstream>
@@ -13,6 +14,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Odometry.h>
+
 
 using MoveBaseClient = actionlib::SimpleActionClient<igvc_msgs::NavigateWaypointAction>;
 
@@ -30,9 +32,16 @@ public:
   ros::Subscriber rviz_sub_;
   tf::TransformListener tf_listener_;
 
+
+
 private:
   // action lib client
   MoveBaseClient client = MoveBaseClient("/move_to_waypoint", true);
+
+  // back circle service client
+  ros::ServiceClient back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("/back_circle");
+  igvc_msgs::BackCircle srv;
+
 
   // params
   bool reading_from_file_;          // true if reading from waypoint file, false if from rviz

@@ -40,4 +40,11 @@
       </description>
     </class>
   </library>
+  <library path="lib/libback_circle_layer">
+    <class type="back_circle_layer::BackCircleLayer" base_class_type="costmap_2d::CostmapLayer">
+      <description>
+        Layer that creates a half-circle blocking the backwards path of the robot.
+      </description>
+    </class>
+  </library>
 </class_libraries>

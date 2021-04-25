@@ -1,0 +1,5 @@
+geometry_msgs/PoseStamped pose # Orientation and position of the robot
+---
+float64[] back_circle_x
+float64[] back_circle_y
+float64[] back_circle_z
