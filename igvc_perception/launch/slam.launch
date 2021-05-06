@@ -30,7 +30,7 @@
         <param name="publish_filtered_gps" value="true"/>
 
         <!-- if true uses yaw angle from the input odom source -->
-        <param name="use_odometry_yaw" value="false"/>
+        <param name="use_odometry_yaw" value="true"/>
 
         <!-- input remapping -->
         <remap from="/imu/data" to="/magnetometer"/>
