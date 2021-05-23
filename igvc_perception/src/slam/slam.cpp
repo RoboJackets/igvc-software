@@ -1,9 +1,9 @@
 #include <slam/slam.h>
 
 // Using statements
-using gtsam::symbol_shorthand::B;
-using gtsam::symbol_shorthand::V;
-using gtsam::symbol_shorthand::X;
+using gtsam::symbol_shorthand::B; // bias measurements
+using gtsam::symbol_shorthand::V; // velocity measurements
+using gtsam::symbol_shorthand::X; // pose measurements
 
 /**
  * Initializes the factor graph and all the subscribers and publishers
@@ -11,13 +11,18 @@ using gtsam::symbol_shorthand::X;
 Slam::Slam() : pnh_{ "~" }
 {
   imu_sub_ = pnh_.subscribe("/imu", 100, &Slam::imuCallback, this);
-  gps_sub_ = pnh_.subscribe("/odometry/gps", 1, &Slam::gpsCallback, this);
-  mag_sub_ = pnh_.subscribe("/magnetometer_mag", 1, &Slam::magCallback, this);
-  location_pub_ = pnh_.advertise<nav_msgs::Odometry>("/slam/position", 1);
+  gps_sub_ = pnh_.subscribe("/fix", 1, &Slam::gpsCallback, this);
+  wheel_sub_ = pnh_.subscribe("/wheel_odometry", 1, &Slam::wheelOdomCallback, this);
+  mag_sub_ = pnh_.subscribe("/magnetometer_mag", 100, &Slam::magCallback, this);
 
+  location_pub_ = pnh_.advertise<nav_msgs::Odometry>("/slam/position", 1);
+  gps_location_pub_ = pnh_.advertise<nav_msgs::Odometry>("/slam_gps", 1);
+
+//  tf2_filter_ = tf2_ros::MessageFilter<sensor_msgs::NavSatFix>(buffer_, target_frame_, 10, pnh_);
   curr_index_ = 0;
   imu_connected_ = false;
   imu_update_available_ = false;
+  transformToOdom = getTransform(target_frame_, ros::Time::now());
 
   initializeDirectionOfLocalMagField();
   initializeNoiseMatrices();
@@ -27,12 +32,58 @@ Slam::Slam() : pnh_{ "~" }
 
 /**
  * The gpsCallback adds GPS measurements to the factor graph
- * @param msg An odometery message derived from GPS measurements (published by navsat_transform_node)
+ * @param gps A NavSatFix message derived from GPS measurements (published by /fix)
  */
-void Slam::gpsCallback(const nav_msgs::Odometry &msg)
-{
-  gtsam::Point3 curr_point = Conversion::odomMsgToGtsamPoint3(msg);
-  gtsam::GPSFactor gps_factor(X(curr_index_ + 1), curr_point, gps_noise_);
+void Slam::gpsCallback(const sensor_msgs::NavSatFixConstPtr& gps) {
+    // get the starting location as the origin
+    double lat, lon, h, E, N, U;
+    lat = gps->latitude;
+    lon = gps->longitude;
+    h = gps->altitude;
+    ROS_INFO_STREAM("gps measurement number: " << gps->header.seq);
+    if (firstReading) {
+        const double lat0 = 33.86998, lon0 = -84.30626, h0 = 274;
+        GeographicLib::LocalCartesian test_ENU = GeographicLib::LocalCartesian(lat0, lon0, h0, GeographicLib::Geocentric::WGS84());
+        test_ENU.Forward(33.87071, -84.30482, 274, E, N, U);
+        ROS_INFO_STREAM("TEST gps_factor reading: " << E << ", " << N << ", " << U);
+
+        origin_ENU = GeographicLib::LocalCartesian(lat, lon, h, GeographicLib::Geocentric::WGS84());
+        firstReading = false;
+//        origin_ENU = GeographicLib::LocalCartesian(gps->latitude, gps->longitude, gps->altitude, GeographicLib::Geocentric::WGS84());
+    }
+    origin_ENU.Forward(lat, lon, h, E, N, U);
+
+    geometry_msgs::Quaternion quat = transformToOdom.transform.rotation;
+    gtsam::Rot3 global_to_local = gtsam::Rot3::Quaternion(quat.x, quat.y, quat.z, quat.w).inverse();
+
+//    gtsam::Rot3 global_to_local = gtsam::Rot3::Quaternion(0,0,-.707,.707);
+
+//    Vec3 measured_gps = Vec3(E, N, U);
+//    Vec3 curr_gps = global_to_local * measured_gps;
+    gtsam::Point3 measured_gps = gtsam::Point3(E, N, U);
+    gtsam::Point3 curr_gps = global_to_local.rotate(measured_gps);
+
+    nav_msgs::Odometry odom;
+    odom.header.stamp = ros::Time::now();
+    odom.header.frame_id = "odom";
+
+    //set the position
+//    odom.pose.pose.position.x = curr_gps.x();
+//    odom.pose.pose.position.y = curr_gps.y();
+//    odom.pose.pose.position.z = curr_gps.z();
+    odom.pose.pose.position.x = E;
+    odom.pose.pose.position.y = N;
+    odom.pose.pose.position.z = U;
+    gps_location_pub_.publish(odom);
+
+//    origin_ENU.Forward(gps->latitude, gps->longitude, gps->altitude, E, N, U);
+//    gtsam::Point3 curr_point = Conversion::odomMsgToGtsamPoint3(msg);
+//  gtsam::GPSFactor gps_factor(X(curr_index_ + 1), curr_point, gps_noise_);
+//    ROS_INFO_STREAM("gps_latlon reading: " << lat << ", " << lon << ", " << h);
+//    ROS_INFO_STREAM("gps_pointer reading: " << gps->latitude << ", " << gps->longitude << ", " << gps->altitude);
+    ROS_INFO_STREAM("gps_factor reading: " << E << ", " << N << ", " << U);
+//    gtsam::GPSFactor gps_factor(X(curr_index_ + 1), gtsam::Point3(curr_gps.x(), curr_gps.y(), curr_gps.z()), gps_noise_);
+    gtsam::GPSFactor gps_factor(X(curr_index_ + 1), gtsam::Point3(E, N, U), gps_noise_);
   graph_.add(gps_factor);
 
   addMagFactor();
@@ -74,6 +125,9 @@ void Slam::imuCallback(const sensor_msgs::Imu &msg)
  */
 void Slam::magCallback(const sensor_msgs::MagneticField &msg)
 {
+//    gtsam::Rot3 quat = gtsam::Rot3::Quaternion(0,0,.707,.707);
+//    gtsam::Point3 curr = gtsam::Point3(msg.magnetic_field.x, msg.magnetic_field.y, msg.magnetic_field.z);
+//    curr_mag_reading_ = quat.rotate(curr);
   curr_mag_reading_ = gtsam::Point3(msg.magnetic_field.x, msg.magnetic_field.y, msg.magnetic_field.z);
 }
 
@@ -119,13 +173,36 @@ void Slam::integrateAndAddIMUFactor()
 }
 
 /**
+ * The magCallback updates the curr_mag_reading_ with its most recent value
+ * @param msg An MagneticField sensor message (published by yostlab_driver_node)
+ */
+void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
+{
+    curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose2(msg);
+    ROS_INFO_STREAM("Wheel odom reading: " << curr_wheelOdom_reading_.x() << ", " << curr_wheelOdom_reading_.y() << ", " << curr_wheelOdom_reading_.theta());
+}
+
+/**
+ * Adds the magFactor to the factor graph
+ */
+void Slam::addWheelOdomFactor()
+{
+//    gtsam::BetweenFactor<gtsam::Pose2> odomFactor = gtsam::BetweenFactor<gtsam::Pose2>(X(curr_index_), X(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise);
+    graph_.add(gtsam::BetweenFactor<gtsam::Pose2>(X(curr_index_), X(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise));
+//    gtsam::OdometryFactorBase odomFactor = gtsam::OdometryFactorBase()
+//    MagPoseFactor mag_factor(X(curr_index_ + 1), curr_mag_reading_, scale_,
+//                             local_mag_field_, gtsam::Point3(1e-9, 1e-9, 1e-9),mag_noise_);
+//    graph_.add(mag_factor);
+}
+
+/**
  * Triggers ISAM2 to optimize the current graph and publish the current estimated pose
  */
 void Slam::optimize()
 {
   static int iteration = 0;
-//  ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
-//                                     << " curr_index: " << curr_index_);
+  ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
+                                     << " curr_index: " << curr_index_);
   // Update ISAM graph with new factors and estimates
   isam_.update(graph_, init_estimate_);
 
@@ -210,6 +287,7 @@ void Slam::initializePriors()
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Pose3> on x0");
 #endif
   init_estimate_.insert(X(0), priorPose);
+  firstReading = true;
 
   // Adding Initial Velocity (Pose + Covariance Matrix)
   Vec3 priorVel(0.0, 0.0, 0.0);
@@ -243,7 +321,9 @@ void Slam::initializeNoiseMatrices()
   double gps_z_noise = pnh_.param("gpsZNoiseConstant", 0.15);
   double mag_noise = pnh_.param("magNoiseConstant", 0.00000005);
   gps_noise_ = noiseDiagonal::Sigmas(Vec3(gps_xy_noise, gps_xy_noise, gps_z_noise));
+//  gps_noise_ = gtsam::noiseModel::Isotropic::Sigma(3, 0.25);
   mag_noise_ = noiseDiagonal::Sigmas(Vec3::Constant(mag_noise));
+  odometryNoise = noiseDiagonal::Sigmas(Vec3(0.2, 0.2, 0.1));
   bias_noise_ = noiseDiagonal::Sigmas(gtsam::Vector6::Constant(bias_noise));
 }
 
@@ -269,4 +349,27 @@ nav_msgs::Odometry Slam::createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vec
   msg.twist.twist.linear = Conversion::gtsamVector3ToVector3Msg(vel);
   msg.twist.twist.angular = Conversion::gtsamVector3ToVector3Msg(ang);
   return msg;
+}
+
+geometry_msgs::TransformStamped Slam::getTransform(const std::string &frame, const ros::Time &stamp) const
+{
+//    geometry_msgs::TransformStamped transformStamped;
+//    try{
+//        transformStamped = tfBuffer.lookupTransform("turtle2", "turtle1",
+//                                                    ros::Time(0));
+//    }
+//    catch (tf2::TransformException &ex) {
+//        ROS_WARN("%s",ex.what());
+//        ros::Duration(1.0).sleep();
+//        continue;
+//    }
+
+    if (!buffer_.canTransform("odom", frame, stamp, ros::Duration{ 1 }))
+    {
+        ROS_WARN_STREAM_THROTTLE(1.0, "Failed to find transform from frame 'odom' to frame 'base_link' within "
+                                      "timeout. Using latest transform...");
+        return buffer_.lookupTransform("odom", frame, ros::Time{ 0 }, ros::Duration{ 1 });
+    }
+
+    return buffer_.lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
 }

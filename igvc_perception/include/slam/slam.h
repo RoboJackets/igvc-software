@@ -3,6 +3,7 @@
 
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/NavSatFix.h>
 // Pose2 == (Point3, Rot3)
 #include <gtsam/geometry/Pose3.h>
 // PriorFactor == Initial Pose
@@ -32,6 +33,9 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2/LinearMath/Transform.h>
+// Convert between geodetic coordinates to local cartesian coordinates
+#include <GeographicLib/Config.h>
+#include <GeographicLib/LocalCartesian.hpp>
 
 // Uncomment to enable debugging and have additional print statements
 //#define _DEBUG 1
@@ -48,13 +52,17 @@ private:
   ros::Subscriber imu_sub_;
   ros::Subscriber gps_sub_;
   ros::Subscriber mag_sub_;
+  ros::Subscriber wheel_sub_;
 
   ros::Publisher location_pub_;
+  ros::Publisher gps_location_pub_;
 
-  void gpsCallback(const nav_msgs::Odometry &msg);
+  void gpsCallback(const sensor_msgs::NavSatFixConstPtr& gps);
   void imuCallback(const sensor_msgs::Imu &msg);
   void magCallback(const sensor_msgs::MagneticField &msg);
   void integrateAndAddIMUFactor();
+  void wheelOdomCallback(const nav_msgs::Odometry &msg);
+  void addWheelOdomFactor();
   void optimize();
   void initializeImuParams();
   void initializePriors();
@@ -63,6 +71,7 @@ private:
   void addMagFactor();
   void updateTransform(const nav_msgs::Odometry &pos);
   static nav_msgs::Odometry createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang);
+  geometry_msgs::TransformStamped getTransform(const std::string &frame, const ros::Time &stamp) const;
 
   // Defining some types
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;
@@ -74,17 +83,26 @@ private:
   gtsam::Values history_;
 #endif
 
+  // Transform from base_link to odom
+  tf2_ros::Buffer buffer_;
+  tf2_ros::TransformListener listener_ = tf2_ros::TransformListener(buffer_);
+  std::string target_frame_ = "odom";
+  geometry_msgs::TransformStamped transformToOdom;
+
   gtsam::NonlinearFactorGraph graph_;
   tf2_ros::TransformBroadcaster world_transform_broadcaster_;
   unsigned long curr_index_;
-  noiseDiagonal::shared_ptr gps_noise_, bias_noise_, mag_noise_;
+  noiseDiagonal::shared_ptr gps_noise_, bias_noise_, mag_noise_, odometryNoise;
   gtsam::Unit3 local_mag_field_;
   gtsam::Point3 curr_mag_reading_;
+  gtsam::Pose2 curr_wheelOdom_reading_;
   gtsam::ISAM2 isam_;
   gtsam::PreintegratedImuMeasurements accum_;
   ros::Time last_imu_measurement_;
-  bool imu_connected_, imu_update_available_;
+  bool imu_connected_, imu_update_available_, firstReading;
   double scale_;
+//  const GeographicLib::Geocentric& kWGS84;
+  GeographicLib::LocalCartesian origin_ENU;
 
   const double KGRAVITY = 9.81;
 };

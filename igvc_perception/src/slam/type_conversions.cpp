@@ -7,6 +7,13 @@ gtsam::Pose3 Conversion::odomMsgToGtsamPose3(const nav_msgs::Odometry &msg)
                       gtsam::Point3(msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z));
 }
 
+gtsam::Pose2 Conversion::odomMsgToGtsamPose2(const nav_msgs::Odometry &msg)
+{
+    gtsam::Rot3 twist = gtsam::Rot3(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z);
+
+    return gtsam::Pose2(twist.yaw(), gtsam::Point2(msg.pose.pose.position.x, msg.pose.pose.position.y));
+}
+
 geometry_msgs::Pose Conversion::gtsamPose3ToPose3Msg(const gtsam::Pose3 &pos){
   geometry_msgs::Pose gPos;
   gPos.position.x = pos.x();
