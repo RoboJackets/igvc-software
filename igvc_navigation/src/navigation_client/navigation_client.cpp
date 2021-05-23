@@ -180,12 +180,6 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
   igvc_msgs::NavigateWaypointGoal goal;
   goal.target_pose = pose;
   goal.fix_goal_orientation = false;
-
-  // Make this another line instead of condition
-  // Because we don't care if the call succeeded or not.
-  // We need to send the goal anyway.
-  // if (back_circle_client.call(bc))
-  // {
   
   if (waiting)
   {
@@ -222,10 +216,6 @@ void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool w
   igvc_msgs::NavigateWaypointGoal goal;
   goal.target_pose = pose;
   goal.fix_goal_orientation = true;
-
-  // Make this another line instead of condition
-  // Because we don't care if the call succeeded or not
-  // We need to send the goal anyway.
 
   if (waiting)
   {

@@ -8,6 +8,8 @@
 #include <map_msgs/OccupancyGridUpdate.h>
 #include <igvc_msgs/BackCircle.h>
 #include <igvc_msgs/BackCircleResponse.h>
+#include <pcl/point_cloud.h>
+#include <pcl_ros/point_cloud.h>
 #include "back_circle_layer_config.h"
 
 namespace back_circle_layer
@@ -24,6 +26,7 @@ public:
                     double* max_y) override;
 
   void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) override;
+  pcl::PointCloud<pcl::PointXYZ> back_circle;
   std::vector<double> xVals, yVals;
 
 

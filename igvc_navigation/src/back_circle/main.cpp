@@ -12,16 +12,17 @@ pcl::PointCloud<pcl::PointXYZ> back_circle_pointcloud;
 
 bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCircle::Response &res)
 {
-	ros::NodeHandle pNh("~");
+  ros::NodeHandle pNh("~");
 
-	double width, length, grid_size, thickness, offset;
+  double width, length, grid_size, thickness, offset;
+  std::vector<double> xVec, yVec, zVec;
 
-	assertions::getParam(pNh, std::string("width"), width);
+  assertions::getParam(pNh, std::string("width"), width);
   assertions::getParam(pNh, std::string("length"), length);
   assertions::getParam(pNh, std::string("grid_size"), grid_size);
   assertions::getParam(pNh, std::string("thickness"), thickness);
   assertions::getParam(pNh, std::string("offset"), offset);
-	double meters = (length + width) * 2;
+  double meters = (length + width) * 2;
 
   using namespace cv;
 
@@ -33,8 +34,6 @@ bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCirc
   back_circle_pointcloud.header.stamp = ros::Time::now().toSec();
   back_circle_pointcloud.header.frame_id = "/base_footprint";
 
-
-
   for (int i = 0; i < img.rows; i++)
   {
   	for (int j = 0; j < img.cols; j++)
@@ -43,12 +42,15 @@ bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCirc
   		{
   			pcl::PointXYZ bc_point((j - img_size / 2) * grid_size + offset, (i - img_size / 2) * grid_size, 0);
   			back_circle_pointcloud.push_back(bc_point);
-  			res.back_circle_x.push_back((j - img_size / 2) * grid_size + offset);
-  			res.back_circle_y.push_back((i - img_size / 2) * grid_size);
-  			res.back_circle_z.push_back(0);
+  			xVec.push_back((j - img_size / 2) * grid_size + offset);
+  			yVec.push_back((i - img_size / 2) * grid_size);
+  			zVec.push_back(0);
   		}
   	}
   }
+  res.x = xVec;
+  res.y = yVec;
+  res.z = zVec;
 
   ROS_INFO("Confirmation");
 
@@ -59,17 +61,17 @@ bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCirc
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "back_circle_server");
+  ros::init(argc, argv, "back_circle_server");
 
-	ros::NodeHandle nh;
+  ros::NodeHandle nh;
 
 
-	ros::ServiceServer service = nh.advertiseService("back_circle", backCircleCallback);
-	ROS_INFO("Back Circle Service Ready");
+  ros::ServiceServer service = nh.advertiseService("/back_circle", backCircleCallback);
+  ROS_INFO("Back Circle Service Ready");
 
-	ros::Publisher pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/back_circle_layer", 1);
+  ros::Publisher pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/back_circle_layer", 1);
   pub.publish(back_circle_pointcloud);
 
-	ros::spin();
-	return 0;
+  ros::spin();
+  return 0;
 }

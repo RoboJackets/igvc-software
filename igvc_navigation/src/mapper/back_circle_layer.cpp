@@ -46,7 +46,7 @@ void BackCircleLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i,
       // might have to do tf transforms
       unsigned int mx;
       unsigned int my;
-      if (master_grid.worldToMap(xVals[i], yVals[j], mx, my)) {
+      if (master_grid.worldToMap(xVals.at(i), yVals.at(j), mx, my)) {
         master_grid.setCost(mx, my, costmap_2d::LETHAL_OBSTACLE);
       }
     }
@@ -60,14 +60,8 @@ void BackCircleLayer::initPubSub()
 
 void BackCircleLayer::costmapCallback(const igvc_msgs::BackCircleResponse::ConstPtr &msg)
 {
-  for (int i = 0; i < msg->back_circle_x.size(); i++)
-  {
-    for (int j = 0; j < msg->back_circle_y.size(); j++)
-    {
-      xVals.push_back(msg->back_circle_x[i]);
-      yVals.push_back(msg->back_circle_y[j]);
-    }
-  }
+  xVals = msg->x;
+  yVals = msg->y;
 
 }
 
