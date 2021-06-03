@@ -32,7 +32,7 @@ NavigationClient::NavigationClient()
   {
     ROS_INFO_STREAM("Waiting for waypoints from rviz.");
   }
-  back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("back_circle");
+  back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("/back_circle");
   
 }
 

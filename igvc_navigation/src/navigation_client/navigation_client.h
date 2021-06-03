@@ -39,8 +39,10 @@ private:
   MoveBaseClient client = MoveBaseClient("/move_to_waypoint", true);
 
   // back circle service client
-  ros::ServiceClient back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("/back_circle");
-  igvc_msgs::BackCircle srv;
+//  ros::ServiceClient back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("/back_circle");
+    ros::ServiceClient back_circle_client;
+
+    igvc_msgs::BackCircle srv;
 
 
   // params
