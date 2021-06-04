@@ -71,7 +71,6 @@ private:
   void addMagFactor();
   void updateTransform(const nav_msgs::Odometry &pos);
   static nav_msgs::Odometry createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang);
-  geometry_msgs::TransformStamped getTransform(const std::string &frame, const ros::Time &stamp) const;
 
   // Defining some types
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;
@@ -82,12 +81,6 @@ private:
 #if defined(_DEBUG)
   gtsam::Values history_;
 #endif
-
-  // Transform from base_link to odom
-  tf2_ros::Buffer buffer_;
-  tf2_ros::TransformListener listener_ = tf2_ros::TransformListener(buffer_);
-  std::string target_frame_ = "odom";
-  geometry_msgs::TransformStamped transformToOdom;
 
   gtsam::NonlinearFactorGraph graph_;
   tf2_ros::TransformBroadcaster world_transform_broadcaster_;
