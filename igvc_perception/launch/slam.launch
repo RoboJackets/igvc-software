@@ -4,42 +4,6 @@
 
     <include file="$(find igvc_navigation)/launch/wheel_odometry.launch" />
 
-<!--    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">-->
-
-<!--        <param name="frequency" value="30"/>-->
-
-<!--        &lt;!&ndash; delay time could be useful but defaults to 0 &ndash;&gt;-->
-<!--        <param name="delay" value="0"/>-->
-
-<!--        &lt;!&ndash; does ardupilot account for magnetic declination? &ndash;&gt;-->
-<!--        <param name="magnetic_declination_radians" value="0"/>-->
-
-<!--        &lt;!&ndash; this assumes we are in a planar environment &ndash;&gt;-->
-<!--        <param name="two_d_mode" value="false"/>-->
-
-<!--        &lt;!&ndash; Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that &ndash;&gt;-->
-<!--        <param name="yaw_offset" value="1.5707963"/>-->
-
-<!--        &lt;!&ndash; sets altitude to 0 &ndash;&gt;-->
-<!--        <param name="zero_altitude" value="false"/>-->
-
-<!--        &lt;!&ndash; broadcast the transform between the UTM grid and the frame of the input odometry data &ndash;&gt;-->
-<!--        <param name="broadcast_utm_transform" value="true"/>-->
-
-<!--        &lt;!&ndash; publishes the lat and long of the robot position &ndash;&gt;-->
-<!--        <param name="publish_filtered_gps" value="true"/>-->
-
-<!--        &lt;!&ndash; if true uses yaw angle from the input odom source &ndash;&gt;-->
-<!--        <param name="use_odometry_yaw" value="true"/>-->
-
-<!--        &lt;!&ndash; input remapping &ndash;&gt;-->
-<!--        <remap from="/imu/data" to="/magnetometer"/>-->
-<!--        <remap from="/gps/fix" to="/fix"/>-->
-<!--        <remap from="/odometry/filtered" to="/wheel_odometry"/>-->
-
-<!--        &lt;!&ndash; can do output remapping also &ndash;&gt;-->
-<!--    </node>-->
-
     <node name="slam" pkg="igvc_perception" type="slam" output="screen">
         <!-- Needs to be updated for each location: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml -->
         <param name="localMagneticField" value="[0.0000227095, 0.0000020783, -0.0000432753]" />
