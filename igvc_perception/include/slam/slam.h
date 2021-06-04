@@ -57,7 +57,7 @@ private:
   ros::Publisher location_pub_;
   ros::Publisher gps_location_pub_;
 
-  void gpsCallback(const sensor_msgs::NavSatFixConstPtr& gps);
+  void gpsCallback(const sensor_msgs::NavSatFixConstPtr &gps);
   void imuCallback(const sensor_msgs::Imu &msg);
   void magCallback(const sensor_msgs::MagneticField &msg);
   void integrateAndAddIMUFactor();
@@ -70,7 +70,8 @@ private:
   void initializeDirectionOfLocalMagField();
   void addMagFactor();
   void updateTransform(const nav_msgs::Odometry &pos);
-  static nav_msgs::Odometry createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang);
+  static nav_msgs::Odometry createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel,
+                                          const gtsam::Vector3 &ang);
 
   // Defining some types
   typedef gtsam::noiseModel::Diagonal noiseDiagonal;
@@ -94,7 +95,7 @@ private:
   ros::Time last_imu_measurement_;
   bool imu_connected_, imu_update_available_, firstReading;
   double scale_;
-//  const GeographicLib::Geocentric& kWGS84;
+  //  const GeographicLib::Geocentric& kWGS84;
   GeographicLib::LocalCartesian origin_ENU;
 
   const double KGRAVITY = 9.81;

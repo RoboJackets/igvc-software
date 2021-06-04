@@ -46,7 +46,8 @@ public:
     gtsam::Point3 hx = nRb.rotation().unrotate(nM_, H, boost::none) + bias_;
     // H is 3x3 from above unrotate operation, but needs to be 3x6, ie. set the 3x3 block on the right
     // to all zeros.
-    if (H) {
+    if (H)
+    {
       H->conservativeResize(3, 6);
       H->rightCols(3).setZero();
     }
@@ -54,10 +55,11 @@ public:
     return error;
   }
 
-  void print(const std::string& s, const gtsam::KeyFormatter& keyFormatter) const override {
-      std::cout << s << "MagPoseFactor on " << keyFormatter(key()) << "\n";
-      std::cout << s << "  Mag measurement: " << measured_.transpose() << std::endl;
-      noiseModel_->print("  noise model: ");
+  void print(const std::string& s, const gtsam::KeyFormatter& keyFormatter) const override
+  {
+    std::cout << s << "MagPoseFactor on " << keyFormatter(key()) << "\n";
+    std::cout << s << "  Mag measurement: " << measured_.transpose() << std::endl;
+    noiseModel_->print("  noise model: ");
   }
 };
 

@@ -9,12 +9,14 @@ gtsam::Pose3 Conversion::odomMsgToGtsamPose3(const nav_msgs::Odometry &msg)
 
 gtsam::Pose2 Conversion::odomMsgToGtsamPose2(const nav_msgs::Odometry &msg)
 {
-    gtsam::Rot3 twist = gtsam::Rot3(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z);
+  gtsam::Rot3 twist = gtsam::Rot3(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
+                                  msg.pose.pose.orientation.z);
 
-    return gtsam::Pose2(twist.yaw(), gtsam::Point2(msg.pose.pose.position.x, msg.pose.pose.position.y));
+  return gtsam::Pose2(twist.yaw(), gtsam::Point2(msg.pose.pose.position.x, msg.pose.pose.position.y));
 }
 
-geometry_msgs::Pose Conversion::gtsamPose3ToPose3Msg(const gtsam::Pose3 &pos){
+geometry_msgs::Pose Conversion::gtsamPose3ToPose3Msg(const gtsam::Pose3 &pos)
+{
   geometry_msgs::Pose gPos;
   gPos.position.x = pos.x();
   gPos.position.y = pos.y();
@@ -24,7 +26,8 @@ geometry_msgs::Pose Conversion::gtsamPose3ToPose3Msg(const gtsam::Pose3 &pos){
   return gPos;
 }
 
-geometry_msgs::Vector3 Conversion::gtsamVector3ToVector3Msg(const gtsam::Vector3 &vec){
+geometry_msgs::Vector3 Conversion::gtsamVector3ToVector3Msg(const gtsam::Vector3 &vec)
+{
   geometry_msgs::Vector3 gVec;
   gVec.x = vec.x();
   gVec.y = vec.y();
