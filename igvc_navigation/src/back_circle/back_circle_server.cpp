@@ -33,8 +33,8 @@ bool BackCircleServer::backCircleCallback(igvc_msgs::BackCircle::Request &req, i
 
   int img_size = static_cast<int>(std::round(meters / grid_size));
   cv::Mat img(img_size, img_size, CV_8U, cv::Scalar::all(0));
-  cv::ellipse(img, cv::Point(img_size / 2, img_size / 2), cv::Size(width / grid_size, length / grid_size), 0, 90, 270, cv::Scalar(255),
-          static_cast<int>(std::round(thickness / grid_size)));
+  cv::ellipse(img, cv::Point(img_size / 2, img_size / 2), cv::Size(width / grid_size, length / grid_size), 0, 90, 270,
+              cv::Scalar(255), static_cast<int>(std::round(thickness / grid_size)));
 
   pcl::PointCloud<pcl::PointXYZ> back_circle_pointcloud_base_footprint;
   back_circle_pointcloud_base_footprint.header.stamp = ros::Time::now().toNSec() / 1000;
