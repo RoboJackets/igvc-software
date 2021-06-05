@@ -14,6 +14,3 @@
 	path = external/elevation_mapping
 	url = https://github.com/RoboJackets/elevation_mapping.git
 
-[submodule "external/gtsam"]
-	path = external/gtsam
-	url = https://github.com/borglab/gtsam.git
