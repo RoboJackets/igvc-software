@@ -1,11 +1,11 @@
 #include "back_circle_layer.h"
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(back_circle_layer::BackCircleLayer, costmap_2d::CostmapLayer)
+PLUGINLIB_EXPORT_CLASS(back_circle_layer::BackCircleLayer, costmap_2d::Layer)
 
 namespace back_circle_layer
 {
-BackCircleLayer::BackCircleLayer() : private_nh_("~"), config_(private_nh_)
+BackCircleLayer::BackCircleLayer() : private_nh_("~")
 {
 }
 
@@ -38,31 +38,28 @@ void BackCircleLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i,
   uint8_t *line_array = getCharMap();
   unsigned int span = master_grid.getSizeInCellsX();
 
-  for (int j = min_j; j < max_j; j++) 
+  for (size_t i = 0; i < xVals.size(); ++i)
   {
-    for (int i = min_i; i < max_i; i++) 
-    {
-      // If back_circle_pointcloud contains the point, add it to the costmap
-      // might have to do tf transforms
-      unsigned int mx;
-      unsigned int my;
-      if (master_grid.worldToMap(xVals.at(i), yVals.at(j), mx, my)) {
-        master_grid.setCost(mx, my, costmap_2d::LETHAL_OBSTACLE);
-      }
+    // If back_circle_pointcloud contains the point, add it to the costmap
+    // might have to do tf transforms
+    unsigned int mx;
+    unsigned int my;
+    if (master_grid.worldToMap(xVals.at(i), yVals.at(i), mx, my)) {
+      master_grid.setCost(mx, my, costmap_2d::LETHAL_OBSTACLE);
     }
   }
 }
 
 void BackCircleLayer::initPubSub()
 {
-  costmap_sub_ = nh_.subscribe(config_.topic, 1, &BackCircleLayer::costmapCallback, this);
+  back_circle_sub_ = nh_.subscribe("/back_circle_response", 1, &BackCircleLayer::costmapCallback, this);
 }
 
 void BackCircleLayer::costmapCallback(const igvc_msgs::BackCircleResponse::ConstPtr &msg)
 {
   xVals = msg->x;
   yVals = msg->y;
-
+  ROS_INFO_STREAM(msg);
 }
 
 }

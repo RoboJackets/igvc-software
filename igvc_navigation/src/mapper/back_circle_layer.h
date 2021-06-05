@@ -18,7 +18,6 @@ class BackCircleLayer : public costmap_2d::CostmapLayer
 {
 public:
   BackCircleLayer();
-  ros::Subscriber back_circle_sub_ = nh_.subscribe("/back_circle", 1, &BackCircleLayer::costmapCallback, this);
 
   void onInitialize() override;
 
@@ -37,10 +36,9 @@ private:
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
-  ros::Subscriber costmap_sub_;
+  ros::Subscriber back_circle_sub_;
 
-  BackCircleLayerConfig config_;
-  //
+  //BackCircleLayerConfig config_;
   
 
 };
