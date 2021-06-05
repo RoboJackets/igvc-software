@@ -10,7 +10,7 @@ BackCircleServer::BackCircleServer()
 void BackCircleServer::waitForTransform()
 {
   const double waiting_time = 5.0;
-  while (!tf_listener_.waitForTransform("/odom", "/base_footprint", ros::Time::now(), ros::Duration(waiting_time)))
+  while (!tf_listener_.waitForTransform("odom", "base_footprint", ros::Time::now(), ros::Duration(waiting_time)))
   {
     ROS_INFO_STREAM("base_footprint->odom transform not found. waiting...");
   }
@@ -31,11 +31,9 @@ bool BackCircleServer::backCircleCallback(igvc_msgs::BackCircle::Request &req, i
   assertions::getParam(pNh, std::string("offset"), offset);
   double meters = (length + width) * 2;
 
-  using namespace cv;
-
   int img_size = static_cast<int>(std::round(meters / grid_size));
-  Mat img(img_size, img_size, CV_8U, Scalar::all(0));
-  ellipse(img, Point(img_size / 2, img_size / 2), Size(width / grid_size, length / grid_size), 0, 90, 270, Scalar(255),
+  cv::Mat img(img_size, img_size, CV_8U, cv::Scalar::all(0));
+  cv::ellipse(img, cv::Point(img_size / 2, img_size / 2), cv::Size(width / grid_size, length / grid_size), 0, 90, 270, cv::Scalar(255),
           static_cast<int>(std::round(thickness / grid_size)));
 
   pcl::PointCloud<pcl::PointXYZ> back_circle_pointcloud_base_footprint;
