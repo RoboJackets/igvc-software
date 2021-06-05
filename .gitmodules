@@ -1,0 +1,16 @@
+[submodule "external/rj-ros-common"]
+	path = external/rj-ros-common
+	url = https://github.com/RoboJackets/rj-ros-common
+[submodule "external/kindr_ros"]
+	path = external/kindr_ros
+	url = https://github.com/ANYbotics/kindr_ros
+[submodule "external/serial"]
+	path = external/serial
+	url = https://github.com/wjwwood/serial.git
+[submodule "external/gazebo_ros_control_select_joints"]
+	path = external/gazebo_ros_control_select_joints
+	url = https://github.com/tu-darmstadt-ros-pkg/gazebo_ros_control_select_joints.git
+[submodule "external/elevation_mapping"]
+	path = external/elevation_mapping
+	url = https://github.com/RoboJackets/elevation_mapping.git
+
