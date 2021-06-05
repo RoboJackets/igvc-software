@@ -38,7 +38,7 @@ bool BackCircleServer::backCircleCallback(igvc_msgs::BackCircle::Request &req, i
             static_cast<int>(std::round(thickness / grid_size)));
 
     pcl::PointCloud<pcl::PointXYZ> back_circle_pointcloud_base_footprint;
-    back_circle_pointcloud_base_footprint.header.stamp = ros::Time::now().toSec();
+    back_circle_pointcloud_base_footprint.header.stamp = ros::Time::now().toNSec() / 1000;
     back_circle_pointcloud_base_footprint.header.frame_id = "/base_footprint";
 
     for (int i = 0; i < img.rows; i++)

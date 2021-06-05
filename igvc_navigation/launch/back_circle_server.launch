@@ -1,9 +1,9 @@
 <launch>
     <node name="back_circle" pkg="igvc_navigation" type="back_circle" output="screen" required="true">
         <param name="width" value="3"/>
-        <param name="length" value="3"/>
+        <param name="length" value="2"/>
         <param name="grid_size" value="0.1"/>
         <param name="thickness" value="0.2"/>
-        <param name="offset" value="2"/>
+        <param name="offset" value="1"/>
     </node>
 </launch>
