@@ -11,6 +11,6 @@ public:
   BackCircleLayerConfig(const ros::NodeHandle& parent_nh);
   std::string topic;
 };
-} // namespace back_circle_layer
+}  // namespace back_circle_layer
 
-#endif // SRC_BACK_CIRCLE_LAYER_CONFIG_H
+#endif  // SRC_BACK_CIRCLE_LAYER_CONFIG_H

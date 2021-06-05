@@ -20,13 +20,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
 
 class ScanToPointcloud
 {
-	public:
-		ScanToPointcloud();
+public:
+  ScanToPointcloud();
 
-		ros::NodeHandle nh;		
-
-		
-
-
+  ros::NodeHandle nh;
 };
 #endif

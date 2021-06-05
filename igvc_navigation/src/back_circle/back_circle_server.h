@@ -12,16 +12,17 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_listener.h>
 
-class BackCircleServer {
+class BackCircleServer
+{
 public:
-    BackCircleServer();
-    ros::NodeHandle nh_;
+  BackCircleServer();
+  ros::NodeHandle nh_;
+
 private:
-    void waitForTransform();
-    bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCircle::Response &res);
-    ros::ServiceServer back_circle_service_server_;
-    tf::TransformListener tf_listener_;
+  void waitForTransform();
+  bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCircle::Response &res);
+  ros::ServiceServer back_circle_service_server_;
+  tf::TransformListener tf_listener_;
 };
 
-
-#endif //SRC_BACK_CIRCLE_H
+#endif  // SRC_BACK_CIRCLE_H

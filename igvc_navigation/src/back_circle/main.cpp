@@ -30,7 +30,7 @@ bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCirc
   int img_size = static_cast<int>(std::round(meters / grid_size));
   Mat img(img_size, img_size, CV_8U, Scalar::all(0));
   ellipse(img, Point(img_size / 2, img_size / 2), Size(width / grid_size, length / grid_size), 0, 90, 270, Scalar(255),
-  				static_cast<int>(std::round(thickness / grid_size)));
+          static_cast<int>(std::round(thickness / grid_size)));
 
   pcl::PointCloud<pcl::PointXYZ> back_circle_pointcloud_base_footprint;
   back_circle_pointcloud_base_footprint.header.stamp = ros::Time::now().toSec();
@@ -38,14 +38,14 @@ bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCirc
 
   for (int i = 0; i < img.rows; i++)
   {
-  	for (int j = 0; j < img.cols; j++)
-  	{
-  		if (img.at<uchar>(i, j) == 255)
-  		{
-  			pcl::PointXYZ bc_point((j - img_size / 2) * grid_size + offset, (i - img_size / 2) * grid_size, 0);
-            back_circle_pointcloud_base_footprint.push_back(bc_point);
-  		}
-  	}
+    for (int j = 0; j < img.cols; j++)
+    {
+      if (img.at<uchar>(i, j) == 255)
+      {
+        pcl::PointXYZ bc_point((j - img_size / 2) * grid_size + offset, (i - img_size / 2) * grid_size, 0);
+        back_circle_pointcloud_base_footprint.push_back(bc_point);
+      }
+    }
   }
 
   pcl::PointCloud<pcl::PointXYZ> back_circle_pointcloud_odom;
@@ -67,8 +67,6 @@ bool backCircleCallback(igvc_msgs::BackCircle::Request &req, igvc_msgs::BackCirc
   return true;
 }
 
-
-
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "back_circle");
@@ -78,8 +76,8 @@ int main(int argc, char **argv)
   ros::ServiceServer service = nh.advertiseService("/back_circle_service", backCircleCallback);
   ROS_INFO("Back Circle Service Ready");
 
-  //ros::Publisher pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/back_circle_layer", 1);
-  //pub.publish(back_circle_pointcloud);
+  // ros::Publisher pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/back_circle_layer", 1);
+  // pub.publish(back_circle_pointcloud);
 
   ros::spin();
   return 0;

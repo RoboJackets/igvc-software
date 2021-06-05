@@ -5,7 +5,7 @@ namespace back_circle_layer
 {
 BackCircleLayerConfig::BackCircleLayerConfig(const ros::NodeHandle &parent_nh)
 {
-  ros::NodeHandle nh{parent_nh, "back_circle_layer"};
+  ros::NodeHandle nh{ parent_nh, "back_circle_layer" };
   assertions::getParam(nh, "topic", topic);
 }
-} // namespace back_circle_layer
+}  // namespace back_circle_layer

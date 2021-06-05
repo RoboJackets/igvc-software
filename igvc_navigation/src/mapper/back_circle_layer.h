@@ -28,20 +28,16 @@ public:
   pcl::PointCloud<pcl::PointXYZ> back_circle;
   std::vector<double> xVals, yVals;
 
-
-
 private:
   void initPubSub();
-  void costmapCallback(const igvc_msgs::BackCircleResponse::ConstPtr &msg);
+  void costmapCallback(const igvc_msgs::BackCircleResponse::ConstPtr& msg);
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
   ros::Subscriber back_circle_sub_;
 
-  //BackCircleLayerConfig config_;
-  
-
+  // BackCircleLayerConfig config_;
 };
-} // namespace back_circle_layer
+}  // namespace back_circle_layer
 
-#endif // SRC_BACK_CIRCLE_LAYER
+#endif  // SRC_BACK_CIRCLE_LAYER

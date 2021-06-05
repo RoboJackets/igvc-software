@@ -19,19 +19,16 @@ void BackCircleLayer::onInitialize()
 }
 
 void BackCircleLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
-                                double *max_x, double *max_y)
+                                   double *max_x, double *max_y)
 {
-
   updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
-
-
 
   *min_x = getOriginX();
   *max_x = getOriginX() + getSizeInMetersX();
   *min_y = getOriginY();
   *max_y = getOriginY() + getSizeInMetersY();
 }
-    
+
 void BackCircleLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
   uint8_t *master_array = master_grid.getCharMap();
@@ -44,7 +41,8 @@ void BackCircleLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i,
     // might have to do tf transforms
     unsigned int mx;
     unsigned int my;
-    if (master_grid.worldToMap(xVals.at(i), yVals.at(i), mx, my)) {
+    if (master_grid.worldToMap(xVals.at(i), yVals.at(i), mx, my))
+    {
       master_grid.setCost(mx, my, costmap_2d::LETHAL_OBSTACLE);
     }
   }
@@ -62,4 +60,4 @@ void BackCircleLayer::costmapCallback(const igvc_msgs::BackCircleResponse::Const
   ROS_INFO_STREAM(msg);
 }
 
-}
+}  // namespace back_circle_layer

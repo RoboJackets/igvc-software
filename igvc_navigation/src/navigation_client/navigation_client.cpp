@@ -5,8 +5,6 @@
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/StringUtils.hpp>
 
-
-
 NavigationClient::NavigationClient()
 {
   ros::NodeHandle private_nh("~");
@@ -36,8 +34,6 @@ NavigationClient::NavigationClient()
   {
     ROS_INFO_STREAM("Waiting for waypoints from rviz.");
   }
-
-  
 }
 
 void NavigationClient::waitForTransform()
@@ -254,8 +250,6 @@ void NavigationClient::rvizWaypointCallback(const geometry_msgs::PoseStamped& po
     sendGoal(pose, false);
   }
 }
-
-
 
 int main(int argc, char** argv)
 {

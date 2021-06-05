@@ -15,7 +15,6 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Odometry.h>
 
-
 using MoveBaseClient = actionlib::SimpleActionClient<igvc_msgs::NavigateWaypointAction>;
 
 struct LatLong
@@ -31,8 +30,6 @@ public:
   ros::NodeHandle nh_;
   ros::Subscriber rviz_sub_;
   tf::TransformListener tf_listener_;
-
-
 
 private:
   // action lib client
