@@ -95,7 +95,6 @@ private:
   ros::Time last_imu_measurement_;
   bool imu_connected_, imu_update_available_, firstReading;
   double scale_;
-  //  const GeographicLib::Geocentric& kWGS84;
   GeographicLib::LocalCartesian origin_ENU;
 
   const double KGRAVITY = 9.81;
