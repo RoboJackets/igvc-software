@@ -6,7 +6,7 @@ from image_geometry import PinholeCameraModel
 from cv_bridge import CvBridge, CvBridgeError
 import tf as ros_tf
 import rospy
-from train_eval.models.model import UNet
+# from train_eval.models.model import UNet
 import cv2
 import functools
 import numpy as np
@@ -87,26 +87,26 @@ class SegmentationModel(object):
 
             self.camera_models[camera_name] = PinholeCameraModel()
             self.camera_models[camera_name].fromCameraInfo(camera_info)
-            # Get transform between camera and base_footprint.
-            transform_listener = ros_tf.TransformListener()
-            rospy.loginfo(ros_tf.Transformer().allFramesAsString())
-            print(camera_name)
-            cam_frame_name = "cam/" + camera_name.replace("usb_cam_", "")
-            # cam_frame_name = camera_name.replace("/raw","") + "_optical"
-            rospy.loginfo(cam_frame_name)
-            transform_listener.waitForTransform(
-                '/base_footprint',
-                cam_frame_name,
-                rospy.Time(0),
-                rospy.Duration(5.0))
-            cam_transform_translation, cam_transform_rotation = \
-                transform_listener.lookupTransform(
-                    '/base_footprint', cam_frame_name, rospy.Time(0))
-            self.cam_transform_rotation_matrices[camera_name] = \
-                ros_tf.transformations.quaternion_matrix(
-                    cam_transform_rotation)[:-1, :-1]
-            self.cam_transform_translations[camera_name] = np.asarray(
-                cam_transform_translation)
+            # # Get transform between camera and base_footprint.
+            # transform_listener = ros_tf.TransformListener()
+            # rospy.loginfo(ros_tf.Transformer().allFramesAsString())
+            # print(camera_name)
+            # cam_frame_name = "cam/" + camera_name.replace("usb_cam_", "")
+            # # cam_frame_name = camera_name.replace("/raw","") + "_optical"
+            # rospy.loginfo(cam_frame_name)
+            # transform_listener.waitForTransform(
+            #     '/base_footprint',
+            #     cam_frame_name,
+            #     rospy.Time(0),
+            #     rospy.Duration(5.0))
+            # cam_transform_translation, cam_transform_rotation = \
+            #     transform_listener.lookupTransform(
+            #         '/base_footprint', cam_frame_name, rospy.Time(0))
+            # self.cam_transform_rotation_matrices[camera_name] = \
+            #     ros_tf.transformations.quaternion_matrix(
+            #         cam_transform_rotation)[:-1, :-1]
+            # self.cam_transform_translations[camera_name] = np.asarray(
+            #     cam_transform_translation)
 
             # Create image publishers.
             self.im_publishers[camera_name] = rospy.Publisher(
