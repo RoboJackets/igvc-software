@@ -74,9 +74,9 @@ jobs:
       - <<: *load_src_cache
       - checkout:
           path: ~/catkin_ws/src/igvc-software
+      - <<: *install_deps
       - <<: *checkout_submodules
       - <<: *save_src_cache
-      - <<: *install_deps
       - <<: *load_compile_cache
       - run: source /opt/ros/noetic/setup.sh && catkin_make -j2 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - <<: *save_compile_cache
