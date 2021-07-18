@@ -10,5 +10,6 @@ if [ ! -d "/usr/local/include/kindr/" ]; then
     rm -rf kindr
 fi
 
+rosdep update
 rosdep install -iy --from-paths ../../src --skip-keys='kindr serial'
 pip3 install --no-cache-dir torch torchvision
