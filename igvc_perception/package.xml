@@ -61,6 +61,7 @@
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>pcl_conversions</exec_depend>
   <exec_depend>image_geometry</exec_depend>
+  <exec_depend>geographiclib</exec_depend>
   <exec_depend>robot_localization</exec_depend>
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>python-pytorch-pip</exec_depend>
