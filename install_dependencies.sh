@@ -20,7 +20,3 @@ sudo add-apt-repository ppa:borglab/gtsam-release-4.0
 sudo apt update  # not necessary since Bionic
 # Install:
 sudo apt install libgtsam-dev libgtsam-unstable-dev
-
-## GeographicLib
-sudo apt-get install -y libgeographic-dev
-sudo ln -s /usr/share/cmake/geographiclib/FindGeographicLib.cmake /usr/share/cmake-3.16/Modules/
