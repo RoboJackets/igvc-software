@@ -9,6 +9,8 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # Find GeographicLib helpful: "sudo ln -s /usr/share/cmake/geographiclib/FindGeographicLib.cmake /usr/share/cmake-3.16/Modules/"
+# Geographiclib installs FindGeographicLib.cmake to this non-standard location
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/share/cmake/geographiclib/")
 find_package(GeographicLib REQUIRED)
 include_directories(${GeographicLib_INCLUDE_DIR})
 
