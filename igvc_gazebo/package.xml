@@ -20,6 +20,7 @@
   <depend>nav_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>tf</depend>
+  <depend>geographiclib</depend>
   <depend>robot_localization</depend>
 
   <build_depend>pcl_conversions</build_depend>
