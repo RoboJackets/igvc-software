@@ -80,6 +80,7 @@ void Slam::imuCallback(const sensor_msgs::Imu &msg)
   ros::Time curr_time = ros::Time::now();
   Vec3 measured_acc = Vec3(msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z);
   Vec3 measured_omega = Vec3(msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z);
+
   if (!imu_connected_)
   {
     imu_connected_ = true;
@@ -173,8 +174,10 @@ void Slam::addWheelOdomFactor()
 void Slam::optimize()
 {
   static int iteration = 0;
-  //  ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
-  //                                     << " curr_index: " << curr_index_);
+#if defined(_DEBUG)
+  ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
+                                     << " curr_index: " << curr_index_);
+#endif
   // Update ISAM graph with new factors and estimates
   isam_.update(graph_, init_estimate_);
 
@@ -254,7 +257,19 @@ void Slam::initializeImuParams()
 void Slam::initializePriors()
 {
   // Adding Initial Position (Pose + Covariance Matrix)
-  gtsam::Pose3 priorPose;
+  sensor_msgs::Imu initImuMsg;
+  sensor_msgs::ImuConstPtr msg = ros::topic::waitForMessage<sensor_msgs::Imu>("/magnetometer", ros::Duration(1));
+  if (msg == NULL)
+  {
+    ROS_INFO("No messages received");
+  }
+  else
+  {
+    initImuMsg = *msg;
+  }
+  initOrientation = gtsam::Rot3::Quaternion(initImuMsg.orientation.w, initImuMsg.orientation.x,
+                                            initImuMsg.orientation.y, initImuMsg.orientation.z);
+  gtsam::Pose3 priorPose = gtsam::Pose3(initOrientation, gtsam::Point3());
   noiseDiagonal::shared_ptr poseNoise =
       noiseDiagonal::Sigmas((gtsam::Vector(6) << Vec3::Constant(0.1), Vec3::Constant(0.3)).finished());
   graph_.push_back(gtsam::PriorFactor<gtsam::Pose3>(X(0), priorPose, poseNoise));

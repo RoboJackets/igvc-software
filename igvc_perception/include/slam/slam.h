@@ -96,6 +96,7 @@ private:
   bool imu_connected_, imu_update_available_, firstReading;
   double scale_;
   GeographicLib::LocalCartesian origin_ENU;
+  gtsam::Rot3 initOrientation;
 
   const double KGRAVITY = 9.81;
 };
