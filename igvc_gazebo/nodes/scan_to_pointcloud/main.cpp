@@ -1,6 +1,5 @@
-#include "scan_to_pointcloud.h"
-
 #include <laser_geometry/laser_geometry.h>
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
@@ -8,22 +7,12 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_datatypes.h>
-#include <parameter_assertions/assertions.h>
 
-ScanToPointcloud::ScanToPointcloud()
-{
-  ros::NodeHandle pNh("~");
+ros::Publisher _pointcloud_pub;
+laser_geometry::LaserProjection projection;
 
-  assertions::getParam(pNh, "min_dist", min_dist);
-  assertions::getParam(pNh, "neighbor_dist", neighbor_dist);
-  assertions::getParam(pNh, "offset", offset);
-
-  ros::NodeHandle nh;
-
-  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/pc2", 1);
-
-  ros::Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
-}
+double min_dist, neighbor_dist;
+double offset;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
@@ -69,6 +58,18 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "scan_to_pointcloud");
-  ScanToPointcloud scan = ScanToPointcloud();
+
+  ros::NodeHandle pNh("~");
+
+  assertions::getParam(pNh, "min_dist", min_dist);
+  assertions::getParam(pNh, "neighbor_dist", neighbor_dist);
+  assertions::getParam(pNh, "offset", offset);
+
+  ros::NodeHandle nh;
+
+  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/pc2", 1);
+
+  ros::Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
+
   ros::spin();
 }
