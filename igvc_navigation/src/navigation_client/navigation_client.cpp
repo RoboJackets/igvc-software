@@ -27,7 +27,7 @@ NavigationClient::NavigationClient()
   {
     std::vector<geometry_msgs::PointStamped> waypoints = loadWaypointsFromFile();
     ROS_INFO_STREAM("Reading from file.");
-    ros::Duration(2.0).sleep();
+    ros::Duration(2.0).sleep(); // give time for file to be read
     sendWaypoints(waypoints);
   }
   else
@@ -56,7 +56,7 @@ void NavigationClient::waitForServer()
   ROS_INFO_STREAM("Connected to navigation server!");
   while (!back_circle_client.waitForExistence(ros::Duration(waiting_time)))
   {
-    ROS_INFO_STREAM("Waiting for the back circle service server to come up");
+    ROS_INFO_STREAM("Waiting for the back circle service client to come up");
   }
   ROS_INFO_STREAM("Connected to back circle service server!");
 }
@@ -178,10 +178,9 @@ void NavigationClient::sendWaypoints(const std::vector<geometry_msgs::PointStamp
   }
 }
 
-void NavigationClient::callBackCircleService(const geometry_msgs::PoseStamped& pose)
+void NavigationClient::callBackCircleService()
 {
   igvc_msgs::BackCircle srv;
-  srv.request.pose = pose;
   bool confirm = back_circle_client.call(srv);
   if (confirm)
   {
@@ -202,7 +201,7 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
   goal.target_pose = pose;
   goal.fix_goal_orientation = false;
 
-  callBackCircleService(pose);
+  callBackCircleService();
 
   if (waiting)
   {
@@ -227,7 +226,7 @@ void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool w
   goal.target_pose = pose;
   goal.fix_goal_orientation = true;
 
-  callBackCircleService(pose);
+  callBackCircleService();
 
   if (waiting)
   {

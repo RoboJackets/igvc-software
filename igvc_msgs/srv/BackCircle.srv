@@ -1,4 +1,3 @@
-geometry_msgs/PoseStamped pose # Orientation and position of the robot
 ---
 float64[] x
 float64[] y

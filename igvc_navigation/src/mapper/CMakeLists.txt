@@ -44,13 +44,12 @@ target_link_libraries(unrolling_layer ${catkin_LIBRARIES})
 
 add_library(back_circle_layer
 	back_circle_layer.cpp back_circle_layer.h
-	back_circle_layer_config.cpp back_circle_layer_config.h
 	)
 add_dependencies(back_circle_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(back_circle_layer ${catkin_LIBRARIES})
 
 install(
-    TARGETS line_layer traversability_layer rolling_layer 
+    TARGETS line_layer traversability_layer rolling_layer  back_circle_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

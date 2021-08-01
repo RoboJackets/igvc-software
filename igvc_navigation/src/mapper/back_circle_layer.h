@@ -10,7 +10,6 @@
 #include <igvc_msgs/BackCircleResponse.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
-#include "back_circle_layer_config.h"
 
 namespace back_circle_layer
 {
@@ -35,8 +34,6 @@ private:
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
   ros::Subscriber back_circle_sub_;
-
-  // BackCircleLayerConfig config_;
 };
 }  // namespace back_circle_layer
 

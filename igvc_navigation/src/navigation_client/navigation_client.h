@@ -87,9 +87,8 @@ private:
 
   /**
   calls the BackCicle service to prevent robot from pathing backwards
-  @param[in] pose PoseStamped to use for service call
    */
-  void callBackCircleService(const geometry_msgs::PoseStamped& pose);
+  void callBackCircleService();
 
   /**
   sends `pose` as a goal and waits if `waiting` is true
