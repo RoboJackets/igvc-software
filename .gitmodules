@@ -7,13 +7,10 @@
 [submodule "external/serial"]
 	path = external/serial
 	url = https://github.com/wjwwood/serial.git
-[submodule "external/hector_models"]
-	path = external/hector_models
-	url = https://github.com/tu-darmstadt-ros-pkg/hector_models.git
-	branch = melodic-devel
 [submodule "external/gazebo_ros_control_select_joints"]
 	path = external/gazebo_ros_control_select_joints
 	url = https://github.com/tu-darmstadt-ros-pkg/gazebo_ros_control_select_joints.git
 [submodule "external/elevation_mapping"]
 	path = external/elevation_mapping
 	url = https://github.com/RoboJackets/elevation_mapping.git
+
