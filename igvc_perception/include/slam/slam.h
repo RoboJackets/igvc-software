@@ -77,7 +77,7 @@ private:
   typedef gtsam::Vector3 Vec3;
 
   // Defining some variables
-  gtsam::Values init_estimate_, result_;
+  gtsam::Values graphValues, result_;
 #if defined(_DEBUG)
   gtsam::Values history_;
 #endif
@@ -99,7 +99,6 @@ private:
 
   const double KGRAVITY = 9.81;
   size_t n_discard_frames = 20;
-
 };
 
 #endif  // SRC_SLAM_H

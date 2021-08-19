@@ -30,7 +30,7 @@ Slam::Slam() : pnh_{ "~" }
 
 /**
  * The gpsCallback adds GPS measurements to the factor graph, publishes GPS odom measurements.
- * Also adds magnetometer factors, wheel odom measurements, and imu factors, then 
+ * Also adds magnetometer factors, wheel odom measurements, and imu factors, then
  * @param gps A NavSatFix message derived from GPS measurements (published by /fix)
  */
 void Slam::gpsCallback(const sensor_msgs::NavSatFixConstPtr &gps)
@@ -124,9 +124,10 @@ void Slam::addMagFactor()
 void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
 {
   curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose3(msg);
-  odometryNoise = noiseDiagonal::Sigmas(
-          (gtsam::Vector(6) << msg.pose.covariance[0], msg.pose.covariance[7], msg.pose.covariance[14],
-            msg.pose.covariance[21], msg.pose.covariance[28], msg.pose.covariance[35]).finished());
+  odometryNoise = noiseDiagonal::Sigmas((gtsam::Vector(6) << msg.pose.covariance[0], msg.pose.covariance[7],
+                                         msg.pose.covariance[14], msg.pose.covariance[21], msg.pose.covariance[28],
+                                         msg.pose.covariance[35])
+                                            .finished());
 
 #if defined(_DEBUG)
   ROS_INFO_STREAM("Wheel odom reading: " << curr_wheelOdom_reading_.x() << ", " << curr_wheelOdom_reading_.y() << ", "
@@ -139,12 +140,14 @@ void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
  */
 void Slam::addWheelOdomFactor()
 {
-  auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose3> >(X(curr_index_), X(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise);
+  auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose3> >(X(curr_index_), X(curr_index_ + 1),
+                                                                        curr_wheelOdom_reading_, odometryNoise);
   graph_.add(factor);
 }
 
 /**
- * If there are IMU measurements in the accumulator, this adds them as a single factor to the factor graph and optimizes graph.
+ * If there are IMU measurements in the accumulator, this adds them as a single factor to the factor graph and optimizes
+ * graph.
  */
 void Slam::integrateAndAddIMUFactor()
 {
@@ -181,13 +184,12 @@ void Slam::integrateAndAddIMUFactor()
  */
 void Slam::optimize()
 {
-
 #if defined(_DEBUG)
   static int iteration = 0;
   ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
                                      << " curr_index: " << curr_index_);
 #endif
-  // Adds new factors, updating the ISAM solution and relinearizing as needed. 
+  // Adds new factors, updating the ISAM solution and relinearizing as needed.
   isam_.update(graph_, graphValues);
 
 #if defined(_DEBUG)
