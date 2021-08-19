@@ -123,9 +123,6 @@ void Slam::addMagFactor()
  */
 void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
 {
-  // curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose2(msg);
-  // odometryNoise = noiseDiagonal::Sigmas(
-  //         (gtsam::Vector(3) << msg.pose.covariance[0], msg.pose.covariance[7], msg.pose.covariance[35]).finished());
   curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose3(msg);
   odometryNoise = noiseDiagonal::Sigmas(
           (gtsam::Vector(6) << msg.pose.covariance[0], msg.pose.covariance[7], msg.pose.covariance[14],
@@ -142,8 +139,6 @@ void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
  */
 void Slam::addWheelOdomFactor()
 {
-  // auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose2> >(W(curr_index_), W(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise);
-  // graph_.add(factor);
   auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose3> >(X(curr_index_), X(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise);
   graph_.add(factor);
 }
@@ -159,7 +154,7 @@ void Slam::integrateAndAddIMUFactor()
     auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::imuBias::ConstantBias> >(
         B(curr_index_), B(curr_index_ + 1), gtsam::imuBias::ConstantBias(), bias_noise_);
     graph_.add(factor);
-    init_estimate_.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
+    graphValues.insert(B(curr_index_ + 1), gtsam::imuBias::ConstantBias());
 
     // Add imu factor
     gtsam::ImuFactor imufac(X(curr_index_), V(curr_index_), X(curr_index_ + 1), V(curr_index_ + 1), B(curr_index_ + 1),
@@ -169,11 +164,11 @@ void Slam::integrateAndAddIMUFactor()
     auto newPoseEstimate = result_.at<gtsam::Pose3>(X(curr_index_));  // gtsam::Pose3 newPoseEstimate
     newPoseEstimate =
         gtsam::Pose3(accum_.deltaRij() * newPoseEstimate.rotation(), accum_.deltaPij() + newPoseEstimate.translation());
-    init_estimate_.insert(X(curr_index_ + 1), newPoseEstimate);
+    graphValues.insert(X(curr_index_ + 1), newPoseEstimate);
 
     Vec3 last_vel = result_.at<Vec3>(V(curr_index_));
     last_vel += accum_.deltaVij();
-    init_estimate_.insert(V(curr_index_ + 1), last_vel);
+    graphValues.insert(V(curr_index_ + 1), last_vel);
 
     curr_index_++;
     optimize();
@@ -192,12 +187,12 @@ void Slam::optimize()
   ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
                                      << " curr_index: " << curr_index_);
 #endif
-  // Update ISAM graph with new factors and estimates
-  isam_.update(graph_, init_estimate_);
+  // Adds new factors, updating the ISAM solution and relinearizing as needed. 
+  isam_.update(graph_, graphValues);
 
 #if defined(_DEBUG)
   // Add initial estimates to history_
-  history_.insert(init_estimate_);
+  history_.insert(graphValues);
   graph_.printErrors(history_);
 
   ROS_INFO_STREAM("printErrors:");
@@ -210,7 +205,7 @@ void Slam::optimize()
   result_ = isam_.calculateEstimate();
 
 #if defined(_DEBUG)
-  graph_.printErrors(init_estimate_);
+  graph_.printErrors(graphValues);
 
   // Update variables with optimized ones
   history_.update(result_);
@@ -218,7 +213,7 @@ void Slam::optimize()
 
   // Clear the objects holding new factors and node values for the next iteration
   graph_.resize(0);
-  init_estimate_.clear();
+  graphValues.clear();
 
   // Discard first frames, while we wait for pose to converge
   if (curr_index_ < n_discard_frames)
@@ -298,15 +293,7 @@ void Slam::initializePriors()
 #if defined(_DEBUG)
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Pose3> on x0");
 #endif
-  init_estimate_.insert(X(0), priorPose);
-
-//   // Adding Initial Position for wheel odometry (Pose + Covariance Matrix)
-//   gtsam::Pose2 priorPose2 = gtsam::Pose2(initOrientation.yaw(), gtsam::Point2());
-//   graph_.push_back(gtsam::PriorFactor<gtsam::Pose2>(W(0), priorPose2, noiseDiagonal::Sigmas(Vec3::Constant(0.1))));
-// #if defined(_DEBUG)
-//   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Pose3> on w0");
-// #endif
-//   init_estimate_.insert(W(0), priorPose2);
+  graphValues.insert(X(0), priorPose);
 
   // Adding Initial Velocity (Pose + Covariance Matrix)
   Vec3 priorVel(0.0, 0.0, 0.0);
@@ -315,7 +302,7 @@ void Slam::initializePriors()
 #if defined(_DEBUG)
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Vec3> on v0");
 #endif
-  init_estimate_.insert(V(0), priorVel);
+  graphValues.insert(V(0), priorVel);
 
   // Adding Bias Prior
   noiseDiagonal::shared_ptr biasNoise = noiseDiagonal::Sigmas(gtsam::Vector6::Constant(0.1));
@@ -324,7 +311,7 @@ void Slam::initializePriors()
 #if defined(_DEBUG)
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<constantBias> on B0");
 #endif
-  init_estimate_.insert(B(0), gtsam::imuBias::ConstantBias());
+  graphValues.insert(B(0), gtsam::imuBias::ConstantBias());
 
   // Set flag for first reading
   firstReading = true;
