@@ -17,15 +17,14 @@
 #include <gtsam/nonlinear/Values.h>
 // Custom Mag Factor based around Pose3
 #include <slam/MagPoseFactor.h>
+#include <slam/type_conversions.h>
 #include <gtsam/geometry/Rot3.h>
 #include <tf/transform_listener.h>
 #include <gtsam/inference/Symbol.h>
 #include <gtsam/navigation/ImuBias.h>
-#include <gtsam/navigation/MagFactor.h>
 #include <gtsam/navigation/ImuFactor.h>
 #include <gtsam/navigation/GPSFactor.h>
 #include <gtsam/nonlinear/ISAM2.h>
-#include <slam/type_conversions.h>
 #include <sensor_msgs/MagneticField.h>
 #include <tf2/convert.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -89,7 +88,7 @@ private:
   noiseDiagonal::shared_ptr gps_noise_, bias_noise_, mag_noise_, odometryNoise;
   gtsam::Unit3 local_mag_field_;
   gtsam::Point3 curr_mag_reading_;
-  gtsam::Pose2 curr_wheelOdom_reading_;
+  gtsam::Pose3 curr_wheelOdom_reading_;
   gtsam::ISAM2 isam_;
   gtsam::PreintegratedImuMeasurements accum_;
   ros::Time last_imu_measurement_;
@@ -99,6 +98,8 @@ private:
   gtsam::Rot3 initOrientation;
 
   const double KGRAVITY = 9.81;
+  size_t n_discard_frames = 20;
+
 };
 
 #endif  // SRC_SLAM_H

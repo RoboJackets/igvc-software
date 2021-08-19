@@ -29,7 +29,8 @@ Slam::Slam() : pnh_{ "~" }
 }
 
 /**
- * The gpsCallback adds GPS measurements to the factor graph
+ * The gpsCallback adds GPS measurements to the factor graph, publishes GPS odom measurements.
+ * Also adds magnetometer factors, wheel odom measurements, and imu factors, then 
  * @param gps A NavSatFix message derived from GPS measurements (published by /fix)
  */
 void Slam::gpsCallback(const sensor_msgs::NavSatFixConstPtr &gps)
@@ -63,6 +64,7 @@ void Slam::gpsCallback(const sensor_msgs::NavSatFixConstPtr &gps)
   graph_.add(gps_factor);
 
   addMagFactor();
+  addWheelOdomFactor();
 
   if (imu_update_available_)
   {
@@ -116,7 +118,38 @@ void Slam::addMagFactor()
 }
 
 /**
- * If there are IMU measurements in the accumulator, this adds them as a single factor to the factor graph.
+ * The wheelOdomCallback updates the curr_mag_reading_ with its most recent value
+ * @param msg An odometry sensor message
+ */
+void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
+{
+  // curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose2(msg);
+  // odometryNoise = noiseDiagonal::Sigmas(
+  //         (gtsam::Vector(3) << msg.pose.covariance[0], msg.pose.covariance[7], msg.pose.covariance[35]).finished());
+  curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose3(msg);
+  odometryNoise = noiseDiagonal::Sigmas(
+          (gtsam::Vector(6) << msg.pose.covariance[0], msg.pose.covariance[7], msg.pose.covariance[14],
+            msg.pose.covariance[21], msg.pose.covariance[28], msg.pose.covariance[35]).finished());
+
+#if defined(_DEBUG)
+  ROS_INFO_STREAM("Wheel odom reading: " << curr_wheelOdom_reading_.x() << ", " << curr_wheelOdom_reading_.y() << ", "
+                                         << curr_wheelOdom_reading_.theta());
+#endif
+}
+
+/**
+ * Adds the wheelOdom measurement to the factor graph
+ */
+void Slam::addWheelOdomFactor()
+{
+  // auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose2> >(W(curr_index_), W(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise);
+  // graph_.add(factor);
+  auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose3> >(X(curr_index_), X(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise);
+  graph_.add(factor);
+}
+
+/**
+ * If there are IMU measurements in the accumulator, this adds them as a single factor to the factor graph and optimizes graph.
  */
 void Slam::integrateAndAddIMUFactor()
 {
@@ -137,9 +170,11 @@ void Slam::integrateAndAddIMUFactor()
     newPoseEstimate =
         gtsam::Pose3(accum_.deltaRij() * newPoseEstimate.rotation(), accum_.deltaPij() + newPoseEstimate.translation());
     init_estimate_.insert(X(curr_index_ + 1), newPoseEstimate);
+
     Vec3 last_vel = result_.at<Vec3>(V(curr_index_));
     last_vel += accum_.deltaVij();
     init_estimate_.insert(V(curr_index_ + 1), last_vel);
+
     curr_index_++;
     optimize();
   }
@@ -147,34 +182,13 @@ void Slam::integrateAndAddIMUFactor()
 }
 
 /**
- * The magCallback updates the curr_mag_reading_ with its most recent value
- * @param msg An MagneticField sensor message (published by yostlab_driver_node)
- */
-void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
-{
-  curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose2(msg);
-#if defined(_DEBUG)
-  ROS_INFO_STREAM("Wheel odom reading: " << curr_wheelOdom_reading_.x() << ", " << curr_wheelOdom_reading_.y() << ", "
-                                         << curr_wheelOdom_reading_.theta());
-#endif
-}
-
-/**
- * Adds the magFactor to the factor graph
- */
-void Slam::addWheelOdomFactor()
-{
-  graph_.add(
-      gtsam::BetweenFactor<gtsam::Pose2>(X(curr_index_), X(curr_index_ + 1), curr_wheelOdom_reading_, odometryNoise));
-}
-
-/**
  * Triggers ISAM2 to optimize the current graph and publish the current estimated pose
  */
 void Slam::optimize()
 {
-  static int iteration = 0;
+
 #if defined(_DEBUG)
+  static int iteration = 0;
   ROS_INFO_STREAM("SLAM: Iteration:" << iteration++ << " Imu_updated: " << imu_update_available_
                                      << " curr_index: " << curr_index_);
 #endif
@@ -202,9 +216,16 @@ void Slam::optimize()
   history_.update(result_);
 #endif
 
-  // Clear graph and estimates
+  // Clear the objects holding new factors and node values for the next iteration
   graph_.resize(0);
   init_estimate_.clear();
+
+  // Discard first frames, while we wait for pose to converge
+  if (curr_index_ < n_discard_frames)
+  {
+    ROS_INFO("Discarding initial poses...");
+    return;
+  }
 
   auto curr_pose = result_.at<gtsam::Pose3>(X(curr_index_));  // gtsam::Pose3 currPose
   Vec3 curr_vel = result_.at<Vec3>(V(curr_index_));
@@ -218,6 +239,7 @@ void Slam::optimize()
 #if defined(_DEBUG)
   ROS_INFO_STREAM("IMU MSG: x: " << odom_message.pose.pose.position.x);
 #endif
+
   location_pub_.publish(odom_message);
   updateTransform(odom_message);
 }
@@ -277,7 +299,14 @@ void Slam::initializePriors()
   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Pose3> on x0");
 #endif
   init_estimate_.insert(X(0), priorPose);
-  firstReading = true;
+
+//   // Adding Initial Position for wheel odometry (Pose + Covariance Matrix)
+//   gtsam::Pose2 priorPose2 = gtsam::Pose2(initOrientation.yaw(), gtsam::Point2());
+//   graph_.push_back(gtsam::PriorFactor<gtsam::Pose2>(W(0), priorPose2, noiseDiagonal::Sigmas(Vec3::Constant(0.1))));
+// #if defined(_DEBUG)
+//   ROS_INFO_STREAM("Factor " << graph_.size() << ": PriorFactor<gtsam::Pose3> on w0");
+// #endif
+//   init_estimate_.insert(W(0), priorPose2);
 
   // Adding Initial Velocity (Pose + Covariance Matrix)
   Vec3 priorVel(0.0, 0.0, 0.0);
@@ -297,6 +326,9 @@ void Slam::initializePriors()
 #endif
   init_estimate_.insert(B(0), gtsam::imuBias::ConstantBias());
 
+  // Set flag for first reading
+  firstReading = true;
+
   optimize();
   ROS_INFO_STREAM("Priors Initialized.");
 }
@@ -312,7 +344,6 @@ void Slam::initializeNoiseMatrices()
   double mag_noise = pnh_.param("magNoiseConstant", 0.00000005);
   gps_noise_ = noiseDiagonal::Sigmas(Vec3(gps_xy_noise, gps_xy_noise, gps_z_noise));
   mag_noise_ = noiseDiagonal::Sigmas(Vec3::Constant(mag_noise));
-  odometryNoise = noiseDiagonal::Sigmas(Vec3(0.2, 0.2, 0.1));
   bias_noise_ = noiseDiagonal::Sigmas(gtsam::Vector6::Constant(bias_noise));
 }
 
