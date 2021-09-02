@@ -165,6 +165,14 @@ void Slam::addWheelOdomFactor()
               .finished()));
 
   graph_.add(factor);
+  
+  g_x = 0;
+  g_y = 0;
+  g_theta = 0;
+  g_xVar = 0;
+  g_yVar = 0;
+  g_zVar = 0;
+  g_thetaVariance = 0;
 }
 
 /**
@@ -226,7 +234,7 @@ void Slam::optimize()
   isam_.getFactorsUnsafe().print();
 #endif
 
-  result_ = isam_.calculateEstimate();
+  result_ = isam_.calculateBestEstimate();
 
 #if defined(_DEBUG)
   graph_.printErrors(graphValues);
