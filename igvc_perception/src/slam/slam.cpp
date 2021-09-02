@@ -161,7 +161,7 @@ void Slam::addWheelOdomFactor()
   auto factor = gtsam::BetweenFactor<gtsam::Pose3>(
       X(curr_index_), X(curr_index_ + 1), betweenPose,
       noiseDiagonal::Sigmas(
-          (gtsam::Vector(6) << g_thetaVariance * 2, g_thetaVariance * 2, g_thetaVariance, g_xVar, g_yVar, g_zVar)
+          (gtsam::Vector(6) << g_xVar, g_yVar, g_zVar, g_thetaVariance * 2, g_thetaVariance * 2, g_thetaVariance)
               .finished()));
 
   graph_.add(factor);
