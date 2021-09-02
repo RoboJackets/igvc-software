@@ -165,7 +165,7 @@ void Slam::addWheelOdomFactor()
               .finished()));
 
   graph_.add(factor);
-  
+
   g_x = 0;
   g_y = 0;
   g_theta = 0;
