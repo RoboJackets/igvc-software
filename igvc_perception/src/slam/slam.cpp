@@ -234,7 +234,7 @@ void Slam::optimize()
   isam_.getFactorsUnsafe().print();
 #endif
 
-  result_ = isam_.calculateBestEstimate();
+  result_ = isam_.calculateEstimate();
 
 #if defined(_DEBUG)
   graph_.printErrors(graphValues);
