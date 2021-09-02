@@ -132,11 +132,11 @@ void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
 
   // the local frame velocities
   double vx = msg.twist.twist.linear.x;
-  double vy = msg.twist.twist.linear.y; // currently zero with jessi but that will change with swervi
+  double vy = msg.twist.twist.linear.y;  // currently zero with jessi but that will change with swervi
 
   // update the relative position from the previous factor
-  g_x += vx*dt*cos(g_theta) - vy*dt*sin(g_theta);
-  g_y += vx*dt*sin(g_theta) + vy*dt*cos(g_theta);
+  g_x += vx * dt * cos(g_theta) - vy * dt * sin(g_theta);
+  g_y += vx * dt * sin(g_theta) + vy * dt * cos(g_theta);
 
   g_theta += dt * msg.twist.twist.angular.z;
   g_xVar += dt * msg.twist.covariance[0];
@@ -158,9 +158,12 @@ void Slam::addWheelOdomFactor()
 {
   gtsam::Pose3 betweenPose(gtsam::Rot3::Rz(g_theta), gtsam::Point3(g_x, g_y, 0.0));
 
-  auto factor = gtsam::BetweenFactor<gtsam::Pose3>(X(curr_index_), X(curr_index_ + 1), betweenPose, noiseDiagonal::Sigmas(
-          (gtsam::Vector(6) << g_thetaVariance*2, g_thetaVariance*2, g_thetaVariance, g_xVar, g_yVar, g_zVar).finished()));
-  
+  auto factor = gtsam::BetweenFactor<gtsam::Pose3>(
+      X(curr_index_), X(curr_index_ + 1), betweenPose,
+      noiseDiagonal::Sigmas(
+          (gtsam::Vector(6) << g_thetaVariance * 2, g_thetaVariance * 2, g_thetaVariance, g_xVar, g_yVar, g_zVar)
+              .finished()));
+
   graph_.add(factor);
 }
 

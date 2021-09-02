@@ -107,7 +107,7 @@ private:
   double g_yVar = 0;
   double g_zVar = 0;
   double g_thetaVariance = 0;
-  ros::Time g_last_time; // Last time callback was called (to calculate delta t)
+  ros::Time g_last_time;  // Last time callback was called (to calculate delta t)
 };
 
 #endif  // SRC_SLAM_H
