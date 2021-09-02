@@ -236,6 +236,8 @@ void Slam::optimize()
 
   result_ = isam_.calculateEstimate();
 
+  gtsam::Matrix covariance = isam_.marginalCovariance(X(curr_index_));
+
 #if defined(_DEBUG)
   graph_.printErrors(graphValues);
 
@@ -262,7 +264,7 @@ void Slam::optimize()
   curr_vel = global_to_local._transformVector(curr_vel);
 
   Vec3 curr_ang = accum_.deltaRij().rpy() / accum_.deltaTij();
-  auto odom_message = createOdomMsg(curr_pose, curr_vel, curr_ang);
+  auto odom_message = createOdomMsg(curr_pose, curr_vel, curr_ang, covariance);
 #if defined(_DEBUG)
   ROS_INFO_STREAM("IMU MSG: x: " << odom_message.pose.pose.position.x);
 #endif
@@ -378,14 +380,17 @@ void Slam::initializeDirectionOfLocalMagField()
   ROS_INFO_STREAM("Initializing Direction of Local Magnetic Field");
 }
 
-nav_msgs::Odometry Slam::createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang)
+nav_msgs::Odometry Slam::createOdomMsg(const gtsam::Pose3 &pos, const gtsam::Vector3 &vel, const gtsam::Vector3 &ang,
+                                       const gtsam::Matrix &cov)
 {
   nav_msgs::Odometry msg;
   msg.header.stamp = ros::Time::now();
   msg.child_frame_id = "base_footprint";
   msg.header.frame_id = "odom";
-  msg.pose.pose = Conversion::gtsamPose3ToPose3Msg(pos);
+  msg.pose = Conversion::gtsamPose3ToPose3Msg(pos, cov);
   msg.twist.twist.linear = Conversion::gtsamVector3ToVector3Msg(vel);
   msg.twist.twist.angular = Conversion::gtsamVector3ToVector3Msg(ang);
+
+  msg.twist.covariance = msg.pose.covariance;
   return msg;
 }
