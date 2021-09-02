@@ -99,6 +99,15 @@ private:
 
   const double KGRAVITY = 9.81;
   size_t n_discard_frames = 20;
+
+  double g_x = 0;
+  double g_y = 0;
+  double g_theta = 0;
+  double g_xVar = 0;
+  double g_yVar = 0;
+  double g_zVar = 0;
+  double g_thetaVariance = 0;
+  ros::Time g_last_time; // Last time callback was called (to calculate delta t)
 };
 
 #endif  // SRC_SLAM_H

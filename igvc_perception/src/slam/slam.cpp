@@ -123,12 +123,28 @@ void Slam::addMagFactor()
  */
 void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
 {
-  curr_wheelOdom_reading_ = Conversion::odomMsgToGtsamPose3(msg);
-  odometryNoise = noiseDiagonal::Sigmas((gtsam::Vector(6) << msg.pose.covariance[0], msg.pose.covariance[7],
-                                         msg.pose.covariance[14], msg.pose.covariance[21], msg.pose.covariance[28],
-                                         msg.pose.covariance[35])
-                                            .finished());
+  if (g_last_time.sec == 0)
+  {
+    g_last_time = ros::Time::now();
+  }
+  ros::Duration delta_t = msg.header.stamp - g_last_time;
+  double dt = delta_t.toSec();
 
+  // the local frame velocities
+  double vx = msg.twist.twist.linear.x;
+  double vy = msg.twist.twist.linear.y; // currently zero with jessi but that will change with swervi
+
+  // update the relative position from the previous factor
+  g_x += vx*dt*cos(g_theta) - vy*dt*sin(g_theta);
+  g_y += vx*dt*sin(g_theta) + vy*dt*cos(g_theta);
+
+  g_theta += dt * msg.twist.twist.angular.z;
+  g_xVar += dt * msg.twist.covariance[0];
+  g_yVar += dt * msg.twist.covariance[7];
+  g_zVar += dt * msg.twist.covariance[14];
+  g_thetaVariance += dt * msg.twist.covariance[35];
+
+  g_last_time = msg.header.stamp;
 #if defined(_DEBUG)
   ROS_INFO_STREAM("Wheel odom reading: " << curr_wheelOdom_reading_.x() << ", " << curr_wheelOdom_reading_.y() << ", "
                                          << curr_wheelOdom_reading_.theta());
@@ -140,8 +156,11 @@ void Slam::wheelOdomCallback(const nav_msgs::Odometry &msg)
  */
 void Slam::addWheelOdomFactor()
 {
-  auto factor = boost::make_shared<gtsam::BetweenFactor<gtsam::Pose3> >(X(curr_index_), X(curr_index_ + 1),
-                                                                        curr_wheelOdom_reading_, odometryNoise);
+  gtsam::Pose3 betweenPose(gtsam::Rot3::Rz(g_theta), gtsam::Point3(g_x, g_y, 0.0));
+
+  auto factor = gtsam::BetweenFactor<gtsam::Pose3>(X(curr_index_), X(curr_index_ + 1), betweenPose, noiseDiagonal::Sigmas(
+          (gtsam::Vector(6) << g_thetaVariance*2, g_thetaVariance*2, g_thetaVariance, g_xVar, g_yVar, g_zVar).finished()));
+  
   graph_.add(factor);
 }
 
