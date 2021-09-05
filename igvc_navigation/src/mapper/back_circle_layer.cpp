@@ -9,7 +9,7 @@ BackCircleLayer::BackCircleLayer() : private_nh_("~")
 {
 }
 
-// Get a subscriber in here that subscribes to a topic published to in the main.cpp
+// Get a subscriber in here that subscribes to a topic published to in the back_circle_server.cpp
 
 void BackCircleLayer::onInitialize()
 {
@@ -37,8 +37,7 @@ void BackCircleLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i,
 
   for (size_t i = 0; i < xVals.size(); ++i)
   {
-    // If back_circle_pointcloud contains the point, add it to the costmap
-    // might have to do tf transforms
+    // If costmap contains the back circle point, add it to the costmap
     unsigned int mx;
     unsigned int my;
     if (master_grid.worldToMap(xVals.at(i), yVals.at(i), mx, my))
