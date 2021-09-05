@@ -27,7 +27,7 @@ NavigationClient::NavigationClient()
   {
     std::vector<geometry_msgs::PointStamped> waypoints = loadWaypointsFromFile();
     ROS_INFO_STREAM("Reading from file.");
-    ros::Duration(2.0).sleep(); // give time for file to be read
+    ros::Duration(2.0).sleep();  // give time for file to be read
     sendWaypoints(waypoints);
   }
   else
