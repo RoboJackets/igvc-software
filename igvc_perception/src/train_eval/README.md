@@ -21,7 +21,7 @@ In ```/igvc_perception/src/train_eval/train_test_generation.py``` set the path o
 dataset_path = '/home/vivek/Desktop/binaryTraining'
 ```
 
-If using the [labelme tool](https://github.com/wkentaro/labelme) to generate json annotations use the the following [script](https://github.com/wkentaro/labelme/blob/master/examples/semantic_segmentation/labelme2voc.py) to convert to a VOC-format dataset. Download the [script](https://github.com/wkentaro/labelme/blob/master/examples/semantic_segmentation/labelme2voc.py) and place it in the directory containing your labeled dataset. Additionally make sure to add a labels.txt file which specifies the different classes that the model predicts. In this case, the model is only predicting background and line. The contents of labels.txt should look like this:
+If using the [labelme tool](https://github.com/wkentaro/labelme) to generate json annotations, use the the following [script](https://github.com/wkentaro/labelme/blob/master/examples/semantic_segmentation/labelme2voc.py) to convert to a VOC-format dataset. Download the [script](https://github.com/wkentaro/labelme/blob/master/examples/semantic_segmentation/labelme2voc.py) and place it in the directory containing your labeled dataset. Additionally make sure to add a labels.txt file which specifies the different classes that the model predicts. In this case, the model is only predicting background and line. The contents of labels.txt should look like this:
 ```bash
 __ignore__
 _background_
@@ -69,7 +69,7 @@ training-data
 │   │   ├── 00000001.jpg
 │   ├── class_names.txt
 ```
-Once this is done make sure to copy the files in SegmentationClassPNG to the original dataset specified in ```train_test_generation.py``` so the training detects the labels. The resultant file structure should something like this:
+Once this is done, make sure to copy the files in SegmentationClassPNG to the original dataset specified in ```train_test_generation.py```, so the training detects the labels. The resultant file structure should be something like this:
 ```bash
 training-data
 ├── labelme2voc.py
@@ -93,11 +93,11 @@ Make sure tensorboard is installed and you are in the ```/igvc_perception/src/tr
 
 ```tensorboard --logdir=runs```
 
-To view the training progress of the U-Net. You can example the accuracy and loss of the model to choose the best model.
+To view the training progress of the U-Net, you can examine the accuracy and loss of the model to choose the best model.
 
 
 ## Evaluating Model
-To view the performance of the model on a training set make sure you are in the ```/igvc_perception/src/train_eval``` directory and run ```evaluate.py```. Make sure the location of the model, the image directory, the annotation directory, and the visualization settings are all specified:
+To view the performance of the model on a training set, make sure you are in the ```/igvc_perception/src/train_eval``` directory and run ```evaluate.py```. Make sure the location of the model, the image directory, the annotation directory, and the visualization settings are all specified:
 
 ```
 python3 evaluate.py --load_model ~/Desktop/trainingData/IGVCModel_10.pt --img_dir ~/Desktop/trainingData/data_dataset_voc_parkinglot4/JPEGImages --anno_dir ~/Desktop/trainingData/data_dataset_voc_parkinglot4/SegmentationClassPNG/ --vis
