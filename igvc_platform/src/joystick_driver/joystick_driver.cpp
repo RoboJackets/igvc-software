@@ -1,4 +1,4 @@
-#include <igvc_msgs/velocity_pair.h>
+#include <igvc_msgs/velocity_triple.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
@@ -40,18 +40,21 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
   nhp->setParam("maxVel", maxVel);
 
-  int leftJoyAxis, rightJoyAxis;
+  int leftJoyAxis, rightJoyAxis, leftJoyTrigger, rightJoyTrigger;
   bool leftInverted, rightInverted;
   nhp->param(std::string("leftAxis"), leftJoyAxis, 1);
   nhp->param(std::string("rightAxis"), rightJoyAxis, 4);
+  nhp->param(std::string("leftTrigger"), leftJoyTrigger,2);
+  nhp->param(std::string("rightTrigger"), rightJoyTrigger, 5);
   nhp->param(std::string("leftInverted"), leftInverted, false);
   nhp->param(std::string("rightInverted"), rightInverted, false);
 
   updater_ptr->update();
 
-  igvc_msgs::velocity_pair cmd;
+  igvc_msgs::velocity_triple cmd;
   cmd.left_velocity = msg->axes[leftJoyAxis] * maxVel * (leftInverted ? -1.0 : 1.0);
   cmd.right_velocity = msg->axes[rightJoyAxis] * maxVel * (rightInverted ? -1.0 : 1.0);
+  cmd.swerve_velocity = msg->axes[rightJoyTrigger] - msg->axes[leftJoyTrigger];
   cmd.header.stamp = ros::Time::now();
 
   cmd_pub.publish(cmd);
@@ -63,7 +66,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   nhp = new ros::NodeHandle("~");
 
-  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  cmd_pub = nh.advertise<igvc_msgs::velocity_triple>("/motors", 1);
 
   ros::Subscriber joy_sub = nh.subscribe("/joy", 1, joyCallback);
 

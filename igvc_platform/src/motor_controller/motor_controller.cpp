@@ -20,7 +20,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   cmd_sub_ = nh_.subscribe("/motors", 1, &MotorController::cmdCallback, this);
 
   // initialize publishers to publish mbed stats
-  enc_pub_ = nh_.advertise<igvc_msgs::velocity_pair>("/encoders", 1000);
+  enc_pub_ = nh_.advertise<igvc_msgs::velocity_triple>("/encoders", 1000);
   enabled_pub_ = nh_.advertise<std_msgs::Bool>("/robot_enabled", 1);
   battery_pub_ = nh_.advertise<std_msgs::Float64>("/battery", 1);
 
@@ -43,12 +43,16 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   // PID variables
   assertions::getParam(pNh, std::string("p_l"), p_l_);
   assertions::getParam(pNh, std::string("p_r"), p_r_);
+  assertions::getParam(pNh, std::string("p_s"), p_s_);
   assertions::getParam(pNh, std::string("d_l"), d_l_);
   assertions::getParam(pNh, std::string("d_r"), d_r_);
-  assertions::getParam(pNh, std::string("i_r"), i_r_);
+  assertions::getParam(pNh, std::string("d_s"), d_s_);
   assertions::getParam(pNh, std::string("i_l"), i_l_);
+  assertions::getParam(pNh, std::string("i_r"), i_r_);
+  assertions::getParam(pNh, std::string("i_s"), i_s_);
   assertions::getParam(pNh, "kv_l", kv_l_);
   assertions::getParam(pNh, "kv_r", kv_r_);
+  assertions::getParam(pNh, "kv_s", kv_s_);
 
   assertions::getParam(pNh, "watchdog_delay", watchdog_delay_);
 
@@ -79,7 +83,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   }
 }
 
-void MotorController::cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
+void MotorController::cmdCallback(const igvc_msgs::velocity_triple::ConstPtr& msg)
 {
   current_motor_command_ = *msg;
   last_motors_message_ = ros::Time::now();
@@ -131,22 +135,30 @@ void MotorController::setPID()
   /* indicate that pid fields will contain values */
   request.has_p_l = true;
   request.has_p_r = true;
+  request.has_p_s = true;
   request.has_i_l = true;
   request.has_i_r = true;
+  request.has_i_s = true;
   request.has_d_l = true;
   request.has_d_r = true;
+  request.has_d_s = true;
   request.has_kv_l = true;
   request.has_kv_r = true;
+  request.has_kv_s = true;
 
   /* fill in the message fields */
   request.p_l = static_cast<float>(p_l_);
   request.p_r = static_cast<float>(p_r_);
+  request.p_s = static_cast<float>(p_s_);
   request.i_l = static_cast<float>(i_l_);
   request.i_r = static_cast<float>(i_r_);
+  request.i_s = static_cast<float>(i_s_);
   request.d_l = static_cast<float>(d_l_);
   request.d_r = static_cast<float>(d_r_);
+  request.d_s = static_cast<float>(d_s_);
   request.kv_l = static_cast<float>(kv_l_);
   request.kv_r = static_cast<float>(kv_r_);
+  request.kv_s = static_cast<float>(kv_s_);
 
   /* encode the protobuffer */
   status = pb_encode(&ostream, RequestMessage_fields, &request);
@@ -203,10 +215,10 @@ void MotorController::setPID()
       ros::shutdown();
     }
 
-    valid_values = (response.p_l == static_cast<float>(p_l_)) && (response.p_r == static_cast<float>(p_r_)) &&
-                   (response.i_l == static_cast<float>(i_l_)) && (response.i_r == static_cast<float>(i_r_)) &&
-                   (response.d_l == static_cast<float>(d_l_)) && (response.d_r == static_cast<float>(d_r_)) &&
-                   (response.kv_l == static_cast<float>(kv_l_)) && (response.kv_r == static_cast<float>(kv_r_));
+    valid_values = (response.p_l == static_cast<float>(p_l_)) && (response.p_r == static_cast<float>(p_r_)) && (response.p_s == static_cast<float>(p_s_))
+                   (response.i_l == static_cast<float>(i_l_)) && (response.i_r == static_cast<float>(i_r_)) && (response.i_s == static_cast<float>(i_s_))
+                   (response.d_l == static_cast<float>(d_l_)) && (response.d_r == static_cast<float>(d_r_)) && (response.d_s == static_cast<float>(d_s_))
+                   (response.kv_l == static_cast<float>(kv_l_)) && (response.kv_r == static_cast<float>(kv_r_)) && (response.kv_s == static_cast<float>(kv_s_));
 
     rate.sleep();
   }
@@ -227,6 +239,7 @@ void MotorController::sendRequest()
   /* indicate that speed fields will contain values */
   request.has_speed_l = true;
   request.has_speed_r = true;
+  request.has_speed_s = true;
 
   /*double dt = (ros::Time::now() - last_motors_message_).toSec();
   if(dt > watchdog_delay_) {
@@ -239,6 +252,7 @@ void MotorController::sendRequest()
   /* fill in the message fields */
   request.speed_l = static_cast<float>(current_motor_command_.left_velocity);
   request.speed_r = static_cast<float>(current_motor_command_.right_velocity);
+  request.speed_s = static_cast<float>(current_motor_command_.swerve_velocity);
 
   /* encode the protobuffer */
   bool status = pb_encode(&ostream, RequestMessage_fields, &request);
@@ -311,9 +325,10 @@ void MotorController::publishResponse(const ResponseMessage& response)
   enabled_pub_.publish(enabled_msg);
 
   /* publish encoder feedback */
-  igvc_msgs::velocity_pair enc_msg;
+  igvc_msgs::velocity_triple enc_msg;
   enc_msg.left_velocity = response.speed_l;
   enc_msg.right_velocity = response.speed_r;
+  enc_msg.swerve_velocity = response.speed_s;
   enc_msg.duration = response.dt_sec;
   enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
   enc_pub_.publish(enc_msg);

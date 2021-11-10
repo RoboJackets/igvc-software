@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include <igvc_msgs/velocity_pair.h>
+#include <igvc_msgs/velocity_triple.h>
 #include <igvc_utils/EthernetSocket.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -22,9 +22,9 @@ private:
   // seconds to wait before stopping if no new motors command comes in
   double watchdog_delay_;
 
-  igvc_msgs::velocity_pair current_motor_command_;  // desired motor velocities
-  double p_l_, p_r_, d_l_, d_r_, i_l_, i_r_;        // PID Values
-  double kv_l_, kv_r_;
+  igvc_msgs::velocity_triple current_motor_command_;  // desired motor velocities
+  double p_l_, p_r_, p_s_, d_l_, d_r_, d_s_, i_l_, i_r_, i_s_;        // PID Values
+  double kv_l_, kv_r_, kv_s_;
 
   // launch parameters
   std::string ip_addr_;         // server ip address
@@ -70,7 +70,7 @@ private:
 
     @param[in] msg current message on the /motors topic
     */
-  void cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg);
+  void cmdCallback(const igvc_msgs::velocity_triple::ConstPtr& msg);
   /**
   Sets PID values on the mbed
   */

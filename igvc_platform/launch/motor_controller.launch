@@ -5,12 +5,16 @@
           <param name="port" type="int" value="5333"/>
           <param name="p_l" type="double" value="0.0"/>
           <param name="p_r" type="double" value="0.0"/>
+          <param name="p_s" type="double" value="0.0"/>
           <param name="d_l" type="double" value="0.0"/>
           <param name="d_r" type="double" value="0.0"/>
+          <param name="d_s" type="double" value="0.0"/>
           <param name="i_r" type="double" value="0.0"/>
           <param name="i_l" type="double" value="0.0"/>
+          <param name="i_s" type="double" value="0.0"/>
           <param name="kv_l" value="32.0"/>
           <param name="kv_r" value="32.0"/>
+          <param name="kv_s" value="32.0"/>
           <param name="watchdog_delay" value="3.0"/>
           <param name="log_period" type="double" value="5.0"/>
           <param name="min_battery_voltage" type="double" value="23.5"/>
