@@ -1,3 +1,0 @@
-recovery_behaviors:
-    - name: 'back_up_recovery'
-      type: 'back_up_recovery/BackUpRecovery'

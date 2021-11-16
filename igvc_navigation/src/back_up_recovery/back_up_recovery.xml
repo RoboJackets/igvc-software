@@ -1,7 +1,0 @@
-<library path="lib/libback_up_recovery">
-  <class name="back_up_recovery/BackUpRecovery" type="back_up_recovery::BackUpRecovery" base_class_type="nav_core::RecoveryBehavior">
-    <description>
-      A recovery behavior which makes the robot back up.
-    </description>
-  </class>
-</library>

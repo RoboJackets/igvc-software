@@ -1,5 +1,0 @@
-back_up_recovery:
-    frequency: 20.0
-    velocity: 0.8
-    threshold_distance: 0.7
-    obstacle_distance: 0.25
