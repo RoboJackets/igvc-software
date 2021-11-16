@@ -1,9 +1,0 @@
-topic:
-    input: "/lidar/transformed"
-    filtered: "/ground_segmentation"
-range:
-    frame_id: "base_link"
-    x: 5.0
-    y: 5.0
-    height_min: 0.3
-    height_max: 2.0

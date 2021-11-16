@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="igvc_perception" type="pointcloud_filter" name="pointcloud_filter_node" output="screen" required="true">
-        <rosparam command="load" file="$(find igvc_perception)/config/pointcloud_filter.yaml" />
-    </node>
-</launch>

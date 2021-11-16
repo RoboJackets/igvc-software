@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="igvc_perception" type="slope_filter" name="slope_filter" output="screen" required="true" >
-        <rosparam command="load" file="$(find igvc_perception)/config/slope_filter.yaml"/>
-    </node>
-</launch>
