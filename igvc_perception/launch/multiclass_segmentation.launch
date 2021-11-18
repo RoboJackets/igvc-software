@@ -19,7 +19,7 @@
 
     <param name="output_segmentation_topic" value="/semantic_segmentation" />
 
-    <!-- Use a pre-existic segmented image such as an output segmentation from a different node.
+    <!-- Use a pre-existing segmented image such as an output segmentation from a different node.
          If true, the "segmented_image_topics" rosparam must be set with one topic for each camera -->
     <param name="use_preexisting_segmentation" value="false"/>
     <rosparam param="segmented_image_topics">["/center_cam/detected_lines", "/left_cam/detected_lines", "/right_cam/detected_lines"]</rosparam>
