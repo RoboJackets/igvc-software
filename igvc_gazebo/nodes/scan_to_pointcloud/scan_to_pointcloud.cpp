@@ -1,20 +1,17 @@
-#include <laser_geometry/laser_geometry.h>
-#include <parameter_assertions/assertions.h>
-#include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl_ros/transforms.h>
-#include <ros/publisher.h>
-#include <ros/ros.h>
-#include <sensor_msgs/LaserScan.h>
-#include <tf/transform_datatypes.h>
+#include "scan_to_pointcloud.h"
 
-ros::Publisher _pointcloud_pub;
-laser_geometry::LaserProjection projection;
 
-double min_dist, neighbor_dist;
-double offset;
+scan_to_pointcloud::scan_to_pointcloud()
+{
+  assertions::getParam(node_handle, "min_dist", min_dist);
+  assertions::getParam(node_handle, "neighbor_dist", neighbor_dist);
+  assertions::getParam(node_handle, "offset", offset);
 
-void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
+  _pointcloud_pub = node_handle.advertise<pcl::PointCloud<pcl::PointXYZ> >("/pc2", 1);
+  _pointcloud_sub = node_handle.subscribe("/scan", 1, &scan_to_pointcloud::scanCallback, this);
+}
+
+void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
   sensor_msgs::LaserScan scanData = *msg;
 
@@ -29,15 +26,21 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
       continue;
     // Too close
     if (range < min_dist)
+    {
       range = scanData.range_max + 1;
+    }
     // No valid neighbors
     else if ((i == 0 || !rangeIsValid(scanData.ranges[i - 1])) &&
              (i == (scanData.ranges.size() - 1) || !rangeIsValid(scanData.ranges[i + 1])))
+    {
       range = scanData.range_max + 1;
+    }
     // No close neighbors
     else if ((i == 0 || abs(scanData.ranges[i - 1] - range) > neighbor_dist) &&
              (i == (scanData.ranges.size() - 1) || abs(scanData.ranges[i + 1] - range) > neighbor_dist))
+    {
       range = scanData.range_max + 1;
+    } 
   }
 
   sensor_msgs::PointCloud2 cloud;
@@ -58,18 +61,6 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "scan_to_pointcloud");
-
-  ros::NodeHandle pNh("~");
-
-  assertions::getParam(pNh, "min_dist", min_dist);
-  assertions::getParam(pNh, "neighbor_dist", neighbor_dist);
-  assertions::getParam(pNh, "offset", offset);
-
-  ros::NodeHandle nh;
-
-  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/pc2", 1);
-
-  ros::Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
-
+  scan_to_pointcloud scan_object;
   ros::spin();
 }
