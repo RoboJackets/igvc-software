@@ -18,8 +18,8 @@ private:
   ros::Subscriber _pointcloud_sub;
   ros::NodeHandle node_handle;  // look into private node handles
 
-  laser_geometry::LaserProjection projection;  // probably look into what this does
-                                               // it's only used once lmao
+  laser_geometry::LaserProjection projection;  // probably look into what this
+                                               // does it's only used once lmao
 
   double min_dist;
   double neighbor_dist;
