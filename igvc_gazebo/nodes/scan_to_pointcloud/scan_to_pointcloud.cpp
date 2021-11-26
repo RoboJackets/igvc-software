@@ -1,6 +1,5 @@
 #include "scan_to_pointcloud.h"
 
-
 scan_to_pointcloud::scan_to_pointcloud()
 {
   assertions::getParam(node_handle, "min_dist", min_dist);
@@ -15,9 +14,8 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr& ms
 {
   sensor_msgs::LaserScan scanData = *msg;
 
-  auto rangeIsValid = [&scanData](float range) {
-    return !std::isnan(range) && range > scanData.range_min && range < scanData.range_max;
-  };
+  auto rangeIsValid = [&scanData](float range)
+  { return !std::isnan(range) && range > scanData.range_min && range < scanData.range_max; };
 
   for (unsigned int i = 0; i < scanData.ranges.size(); i++)
   {
@@ -40,7 +38,7 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr& ms
              (i == (scanData.ranges.size() - 1) || abs(scanData.ranges[i + 1] - range) > neighbor_dist))
     {
       range = scanData.range_max + 1;
-    } 
+    }
   }
 
   sensor_msgs::PointCloud2 cloud;

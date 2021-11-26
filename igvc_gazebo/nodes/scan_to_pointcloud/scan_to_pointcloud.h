@@ -14,20 +14,20 @@
 class scan_to_pointcloud
 {
 private:
-    ros::Publisher _pointcloud_pub;
-    ros::Subscriber _pointcloud_sub;
-    ros::NodeHandle node_handle; //look into private node handles
+  ros::Publisher _pointcloud_pub;
+  ros::Subscriber _pointcloud_sub;
+  ros::NodeHandle node_handle;  // look into private node handles
 
-    laser_geometry::LaserProjection projection; //probably look into what this does
-                                                //it's only used once lmao
-    
-    double min_dist;
-    double neighbor_dist;
-    double offset;
+  laser_geometry::LaserProjection projection;  // probably look into what this does
+                                               // it's only used once lmao
+
+  double min_dist;
+  double neighbor_dist;
+  double offset;
 
 public:
-    scan_to_pointcloud();
-    void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
+  scan_to_pointcloud();
+  void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
 };
 
 #endif
