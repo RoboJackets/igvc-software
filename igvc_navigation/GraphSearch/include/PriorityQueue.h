@@ -209,7 +209,8 @@ private:
   // Declaring the type of Predicate that accepts 2 pairs and returns a bool
   typedef std::function<bool(std::pair<Node, Key>, std::pair<Node, Key>)> Comparator;
   // Defining a lambda function to compare two entries. Compares using key.
-  Comparator compFunctor = [](std::pair<Node, Key> elem1, std::pair<Node, Key> elem2) {
+  Comparator compFunctor = [](std::pair<Node, Key> elem1, std::pair<Node, Key> elem2)
+  {
     // Comparison logic for priority queue entries
     return elem1.second <= elem2.second;
   };
