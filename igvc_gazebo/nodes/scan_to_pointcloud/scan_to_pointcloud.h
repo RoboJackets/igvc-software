@@ -11,23 +11,20 @@
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_datatypes.h>
 
-class scan_to_pointcloud
-{
+class scan_to_pointcloud {
 private:
   ros::Publisher _pointcloud_pub;
   ros::Subscriber _pointcloud_sub;
-  ros::NodeHandle node_handle;  // look into private node handles
-
-  laser_geometry::LaserProjection projection;  // probably look into what this
-                                               // does it's only used once lmao
 
   double min_dist;
   double neighbor_dist;
   double offset;
 
 public:
-  scan_to_pointcloud();
-  void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
+  explicit scan_to_pointcloud(ros::NodeHandle node_handle,
+                              ros::NodeHandle private_node_handle);
+  void scanCallback(const sensor_msgs::LaserScan::ConstPtr &msg);
+  ~scan_to_pointcloud();
 };
 
 #endif
