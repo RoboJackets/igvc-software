@@ -11,7 +11,8 @@
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_datatypes.h>
 
-class scan_to_pointcloud {
+class scan_to_pointcloud
+{
 private:
   ros::Publisher _pointcloud_pub;
   ros::Subscriber _pointcloud_sub;
@@ -21,8 +22,7 @@ private:
   double offset;
 
 public:
-  explicit scan_to_pointcloud(ros::NodeHandle node_handle,
-                              ros::NodeHandle private_node_handle);
+  explicit scan_to_pointcloud(ros::NodeHandle node_handle, ros::NodeHandle private_node_handle);
   void scanCallback(const sensor_msgs::LaserScan::ConstPtr &msg);
   ~scan_to_pointcloud();
 };
