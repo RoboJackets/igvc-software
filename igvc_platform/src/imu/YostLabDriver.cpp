@@ -79,8 +79,7 @@ std::string YostLabDriver::getEulerDecomp()
   flush();
   serialWriteString(GET_EULER_DECOMPOSTION_ORDER);
   const std::string buf = serialReadLine();
-  const std::string ret_buf = [&]()
-  {
+  const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
       return "XYZ";
     else if (buf == "1\r\n")
@@ -105,8 +104,7 @@ std::string YostLabDriver::getAxisDirection()
   flush();
   serialWriteString(GET_AXIS_DIRECTION);
   const std::string buf = serialReadLine();
-  const std::string ret_buf = [&]()
-  {
+  const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
       return "X: Right, Y: Up, Z: Forward";
     else if (buf == "1\r\n")
@@ -147,8 +145,7 @@ std::string YostLabDriver::getCalibMode()
   flush();
   serialWriteString(GET_CALIB_MODE);
   const std::string buf = serialReadLine();
-  const std::string ret_buf = [&]()
-  {
+  const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
       return "Bias";
     else if (buf == "1\r\n")
@@ -165,8 +162,7 @@ std::string YostLabDriver::getMIMode()
   flush();
   serialWriteString(GET_MI_MODE_ENABLED);
   const std::string buf = serialReadLine();
-  const std::string ret_buf = [&]()
-  {
+  const std::string ret_buf = [&]() {
     if (buf == "0\r\n")
       return "Disabled";
     else if (buf == "1\r\n")
