@@ -1,0 +1,25 @@
+[0.052s] Invoking command in '/home/henry/Robojackets/igvc-software/build/igvc_sandbox': /usr/bin/cmake /home/henry/Robojackets/igvc-software/igvc_sandbox -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/igvc_sandbox
+[0.136s] -- The C compiler identification is GNU 9.3.0
+[0.233s] -- The CXX compiler identification is GNU 9.3.0
+[0.243s] -- Check for working C compiler: /usr/bin/cc
+[0.327s] -- Check for working C compiler: /usr/bin/cc -- works
+[0.329s] -- Detecting C compiler ABI info
+[0.416s] -- Detecting C compiler ABI info - done
+[0.443s] -- Detecting C compile features
+[0.444s] -- Detecting C compile features - done
+[0.451s] -- Check for working CXX compiler: /usr/bin/c++
+[0.558s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[0.560s] -- Detecting CXX compiler ABI info
+[0.655s] -- Detecting CXX compiler ABI info - done
+[0.680s] -- Detecting CXX compile features
+[0.682s] -- Detecting CXX compile features - done
+[0.684s] -- Setting build type to 'Release' as none was specified.
+[0.685s] -- Configuring done
+[0.686s] -- Generating done
+[0.687s] CMake Warning:
+[0.687s]   Manually-specified variables were not used by the project:
+[0.687s] 
+[0.687s]     CATKIN_INSTALL_INTO_PREFIX_ROOT
+[0.688s] 
+[0.688s] 
+[0.688s] -- Build files have been written to: /home/henry/Robojackets/igvc-software/build/igvc_sandbox

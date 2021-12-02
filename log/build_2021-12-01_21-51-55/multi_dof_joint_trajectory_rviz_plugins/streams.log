@@ -1,0 +1,35 @@
+[0.049s] Invoking command in '/home/henry/Robojackets/igvc-software/build/multi_dof_joint_trajectory_rviz_plugins': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/kindr_ros/multi_dof_joint_trajectory_rviz_plugins -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/multi_dof_joint_trajectory_rviz_plugins
+[0.127s] -- The C compiler identification is GNU 9.3.0
+[0.204s] -- The CXX compiler identification is GNU 9.3.0
+[0.212s] -- Check for working C compiler: /usr/bin/cc
+[0.293s] -- Check for working C compiler: /usr/bin/cc -- works
+[0.294s] -- Detecting C compiler ABI info
+[0.381s] -- Detecting C compiler ABI info - done
+[0.401s] -- Detecting C compile features
+[0.401s] -- Detecting C compile features - done
+[0.405s] -- Check for working CXX compiler: /usr/bin/c++
+[0.501s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[0.503s] -- Detecting CXX compiler ABI info
+[0.607s] -- Detecting CXX compiler ABI info - done
+[0.631s] -- Detecting CXX compile features
+[0.634s] -- Detecting CXX compile features - done
+[0.647s] CMake Error at CMakeLists.txt:7 (find_package):
+[0.648s]   By not providing "Findcatkin.cmake" in CMAKE_MODULE_PATH this project has
+[0.648s]   asked CMake to find a package configuration file provided by "catkin", but
+[0.648s]   CMake did not find one.
+[0.648s] 
+[0.648s]   Could not find a package configuration file provided by "catkin" with any
+[0.648s]   of the following names:
+[0.648s] 
+[0.648s]     catkinConfig.cmake
+[0.649s]     catkin-config.cmake
+[0.649s] 
+[0.649s]   Add the installation prefix of "catkin" to CMAKE_PREFIX_PATH or set
+[0.649s]   "catkin_DIR" to a directory containing one of the above files.  If "catkin"
+[0.649s]   provides a separate development package or SDK, be sure it has been
+[0.649s]   installed.
+[0.649s] 
+[0.649s] 
+[0.649s] -- Configuring incomplete, errors occurred!
+[0.650s] See also "/home/henry/Robojackets/igvc-software/build/multi_dof_joint_trajectory_rviz_plugins/CMakeFiles/CMakeOutput.log".
+[0.653s] Invoked command in '/home/henry/Robojackets/igvc-software/build/multi_dof_joint_trajectory_rviz_plugins' returned '1': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/kindr_ros/multi_dof_joint_trajectory_rviz_plugins -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/multi_dof_joint_trajectory_rviz_plugins

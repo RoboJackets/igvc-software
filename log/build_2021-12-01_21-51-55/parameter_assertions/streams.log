@@ -1,0 +1,34 @@
+[0.051s] Invoking command in '/home/henry/Robojackets/igvc-software/build/parameter_assertions': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/rj-ros-common/parameter_assertions -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/parameter_assertions
+[0.632s] -- The C compiler identification is GNU 9.3.0
+[0.633s] -- The CXX compiler identification is GNU 9.3.0
+[0.635s] -- Check for working C compiler: /usr/bin/cc
+[0.635s] -- Check for working C compiler: /usr/bin/cc -- works
+[0.636s] -- Detecting C compiler ABI info
+[0.636s] -- Detecting C compiler ABI info - done
+[0.636s] -- Detecting C compile features
+[0.636s] -- Detecting C compile features - done
+[0.636s] -- Check for working CXX compiler: /usr/bin/c++
+[0.636s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[0.637s] -- Detecting CXX compiler ABI info
+[0.670s] -- Detecting CXX compiler ABI info - done
+[0.690s] -- Detecting CXX compile features
+[0.691s] -- Detecting CXX compile features - done
+[0.701s] CMake Error at CMakeLists.txt:8 (find_package):
+[0.701s]   By not providing "Findcatkin.cmake" in CMAKE_MODULE_PATH this project has
+[0.701s]   asked CMake to find a package configuration file provided by "catkin", but
+[0.701s]   CMake did not find one.
+[0.701s] 
+[0.701s]   Could not find a package configuration file provided by "catkin" with any
+[0.701s]   of the following names:
+[0.701s] 
+[0.702s]     catkinConfig.cmake
+[0.702s]     catkin-config.cmake
+[0.702s] 
+[0.702s]   Add the installation prefix of "catkin" to CMAKE_PREFIX_PATH or set
+[0.702s]   "catkin_DIR" to a directory containing one of the above files.  If "catkin"
+[0.702s]   provides a separate development package or SDK, be sure it has been
+[0.702s]   installed.
+[0.702s] 
+[0.702s] 
+[0.703s] -- Configuring incomplete, errors occurred!
+[0.703s] See also "/home/henry/Robojackets/igvc-software/build/parameter_assertions/CMakeFiles/CMakeOutput.log".

@@ -1,0 +1,1 @@
+Invoking command in '/home/henry/Robojackets/igvc-software/build/serial': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/serial -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/serial

@@ -1,0 +1,1 @@
+Invoking command in '/home/henry/Robojackets/igvc-software/build/kindr_ros': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/kindr_ros/kindr_ros -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/kindr_ros

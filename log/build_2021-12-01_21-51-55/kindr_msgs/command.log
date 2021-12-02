@@ -1,0 +1,2 @@
+Invoking command in '/home/henry/Robojackets/igvc-software/build/kindr_msgs': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/kindr_ros/kindr_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/kindr_msgs
+Invoked command in '/home/henry/Robojackets/igvc-software/build/kindr_msgs' returned '1': /usr/bin/cmake /home/henry/Robojackets/igvc-software/external/kindr_ros/kindr_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/kindr_msgs

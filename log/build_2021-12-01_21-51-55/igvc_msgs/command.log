@@ -1,0 +1,1 @@
+Invoking command in '/home/henry/Robojackets/igvc-software/build/igvc_msgs': /usr/bin/cmake /home/henry/Robojackets/igvc-software/igvc_msgs -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/home/henry/Robojackets/igvc-software/install/igvc_msgs
