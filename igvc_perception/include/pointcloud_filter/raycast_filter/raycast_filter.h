@@ -2,7 +2,7 @@
 #define SRC_RAYCAST_FILTER_H
 
 #include <pcl/point_cloud.h>
-#include <velodyne_pointcloud/point_types.h>
+#include "pointcloud_filter/point_types.h"
 
 #include <pointcloud_filter/filter.h>
 #include <pointcloud_filter/raycast_filter/raycast_filter_config.h>
@@ -12,7 +12,7 @@ namespace pointcloud_filter
 class RaycastFilter : Filter
 {
 public:
-  using PointCloud = pcl::PointCloud<velodyne_pointcloud::PointXYZIR>;
+  using PointCloud = pcl::PointCloud<velodyne_pcl::PointXYZIRT>;
 
   explicit RaycastFilter(const ros::NodeHandle& nh);
 

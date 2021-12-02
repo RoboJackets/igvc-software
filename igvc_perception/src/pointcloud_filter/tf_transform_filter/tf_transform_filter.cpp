@@ -46,7 +46,7 @@ void TFTransformFilter::transform(const PointCloud& from, PointCloud& to, const 
     }
     else
     {
-      velodyne_pointcloud::PointXYZIR new_point{ point };
+      velodyne_pcl::PointXYZIRT new_point{ point };
       new_point.x = eigen_point(0);
       new_point.y = eigen_point(1);
       new_point.z = eigen_point(2);
