@@ -1,8 +1,9 @@
 #include "scan_to_pointcloud.h"
 
-scan_to_pointcloud::scan_to_pointcloud(ros::NodeHandle node_handle, ros::NodeHandle private_node_handle)
+scan_to_pointcloud::scan_to_pointcloud()
   : _pointcloud_pub{ node_handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/pc2", 1) }
   , _pointcloud_sub{ node_handle.subscribe("/scan", 1, &scan_to_pointcloud::scanCallback, this) }
+  , private_node_handle{ "~" }
 {
   assertions::getParam(private_node_handle, "min_dist", min_dist);
   assertions::getParam(private_node_handle, "neighbor_dist", neighbor_dist);
@@ -16,7 +17,7 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr &ms
   auto rangeIsValid = [&scanData](float range)
   { return !std::isnan(range) && range > scanData.range_min && range < scanData.range_max; };
 
-  for (unsigned int i = 0; i < scanData.ranges.size(); i++)
+  for (unsigned int i = 0; i < scanData.ranges.size(); ++i)
   {
     float &range = scanData.ranges[i];
     if (range > scanData.range_max || range < scanData.range_min)
@@ -39,7 +40,6 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr &ms
       range = scanData.range_max + 1;
     }
   }
-  laser_geometry::LaserProjection projection;
   sensor_msgs::PointCloud2 cloud;
   projection.projectLaser(scanData, cloud);
   cloud.header.frame_id = "/lidar";
@@ -55,14 +55,9 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr &ms
   _pointcloud_pub.publish(*cloud_for_pub);
 }
 
-scan_to_pointcloud::~scan_to_pointcloud(){};
-
 int main(int argc, char **argv)
 {
-  ros::NodeHandle node_handle;
-  ros::NodeHandle private_node_handle{ "~" };
-
   ros::init(argc, argv, "scan_to_pointcloud");
-  scan_to_pointcloud scan_object(node_handle, private_node_handle);
+  scan_to_pointcloud scan_object();
   ros::spin();
 }
