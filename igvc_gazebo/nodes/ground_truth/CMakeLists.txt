@@ -1,4 +1,4 @@
-add_executable(ground_truth_republisher main.cpp)
+add_executable(ground_truth_republisher ground_truth_republisher.cpp)
 add_dependencies(ground_truth_republisher ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ground_truth_republisher ${catkin_LIBRARIES})
 
