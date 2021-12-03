@@ -16,15 +16,17 @@ class scan_to_pointcloud
 private:
   ros::Publisher _pointcloud_pub;
   ros::Subscriber _pointcloud_sub;
+  ros::NodeHandle node_handle;
+  ros::NodeHandle private_node_handle;
 
+  laser_geometry::LaserProjection projection;
   double min_dist;
   double neighbor_dist;
   double offset;
 
 public:
-  explicit scan_to_pointcloud(ros::NodeHandle node_handle, ros::NodeHandle private_node_handle);
+  explicit scan_to_pointcloud();
   void scanCallback(const sensor_msgs::LaserScan::ConstPtr &msg);
-  ~scan_to_pointcloud();
 };
 
 #endif
