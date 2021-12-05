@@ -17,9 +17,9 @@ GroundTruthRepublisher::GroundTruthRepublisher()
 	assertions::param(pNh, "longitude", longitude, -84.405001);
 	assertions::param(pNh, "latitude", latitude, 33.774497);
 
-	ros::Subscriber ground_truth = nh.subscribe<nav_msgs::Odometry>(ground_truth_topic, 10, groundTruthCallback);
+	ros::Subscriber ground_truth = nh.subscribe<nav_msgs::Odometry>(ground_truth_topic, 10, &GroundTruthRepublisher::groundTruthCallback, this);
 
-	ros::Subscriber estimate_sub = nh.subscribe<nav_msgs::Odometry>("/odometry/filtered", 1, odomCallback);
+	ros::Subscriber estimate_sub = nh.subscribe<nav_msgs::Odometry>("/odometry/filtered", 1, &GroundTruthRepubisher::odomCallback, this);
 	g_ground_truth_pub = nh.advertise<nav_msgs::Odometry>(pub_topic, 1);
 
 	double utm_x, utm_y;
@@ -30,7 +30,7 @@ GroundTruthRepublisher::GroundTruthRepublisher()
 		tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
 	utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
 
-	ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
+	ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(&GroundTruthRepublisher::utm_callback, _1, utm_to_odom.inverse()));
 }
 
 void GroundTruthRepublisher::odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
