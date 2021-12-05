@@ -1,5 +1,5 @@
-#ifndef GROUND_TRUTH_REPUBLISHER_HPP_
-#define GROUND_TRUTH_REPUBLISHER_HPP_HPP_
+#ifndef GROUND_TRUTH_REPUBLISHER_H
+#define GROUND_TRUTH_REPUBLISHER_H
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/Vector3.h>

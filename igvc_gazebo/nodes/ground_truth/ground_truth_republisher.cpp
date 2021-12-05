@@ -31,7 +31,6 @@ GroundTruthRepublisher::GroundTruthRepublisher()
 	utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
 
 	ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
-	ros::spin();
 }
 
 void GroundTruthRepublisher::odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
@@ -116,5 +115,11 @@ void GroundTruthRepublisher::utm_callback(const ros::TimerEvent& event, const tf
     }
     br.sendTransform(tf::StampedTransform(odom_to_utm, event.current_real, "odom", "utm"));
   }
+}
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "ground_truth_republisher");
+  GroundTruthRepublisher ground_truth_republisher;
+  ros::spin();
 }
 
