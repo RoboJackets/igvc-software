@@ -1,7 +1,6 @@
 #ifndef GROUND_TRUTH_REPUBLISHER_H
 #define GROUND_TRUTH_REPUBLISHER_H
 
-#include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/Vector3.h>
 #include <nav_msgs/Odometry.h>
 #include <robot_localization/navsat_conversions.h>
