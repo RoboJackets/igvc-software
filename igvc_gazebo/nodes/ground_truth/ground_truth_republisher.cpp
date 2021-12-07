@@ -27,16 +27,16 @@ GroundTruthRepublisher::GroundTruthRepublisher()
 
 	tf::Transform utm_to_odom;
 	utm_to_odom.setOrigin(
-		tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
+    tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
 	utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
 
 	ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(&GroundTruthRepublisher::utm_callback, this, _1, utm_to_odom.inverse()));
-};
+}
 
 void GroundTruthRepublisher::odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
   g_last_estimate = msg->header.stamp;
-};
+}
 
 void GroundTruthRepublisher::groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
@@ -85,7 +85,7 @@ void GroundTruthRepublisher::groundTruthCallback(const nav_msgs::Odometry::Const
       tf::Transform utm_to_odom;
     }
   }
-};
+}
 
 void GroundTruthRepublisher::utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm)
 {
@@ -115,12 +115,11 @@ void GroundTruthRepublisher::utm_callback(const ros::TimerEvent& event, const tf
     }
     br.sendTransform(tf::StampedTransform(odom_to_utm, event.current_real, "odom", "utm"));
   }
-};
+}
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "ground_truth_republisher");
-  GroundTruthRepublisher ground_truth_republisher;
+  GroundTruthRepublisher ground_truth_republisher = GroundTruthRepublisher();
   ros::spin();
 }
-
