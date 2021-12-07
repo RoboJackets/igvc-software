@@ -30,7 +30,7 @@ GroundTruthRepublisher::GroundTruthRepublisher()
 		tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
 	utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
 
-	ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
+	ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(&GroundTruthRepublisher::utm_callback, this, _1, utm_to_odom.inverse()));
 }
 
 void GroundTruthRepublisher::odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
