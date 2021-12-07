@@ -11,16 +11,16 @@
 class GroundTruthRepublisher
 {
 public:
-	GroundTruthRepublisher();
+  GroundTruthRepublisher();
 
 private:
-	ros::Publisher g_ground_truth_pub;
-	nav_msgs::Odometry g_og_pose;
-	ros::Time g_last_estimate;
-	
-	void odomCallback(const nav_msgs::Odometry::ConstPtr& msg);
-	void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg);
-	void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm);
+  ros::Publisher g_ground_truth_pub;
+  nav_msgs::Odometry g_og_pose;
+  ros::Time g_last_estimate;
+
+  void odomCallback(const nav_msgs::Odometry::ConstPtr& msg);
+  void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg);
+  void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm);
 };
 
 #endif
