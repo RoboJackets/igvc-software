@@ -1,6 +1,4 @@
 #include "ground_truth_republisher.h"
-#include <mutex>
-#include <parameter_assertions/assertions.h>
 #include <ros/ros.h>
 
 GroundTruthRepublisher::GroundTruthRepublisher()
@@ -113,8 +111,7 @@ void GroundTruthRepublisher::utm_callback(const ros::TimerEvent &event, const tf
     if (found && transform.getRotation() != odom_to_utm.getRotation() &&
         transform.getOrigin() != odom_to_utm.getOrigin())
     {
-      ROS_WARN_STREAM("Anther odom -> utm tf broadcast detected. Disabling "
-                      "ground_truth odom -> utm tf broadcast.");
+      ROS_WARN_STREAM("Another odom -> utm tf broadcast detected. Disabling ground_truth odom -> utm tf broadcast.");
       enabled = false;
       return;
     }
