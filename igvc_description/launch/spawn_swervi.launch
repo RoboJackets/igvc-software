@@ -6,12 +6,11 @@
     <arg name="roll" default="0.0"/>
     <arg name="pitch" default="0.0"/>
     <arg name="yaw" default="0.0"/>
+    <!-- accelerate lidar with GPU -->
+    <arg name="gpu" default="false"/>
 
     <!-- Model file -->
     <arg name="model" default="$(find igvc_description)/urdf/swervi.urdf.xacro"/>
-    
-    <!-- accelerate lidar with GPU -->
-    <arg name="gpu" default="false"/>
 
     <!-- End of arguments list -->
 
@@ -24,5 +23,8 @@
                 -urdf -model Swervi
                 -x $(arg x) -y $(arg y) -z $(arg z)
                 -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+
+    <!-- needed for rviz -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
 </launch>
