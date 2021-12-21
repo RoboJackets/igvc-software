@@ -1,0 +1,20 @@
+joint_limits:
+    fl_swivel_rev:
+      has_position_limits: true
+      min_position: -3.14
+      max_position: 3.14
+      
+    fr_swivel_rev:
+      has_position_limits: true
+      min_position: -3.14
+      max_position: 3.14
+
+    bl_swivel_rev:
+      has_position_limits: true
+      min_position: -3.14
+      max_position: 3.14
+
+    br_swivel_rev:
+      has_position_limits: true
+      min_position: -1.57
+      max_position: 3.14
