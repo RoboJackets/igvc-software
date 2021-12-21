@@ -2,7 +2,6 @@
 
 #include "swerve_joystick.h"
 
-
 void SwerveJoy::joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
   stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Joystick Online");

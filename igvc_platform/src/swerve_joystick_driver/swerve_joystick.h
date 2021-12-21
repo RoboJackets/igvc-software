@@ -11,7 +11,6 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 
-
 class SwerveJoy
 {
 public:
