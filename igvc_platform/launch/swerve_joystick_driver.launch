@@ -1,0 +1,15 @@
+<!-- swerve_joystick_driver.launch -->
+<!--
+    This file launches the joy node and a custom
+    interpreter node that maps joystick inputs
+    to swerve drive robot actions.
+    Use this file to start remote control of the
+    robot.
+    -->
+<launch>
+    <!-- Joystick node -->
+    <node name="joy_node" pkg="joy" type="joy_node" output="screen" respawn="false">
+        <param name="dev" type="str" value="/dev/igvc_joystick"/>
+    </node>
+    <node name="swerve_joystick_driver" pkg="igvc_platform" type="swerve_joystick_driver" output="screen" respawn="false" />
+</launch>
