@@ -24,7 +24,8 @@ private:
   void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg);
   void speedCallback(const igvc_msgs::velocity_quad::ConstPtr &msg);
 
-  struct controlInfo {
+  struct controlInfo
+  {
     double set_point;
     double measured;
     double last_error;

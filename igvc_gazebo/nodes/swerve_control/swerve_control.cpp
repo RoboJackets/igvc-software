@@ -7,14 +7,14 @@ SwerveControl::SwerveControl() : pNh{ "~" }
 {
   // motor pubs
   effortPublishers = {
-    handle.advertise<std_msgs::Float64>("/front_left_effort_controller/command", 1),    // front_left_effort_publisher
-    handle.advertise<std_msgs::Float64>("/front_right_effort_controller/command", 1),   // front_right_effort_publisher
-    handle.advertise<std_msgs::Float64>("/back_left_effort_controller/command", 1),     // back_left_effort_publisher
-    handle.advertise<std_msgs::Float64>("/back_right_effort_controller/command", 1),    // back_right_effort_publisher
-    handle.advertise<std_msgs::Float64>("/front_left_swivel_controller/command", 1),    // front_left_swivel_publisher
-    handle.advertise<std_msgs::Float64>("/front_right_swivel_controller/command", 1),   // front_right_swivel_publisher
-    handle.advertise<std_msgs::Float64>("/back_left_swivel_controller/command", 1),     // back_left_swivel_publisher
-    handle.advertise<std_msgs::Float64>("/back_right_swivel_controller/command", 1)     // back_right_swivel_publisher
+    handle.advertise<std_msgs::Float64>("/front_left_effort_controller/command", 1),   // front_left_effort_publisher
+    handle.advertise<std_msgs::Float64>("/front_right_effort_controller/command", 1),  // front_right_effort_publisher
+    handle.advertise<std_msgs::Float64>("/back_left_effort_controller/command", 1),    // back_left_effort_publisher
+    handle.advertise<std_msgs::Float64>("/back_right_effort_controller/command", 1),   // back_right_effort_publisher
+    handle.advertise<std_msgs::Float64>("/front_left_swivel_controller/command", 1),   // front_left_swivel_publisher
+    handle.advertise<std_msgs::Float64>("/front_right_swivel_controller/command", 1),  // front_right_swivel_publisher
+    handle.advertise<std_msgs::Float64>("/back_left_swivel_controller/command", 1),    // back_left_swivel_publisher
+    handle.advertise<std_msgs::Float64>("/back_right_swivel_controller/command", 1)    // back_right_swivel_publisher
   };
 
   // shock pubs
@@ -24,7 +24,7 @@ SwerveControl::SwerveControl() : pNh{ "~" }
   front_right_shock_publisher = handle.advertise<std_msgs::Float64>("/front_right_shock_controller/command", 1, true);
 
   wheel_speed_publisher = handle.advertise<igvc_msgs::velocity_quad>("/encoders", 1);
-  
+
   // Shocks for all modules
   std_msgs::Float64 shock_set_point;
   shock_set_point.data = 0.0;
@@ -46,15 +46,13 @@ SwerveControl::SwerveControl() : pNh{ "~" }
   assertions::param(pNh, "speed_D_bl", speed_D_bl, 1.0);
   assertions::param(pNh, "speed_D_br", speed_D_br, 1.0);
 
-  assertions::param(pNh, "wheel_radius", wheel_radius, 0.1375); // found in swervi_prop urdf
+  assertions::param(pNh, "wheel_radius", wheel_radius, 0.1375);  // found in swervi_prop urdf
   assertions::param(pNh, "max_effort", max_effort, 4.0);
   assertions::param(pNh, "rate", rate_var, 60.0);
 
   // joint names
-  joint_names = {
-    "fl_wheel_axle", "fr_wheel_axle", "bl_wheel_axle", "br_wheel_axle",
-    "fl_swivel_rev", "fr_swivel_rev", "bl_swivel_rev", "br_swivel_rev"
-  };
+  joint_names = { "fl_wheel_axle", "fr_wheel_axle", "bl_wheel_axle", "br_wheel_axle",
+                  "fl_swivel_rev", "fr_swivel_rev", "bl_swivel_rev", "br_swivel_rev" };
 
   // Publish that the robot is enabled
   enabled_pub = handle.advertise<std_msgs::Bool>("/robot_enabled", 1, /*latch = */ true);
@@ -67,16 +65,16 @@ SwerveControl::SwerveControl() : pNh{ "~" }
   state_sub = handle.subscribe("/joint_states", 1, &SwerveControl::jointStateCallback, this);
 
   motors = {
-      // set_point, measured, last_error, error_accum, effort, P, I, D
-      {0.0, 0.0, 0.0, 0.0, 0.0, speed_P_fl, speed_I_fl, speed_D_fl}, // speed_fl
-      {0.0, 0.0, 0.0, 0.0, 0.0, speed_P_fr, speed_I_fr, speed_D_fr}, // speed_fr
-      {0.0, 0.0, 0.0, 0.0, 0.0, speed_P_bl, speed_I_bl, speed_D_bl}, // speed_bl
-      {0.0, 0.0, 0.0, 0.0, 0.0, speed_P_br, speed_I_br, speed_D_br}, // speed_br
-      // Swivel infos
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, // swivel_fl
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, // swivel_fr
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, // swivel_bl
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}  // swivel_br
+    // set_point, measured, last_error, error_accum, effort, P, I, D
+    { 0.0, 0.0, 0.0, 0.0, 0.0, speed_P_fl, speed_I_fl, speed_D_fl },  // speed_fl
+    { 0.0, 0.0, 0.0, 0.0, 0.0, speed_P_fr, speed_I_fr, speed_D_fr },  // speed_fr
+    { 0.0, 0.0, 0.0, 0.0, 0.0, speed_P_bl, speed_I_bl, speed_D_bl },  // speed_bl
+    { 0.0, 0.0, 0.0, 0.0, 0.0, speed_P_br, speed_I_br, speed_D_br },  // speed_br
+    // Swivel infos
+    { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },  // swivel_fl
+    { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },  // swivel_fr
+    { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },  // swivel_bl
+    { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }   // swivel_br
   };
 
   SwerveControl::ControlLoop();
@@ -84,7 +82,6 @@ SwerveControl::SwerveControl() : pNh{ "~" }
 
 void SwerveControl::ControlLoop()
 {
-
   // Variables for control loop
   prev = ros::Time::now();
 
@@ -101,7 +98,8 @@ void SwerveControl::ControlLoop()
 
     // motors
     size_t motors_end = 4;
-    for (size_t i = 0; i < motors_end; ++i) {
+    for (size_t i = 0; i < motors_end; ++i)
+    {
       double error = motors[i].set_point - motors[i].measured;
       double dError = (error - motors[i].last_error) / dt;
       motors[i].error_accum += error;
@@ -113,9 +111,10 @@ void SwerveControl::ControlLoop()
       effortPublishers[i].publish(effort_msg);
     }
 
-    //swivels
+    // swivels
     size_t swivels_end = 8;
-    for (size_t i = motors_end; i < swivels_end; ++i) {
+    for (size_t i = motors_end; i < swivels_end; ++i)
+    {
       std_msgs::Float64 position_msg;
       position_msg.data = motors[i].set_point;
       effortPublishers[i].publish(position_msg);
@@ -182,7 +181,8 @@ void SwerveControl::jointStateCallback(const sensor_msgs::JointStateConstPtr &ms
 {
   // motors
   size_t motors_end = 4;
-  for (size_t i = 0; i < motors_end; ++i) {
+  for (size_t i = 0; i < motors_end; ++i)
+  {
     auto iter = std::find(msg->name.begin(), msg->name.end(), joint_names[i]);
 
     if (iter != msg->name.end())
@@ -191,10 +191,11 @@ void SwerveControl::jointStateCallback(const sensor_msgs::JointStateConstPtr &ms
       motors[i].measured = (msg->velocity[index]) * (wheel_radius);
     }
   }
-  
-  //swivels
+
+  // swivels
   size_t swivels_end = 8;
-  for (size_t i = motors_end; i < swivels_end; ++i) {
+  for (size_t i = motors_end; i < swivels_end; ++i)
+  {
     auto iter = std::find(msg->name.begin(), msg->name.end(), joint_names[i]);
 
     if (iter != msg->name.end())
@@ -205,54 +206,53 @@ void SwerveControl::jointStateCallback(const sensor_msgs::JointStateConstPtr &ms
   }
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "swervi_controller");
   SwerveControl swerve_control;
   ros::spin();
 }
 
+// double speed_last_error_fl = 0.0;
+// double speed_last_error_fr = 0.0;
+// double speed_last_error_bl = 0.0;
+// double speed_last_error_br = 0.0;
+// double speed_error_accum_fl = 0.0;
+// double speed_error_accum_fr = 0.0;
+// double speed_error_accum_bl = 0.0;
+// double speed_error_accum_br = 0.0;
+// double speed_effort_fl = 0.0;
+// double speed_effort_fr = 0.0;
+// double speed_effort_bl = 0.0;
+// double speed_effort_br = 0.0;
 
-  // double speed_last_error_fl = 0.0;
-  // double speed_last_error_fr = 0.0;
-  // double speed_last_error_bl = 0.0;
-  // double speed_last_error_br = 0.0;
-  // double speed_error_accum_fl = 0.0;
-  // double speed_error_accum_fr = 0.0;
-  // double speed_error_accum_bl = 0.0;
-  // double speed_error_accum_br = 0.0;
-  // double speed_effort_fl = 0.0;
-  // double speed_effort_fr = 0.0;
-  // double speed_effort_bl = 0.0;
-  // double speed_effort_br = 0.0;
+// double swivel_last_error_fl = 0.0;
+// double swivel_last_error_fr = 0.0;
+// double swivel_last_error_bl = 0.0;
+// double swivel_last_error_br = 0.0;
+// double swivel_error_accum_fl = 0.0;
+// double swivel_error_accum_fr = 0.0;
+// double swivel_error_accum_bl = 0.0;
+// double swivel_error_accum_br = 0.0;
+// double swivel_effort_fl = 0.0;
+// double swivel_effort_fr = 0.0;
+// double swivel_effort_bl = 0.0;
+// double swivel_effort_br = 0.0;
 
-  // double swivel_last_error_fl = 0.0;
-  // double swivel_last_error_fr = 0.0;
-  // double swivel_last_error_bl = 0.0;
-  // double swivel_last_error_br = 0.0;
-  // double swivel_error_accum_fl = 0.0;
-  // double swivel_error_accum_fr = 0.0;
-  // double swivel_error_accum_bl = 0.0;
-  // double swivel_error_accum_br = 0.0;
-  // double swivel_effort_fl = 0.0;
-  // double swivel_effort_fr = 0.0;
-  // double swivel_effort_bl = 0.0;
-  // double swivel_effort_br = 0.0;
+// assertions::param(pNh, "swivel_P_fl", swivel_P_fl, 5.0);
+// assertions::param(pNh, "swivel_P_fr", swivel_P_fr, 5.0);
+// assertions::param(pNh, "swivel_P_bl", swivel_P_bl, 5.0);
+// assertions::param(pNh, "swivel_P_br", swivel_P_br, 5.0);
+// assertions::param(pNh, "swivel_I_fl", swivel_I_fl, 0.0);
+// assertions::param(pNh, "swivel_I_fr", swivel_I_fr, 0.0);
+// assertions::param(pNh, "swivel_I_bl", swivel_I_bl, 0.0);
+// assertions::param(pNh, "swivel_I_br", swivel_I_br, 0.0);
+// assertions::param(pNh, "swivel_D_fl", swivel_D_fl, 1.0);
+// assertions::param(pNh, "swivel_D_fr", swivel_D_fr, 1.0);
+// assertions::param(pNh, "swivel_D_bl", swivel_D_bl, 1.0);
+// assertions::param(pNh, "swivel_D_br", swivel_D_br, 1.0);
 
-  // assertions::param(pNh, "swivel_P_fl", swivel_P_fl, 5.0);
-  // assertions::param(pNh, "swivel_P_fr", swivel_P_fr, 5.0);
-  // assertions::param(pNh, "swivel_P_bl", swivel_P_bl, 5.0);
-  // assertions::param(pNh, "swivel_P_br", swivel_P_br, 5.0);
-  // assertions::param(pNh, "swivel_I_fl", swivel_I_fl, 0.0);
-  // assertions::param(pNh, "swivel_I_fr", swivel_I_fr, 0.0);
-  // assertions::param(pNh, "swivel_I_bl", swivel_I_bl, 0.0);
-  // assertions::param(pNh, "swivel_I_br", swivel_I_br, 0.0);
-  // assertions::param(pNh, "swivel_D_fl", swivel_D_fl, 1.0);
-  // assertions::param(pNh, "swivel_D_fr", swivel_D_fr, 1.0);
-  // assertions::param(pNh, "swivel_D_bl", swivel_D_bl, 1.0);
-  // assertions::param(pNh, "swivel_D_br", swivel_D_br, 1.0);
-
-      // {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_fl, swivel_I_fl, swivel_D_fl},
-      // {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_fr, swivel_I_fr, swivel_D_fr},
-      // {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_bl, swivel_I_bl, swivel_D_bl},
-      // {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_br, swivel_I_br, swivel_D_br}
+// {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_fl, swivel_I_fl, swivel_D_fl},
+// {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_fr, swivel_I_fr, swivel_D_fr},
+// {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_bl, swivel_I_bl, swivel_D_bl},
+// {0.0, 0.0, 0.0, 0.0, 0.0, swivel_P_br, swivel_I_br, swivel_D_br}
