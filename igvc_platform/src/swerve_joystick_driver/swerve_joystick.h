@@ -30,6 +30,8 @@ private:
   diagnostic_updater::Updater updater;
 
   double absoluteMaxVel, maxVel, maxVelIncr, maxAngle;
+  int stickLeft_UDAxis, stickRight_UDAxis, stickLeft_LRAxis, stickRight_LRAxis;
+  bool leftUDInverted, rightUDInverted, leftLRInverted, rightLRInverted;
 };
 
 #endif  // SWERVEJOY_H

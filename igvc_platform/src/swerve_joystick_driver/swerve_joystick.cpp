@@ -30,9 +30,6 @@ void SwerveJoy::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
   pNh.setParam("maxVel", maxVel);
 
-  int stickLeft_UDAxis, stickRight_UDAxis;
-  int stickLeft_LRAxis, stickRight_LRAxis;
-  bool leftUDInverted, rightUDInverted, leftLRInverted, rightLRInverted;
   assertions::param(pNh, "stickLeft_UDAxis", stickLeft_UDAxis, 1);
   assertions::param(pNh, "stickRight_UDAxis", stickRight_UDAxis, 4);
   assertions::param(pNh, "stickLeft_LRAxis", stickLeft_LRAxis, 0);
@@ -62,7 +59,6 @@ SwerveJoy::SwerveJoy() : pNh{ "~" }
 {
   cmd_pub = nh.advertise<igvc_msgs::velocity_quad>("/motors", 1);
   joy_sub = nh.subscribe("/joy", 1, &SwerveJoy::joyCallback, this);
-  // updater = diagnostic_updater::Updater();
   updater.setHardwareID("Joystick");
   updater.add("Joystick Diagnostic", this, &SwerveJoy::joystick_diagnostic);
 }
