@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+message NewResponseMessage {
+    optional uint32 fibResponse = 1;
+}
+
+message NewRequestMessage {
+    optional float fl_velocity = 1;
+    optional float fr_velocity = 2;
+    optional float bl_velocity = 3;
+    optional float br_velocity = 4;
+    optional float fl_angle = 5;
+    optional float fr_angle = 6;
+    optional float bl_angle = 7;
+    optional float br_angle = 8;
+    optional float duration = 9;
+}
