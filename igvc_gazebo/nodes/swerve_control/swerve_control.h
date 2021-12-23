@@ -42,14 +42,6 @@ private:
 
   // Publishers
   std::vector<ros::Publisher> effortPublishers;
-  // ros::Publisher back_left_effort_publisher;
-  // ros::Publisher back_left_swivel_publisher;
-  // ros::Publisher back_right_effort_publisher;
-  // ros::Publisher back_right_swivel_publisher;
-  // ros::Publisher front_left_effort_publisher;
-  // ros::Publisher front_left_swivel_publisher;
-  // ros::Publisher front_right_effort_publisher;
-  // ros::Publisher front_right_swivel_publisher;
 
   ros::Publisher back_left_shock_publisher;
   ros::Publisher back_right_shock_publisher;
@@ -64,13 +56,10 @@ private:
 
   ros::Time prev, now;
 
-  // Parameters for all 8 motors
+  // Parameters for all 4 driving motors
   double speed_P_fl, speed_P_fr, speed_P_bl, speed_P_br;
   double speed_I_fl, speed_I_fr, speed_I_bl, speed_I_br;
   double speed_D_fl, speed_D_fr, speed_D_bl, speed_D_br;
-  double swivel_P_fl, swivel_P_fr, swivel_P_bl, swivel_P_br;
-  double swivel_I_fl, swivel_I_fr, swivel_I_bl, swivel_I_br;
-  double swivel_D_fl, swivel_D_fr, swivel_D_bl, swivel_D_br;
   double rate_var;
   double wheel_radius;
   double max_effort = 0.0;
