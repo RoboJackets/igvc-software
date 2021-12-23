@@ -22,19 +22,19 @@
   front_left_swivel_controller:
     type: effort_controllers/JointPositionController
     joint: fl_swivel_rev
-    pid: {p: 2.0, d: 1.0, i: 0.0}
+    pid: {p: 10.0, d: 1.0, i: 0.0}
   back_left_swivel_controller:
     type: effort_controllers/JointPositionController
     joint: bl_swivel_rev
-    pid: {p: 2.0, d: 1.0, i: 0.0}
+    pid: {p: 10.0, d: 1.0, i: 0.0}
   front_right_swivel_controller:
     type: effort_controllers/JointPositionController
     joint: fr_swivel_rev
-    pid: {p: 2.0, d: 1.0, i: 0.0}
+    pid: {p: 10.0, d: 1.0, i: 0.0}
   back_right_swivel_controller:
     type: effort_controllers/JointPositionController
     joint: br_swivel_rev
-    pid: {p: 2.0, d: 1.0, i: 0.0}
+    pid: {p: 10.0, d: 1.0, i: 0.0}
 
   # shock controllers ----------------------------------------
   front_left_shock_controller:
