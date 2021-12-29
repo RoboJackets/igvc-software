@@ -1,0 +1,3 @@
+add_rostest_gtest(TestScanToPointCloud test/test_scan_to_pointcloud.test test_scan_to_pointcloud.cpp)
+add_dependencies(TestScanToPointCloud ${catkin_EXPORTED_TARGETS} scan_to_pointcloud)
+target_link_libraries(TestScanToPointCloud ${catkin_LIBRARIES})
