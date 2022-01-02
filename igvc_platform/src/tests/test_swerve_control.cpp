@@ -8,7 +8,9 @@
 class TestSwerveControl : public testing::Test
 {
 public:
-  TestSwerveControl() : mock_motors_pub(handle.advertise<igvc_msgs::velocity_quad>("/motors", 1)), mock_joint_pub(handle.advertise<sensor_msgs::JointState>("/joint_states", 1))
+  TestSwerveControl()
+    : mock_motors_pub(handle.advertise<igvc_msgs::velocity_quad>("/motors", 1))
+    , mock_joint_pub(handle.advertise<sensor_msgs::JointState>("/joint_states", 1))
   {
   }
 
@@ -18,7 +20,8 @@ protected:
   ros::Publisher mock_joint_pub;
 };
 
-igvc_msgs::velocity_quad createVelocityQuad(double fl_vel, double fr_vel, double bl_vel, double br_vel, double fl_swiv, double fr_swiv, double bl_swiv, double br_swiv)
+igvc_msgs::velocity_quad createVelocityQuad(double fl_vel, double fr_vel, double bl_vel, double br_vel, double fl_swiv,
+                                            double fr_swiv, double bl_swiv, double br_swiv)
 {
   // contructing messages for motors
   igvc_msgs::velocity_quad msg;
@@ -35,14 +38,16 @@ igvc_msgs::velocity_quad createVelocityQuad(double fl_vel, double fr_vel, double
 
 TEST_F(TestSwerveControl, StopTest)
 {
-  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");   // front_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_fr("/front_right_effort_controller/command");  // front_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");    // back_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");   // back_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");   // front_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fr("/front_right_swivel_controller/command");  // front_right_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");    // back_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");   // back_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");  // front_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fr(
+      "/front_right_effort_controller/command");                                         // front_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");   // back_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");  // back_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");  // front_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fr(
+      "/front_right_swivel_controller/command");                                         // front_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");   // back_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");  // back_right_swivel_publisher
 
   ASSERT_TRUE(mock_e_fl.waitForPublisher());
   ASSERT_TRUE(mock_e_fl.waitForSubscriber(mock_motors_pub));
@@ -67,7 +72,7 @@ TEST_F(TestSwerveControl, StopTest)
 
   ASSERT_TRUE(mock_s_br.waitForPublisher());
   ASSERT_TRUE(mock_s_br.waitForSubscriber(mock_motors_pub));
-  
+
   const float stop = 0.0;
   mock_motors_pub.publish(createVelocityQuad(stop, stop, stop, stop, stop, stop, stop, stop));
 
@@ -114,14 +119,16 @@ TEST_F(TestSwerveControl, StopTest)
 
 TEST_F(TestSwerveControl, ForwardTest)
 {
-  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");   // front_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_fr("/front_right_effort_controller/command");  // front_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");    // back_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");   // back_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");   // front_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fr("/front_right_swivel_controller/command");  // front_right_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");    // back_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");   // back_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");  // front_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fr(
+      "/front_right_effort_controller/command");                                         // front_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");   // back_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");  // back_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");  // front_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fr(
+      "/front_right_swivel_controller/command");                                         // front_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");   // back_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");  // back_right_swivel_publisher
 
   ASSERT_TRUE(mock_e_fl.waitForPublisher());
   ASSERT_TRUE(mock_e_fl.waitForSubscriber(mock_motors_pub));
@@ -146,7 +153,7 @@ TEST_F(TestSwerveControl, ForwardTest)
 
   ASSERT_TRUE(mock_s_br.waitForPublisher());
   ASSERT_TRUE(mock_s_br.waitForSubscriber(mock_motors_pub));
-  
+
   const float forward = 1.0;
   const float stop = 0.0;
   mock_motors_pub.publish(createVelocityQuad(forward, forward, forward, forward, stop, stop, stop, stop));
@@ -194,14 +201,16 @@ TEST_F(TestSwerveControl, ForwardTest)
 
 TEST_F(TestSwerveControl, ReverseTest)
 {
-  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");   // front_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_fr("/front_right_effort_controller/command");  // front_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");    // back_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");   // back_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");   // front_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fr("/front_right_swivel_controller/command");  // front_right_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");    // back_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");   // back_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");  // front_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fr(
+      "/front_right_effort_controller/command");                                         // front_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");   // back_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");  // back_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");  // front_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fr(
+      "/front_right_swivel_controller/command");                                         // front_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");   // back_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");  // back_right_swivel_publisher
 
   ASSERT_TRUE(mock_e_fl.waitForPublisher());
   ASSERT_TRUE(mock_e_fl.waitForSubscriber(mock_motors_pub));
@@ -226,7 +235,7 @@ TEST_F(TestSwerveControl, ReverseTest)
 
   ASSERT_TRUE(mock_s_br.waitForPublisher());
   ASSERT_TRUE(mock_s_br.waitForSubscriber(mock_motors_pub));
-  
+
   const float backwards = -1.0;
   const float stop = 0.0;
   mock_motors_pub.publish(createVelocityQuad(backwards, backwards, backwards, backwards, stop, stop, stop, stop));
@@ -274,14 +283,16 @@ TEST_F(TestSwerveControl, ReverseTest)
 
 TEST_F(TestSwerveControl, ReverseTurnTest)
 {
-  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");   // front_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_fr("/front_right_effort_controller/command");  // front_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");    // back_left_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");   // back_right_effort_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");   // front_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_fr("/front_right_swivel_controller/command");  // front_right_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");    // back_left_swivel_publisher
-  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");   // back_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fl("/front_left_effort_controller/command");  // front_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_fr(
+      "/front_right_effort_controller/command");                                         // front_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_bl("/back_left_effort_controller/command");   // back_left_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_e_br("/back_right_effort_controller/command");  // back_right_effort_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fl("/front_left_swivel_controller/command");  // front_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_fr(
+      "/front_right_swivel_controller/command");                                         // front_right_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_bl("/back_left_swivel_controller/command");   // back_left_swivel_publisher
+  MockSubscriber<std_msgs::Float64> mock_s_br("/back_right_swivel_controller/command");  // back_right_swivel_publisher
 
   ASSERT_TRUE(mock_e_fl.waitForPublisher());
   ASSERT_TRUE(mock_e_fl.waitForSubscriber(mock_motors_pub));
@@ -306,11 +317,12 @@ TEST_F(TestSwerveControl, ReverseTurnTest)
 
   ASSERT_TRUE(mock_s_br.waitForPublisher());
   ASSERT_TRUE(mock_s_br.waitForSubscriber(mock_motors_pub));
-  
+
   const float backwards = -1.0;
   const float stop = 0.0;
   const float turn90 = 1.57;
-  mock_motors_pub.publish(createVelocityQuad(backwards, backwards, backwards, backwards, turn90, turn90, turn90, turn90));
+  mock_motors_pub.publish(
+      createVelocityQuad(backwards, backwards, backwards, backwards, turn90, turn90, turn90, turn90));
 
   ASSERT_TRUE(mock_e_fl.spinUntilMessages(ros::Duration{ 5 }, 5));
   ASSERT_EQ(mock_e_fl.messages().size(), 5LU);
