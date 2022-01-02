@@ -21,8 +21,8 @@ public:
   MockSubscriber(const std::string& topic, CBFunctionType cb_function, int queue_size = 1);
   MockSubscriber(const std::string& topic, int queue_size = 1);
   ~MockSubscriber();
-  MockSubscriber(const MockSubscriber&) = delete;
-  MockSubscriber& operator=(const MockSubscriber&) = delete;
+  MockSubscriber(const MockSubscriber&) = delete;             // prohibits copying
+  MockSubscriber& operator=(const MockSubscriber&) = delete;  // prohibits copying
 
   void init(const std::string& topic, int queue_size = 1);
 
@@ -30,6 +30,7 @@ public:
   bool spinUntilMessages(const ros::Duration& timeout = ros::Duration{ 5 }, int num_messages = 1);
   [[nodiscard]] bool hasMessage() const;
   [[nodiscard]] const MessageType& front() const;
+  [[nodiscard]] const MessageType& back() const;
   [[nodiscard]] const std::vector<MessageType>& messages() const;
   [[nodiscard]] bool waitForSubscriber(const ros::Publisher& mock_pub) const;
 
@@ -123,6 +124,12 @@ template <typename M>
 const typename MockSubscriber<M>::MessageType& MockSubscriber<M>::front() const
 {
   return message_buffer_.front();
+}
+
+template <typename M>
+const typename MockSubscriber<M>::MessageType& MockSubscriber<M>::back() const
+{
+  return message_buffer_.back();
 }
 
 template <typename M>
