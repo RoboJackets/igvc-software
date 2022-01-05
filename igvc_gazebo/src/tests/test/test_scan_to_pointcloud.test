@@ -1,6 +1,0 @@
-<launch>
-    <node name="scan_to_pointcloud" pkg="igvc_gazebo"
-type="scan_to_pointcloud" output="screen" required="true"/>
-    <test test-name="test_scan_to_pointcloud" pkg="igvc_gazebo"
-type="TestScanToPointCloud"/>
-</launch>

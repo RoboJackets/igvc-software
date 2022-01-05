@@ -46,11 +46,6 @@ install(DIRECTORY config/
     FILES_MATCHING PATTERN "*.yaml"
     )
 
-if (CATKIN_ENABLE_TESTING)
-	find_package(rostest REQUIRED)
-	add_subdirectory(src/tests)
-endif()
-
 add_subdirectory(nodes/magnetometer)
 add_subdirectory(nodes/control)
 add_subdirectory(nodes/scan_to_pointcloud)
