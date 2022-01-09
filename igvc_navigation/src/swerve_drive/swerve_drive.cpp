@@ -97,9 +97,8 @@ int SwerveDrive::set_command_angle(const double& target, const int wheel_idx)
     }
   }
 
-  int min_arg;
   int omega_direc_;
-  min_arg = std::distance(ranges.begin(), std::min_element(ranges.begin(), ranges.end()));
+  int min_arg = std::distance(ranges.begin(), std::min_element(ranges.begin(), ranges.end()));
   if (min_arg == 0)
   {
     omega_direc_ = 1;
