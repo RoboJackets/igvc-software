@@ -1,4 +1,4 @@
-add_executable(swerve_drive swerve_drive.cpp interval.cpp utils.cpp)
+add_executable(swerve_drive swerve_drive.cpp)
 add_dependencies(swerve_drive ${catkin_EXPORTED_TARGETS})
 target_link_libraries(swerve_drive ${catkin_LIBRARIES})
 
