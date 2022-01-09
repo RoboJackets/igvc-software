@@ -76,30 +76,35 @@ int SwerveDrive::set_command_angle(const double& target, const int wheel_idx)
     {
         triple_point = true;        
     }
-    auto supplementary = utils::theta_map(target+M_PI);        
+    auto supplementary = utils::theta_map(target+M_PI);
+
+    std::array<double, 3> ranges;
+    ranges.fill(INT_MAX);
+
+    if (target <= 1.88 && target >= -1.88) {
+      ranges[0] = fabs(wheel_info[wheel_idx][1] - target);
+    }
+    if (supplementary <= 1.88 && supplementary >= -1.88) {
+      ranges[1] = fabs(wheel_info[wheel_idx][1] - supplementary);
+    }
+
     double supplementary2 = 0;
     if (triple_point)
     {
-        supplementary2 = utils::isclose(supplementary,M_PI) ? -M_PI : M_PI;
+      supplementary2 = utils::isclose(supplementary,M_PI) ? -M_PI : M_PI;
+      if (supplementary2 <= 1.88 && supplementary2 >= -1.88) {
+        ranges[2] = fabs(wheel_info[wheel_idx][1] - supplementary2);
+      }
+      ROS_INFO_STREAM("supplementary2: " << supplementary2);
     }
 
-    // if (target > 1.58 || target < -1.58) {
-    //   ROS_WARN_STREAM("bro wtf is this target?: " << target);
-    // }
-    // if (supplementary > 1.58 || supplementary < -1.58) {
-    //   ROS_WARN_STREAM("bro wtf is this supplementary?: " << supplementary);
-    // }
-    // if (supplementary2 > 1.58 || supplementary2 < -1.58) {
-    //   ROS_WARN_STREAM("bro wtf is this supplementary2?: " << supplementary2);
-    // }
     ROS_INFO_STREAM("target: " << target);
     ROS_INFO_STREAM("supplementary: " << supplementary);
-    ROS_INFO_STREAM("supplementary2: " << supplementary2);
 
-    auto interval1  = interval(std::array<double,2>({wheel_info[wheel_idx][1],target}),"close" );
-    auto interval2  = interval(std::array<double,2>({wheel_info[wheel_idx][1],supplementary}),"close" );
-    auto interval3  = interval1.complement();
-    auto interval4  = interval2.complement();
+    // auto interval1  = interval(std::array<double,2>({wheel_info[wheel_idx][1],target}),"close" );
+    // auto interval2  = interval(std::array<double,2>({wheel_info[wheel_idx][1],supplementary}),"close" );
+    // auto interval3  = interval1.complement();
+    // auto interval4  = interval2.complement();
 
     // interval1.print();
     // ROS_INFO_STREAM("break");
@@ -109,64 +114,63 @@ int SwerveDrive::set_command_angle(const double& target, const int wheel_idx)
     // ROS_INFO_STREAM("break");
     // interval4.print();
     
-    interval interval5;
-    interval interval6;
-    if (triple_point)
-    {
-        interval5  = interval(std::array<double,2>({wheel_info[wheel_idx][1],supplementary2}),"close" );
-        interval6  = interval5.complement();
-    }
-    std::vector<double> lengths = {interval1.len(), interval3.len(), interval2.len(), interval4.len()};
+    // interval interval5;
+    // interval interval6;
+    // if (triple_point)
+    // {
+    //     interval5  = interval(std::array<double,2>({wheel_info[wheel_idx][1],supplementary2}),"close" );
+    //     interval6  = interval5.complement();
+    // }
+
+    // std::vector<double> lengths = {interval1.len(), interval3.len(), interval2.len(), interval4.len()};
 
     int min_arg;
-    std::vector<bool> intersects = {interval1.is_intersecting(limits_list[wheel_idx]), interval3.is_intersecting(limits_list[wheel_idx]),
-      interval2.is_intersecting(limits_list[wheel_idx]), interval4.is_intersecting(limits_list[wheel_idx])};
-    if (intersects[0] && intersects[1] && intersects[2] && intersects[3])
-    {
-        interval1.print();
-        interval3.print();
-        interval2.print();
-        interval4.print();
-        ROS_WARN_STREAM("bro wtf");
-        //print something
-        // return 0;
-    }
-    lengths = {lengths[0] + 2*M_PI*intersects[0], lengths[1] + 2*M_PI*intersects[1], lengths[2] + 2*M_PI*intersects[2], lengths[3] + 2*M_PI*intersects[3]}; //punished with intersection
-    if (triple_point)
-    {  
-         lengths.push_back(interval5.len()+ 2*M_PI*interval5.is_intersecting(limits_list[wheel_idx]));
-         lengths.push_back(interval6.len()+ 2*M_PI*interval6.is_intersecting(limits_list[wheel_idx]));
-    }
+    // std::vector<bool> intersects = {interval1.is_intersecting(limits_list[wheel_idx]), interval3.is_intersecting(limits_list[wheel_idx]),
+    //   interval2.is_intersecting(limits_list[wheel_idx]), interval4.is_intersecting(limits_list[wheel_idx])};
+    // if (intersects[0] && intersects[1] && intersects[2] && intersects[3])
+    // {
+    //     interval1.print();
+    //     interval3.print();
+    //     interval2.print();
+    //     interval4.print();
+    //     ROS_WARN_STREAM("bro wtf");
+    //     //print something
+    //     // return 0;
+    // }
+    // lengths = {lengths[0] + 2*M_PI*intersects[0], lengths[1] + 2*M_PI*intersects[1], lengths[2] + 2*M_PI*intersects[2], lengths[3] + 2*M_PI*intersects[3]}; //punished with intersection
+    // if (triple_point)
+    // {  
+    //      lengths.push_back(interval5.len()+ 2*M_PI*interval5.is_intersecting(limits_list[wheel_idx]));
+    //      lengths.push_back(interval6.len()+ 2*M_PI*interval6.is_intersecting(limits_list[wheel_idx]));
+    // }
+
 
     int omega_direc_;
-    min_arg = std::distance(lengths.begin(), std::min_element(lengths.begin(), lengths.end()));        
-    if (min_arg < 2)
+    // min_arg = std::distance(lengths.begin(), std::min_element(lengths.begin(), lengths.end()));
+    min_arg = std::distance(ranges.begin(), std::min_element(ranges.begin(), ranges.end()));        
+    if (min_arg == 0)
     {
         omega_direc_ = 1;
-        if (target > 1.58 || target < -1.58) {
+        if (target > 1.88 || target < -1.88) {
           ROS_WARN_STREAM("bro wtf is this: " << target);
         }
         wheel_info[wheel_idx][1] = target;
-        return omega_direc_;
-    }
-    if (min_arg < 4)
+    } else if (min_arg == 1)
     {
         omega_direc_ = -1;
-        if (supplementary > 1.58 || supplementary < -1.58) {
+        if (supplementary > 1.88 || supplementary < -1.88) {
           ROS_WARN_STREAM("bro wtf is this: " << supplementary);
         }
         wheel_info[wheel_idx][1] = supplementary;
-        return omega_direc_;
-    }
-    else
+    } else
     {
         omega_direc_ = -1;
-        if (supplementary2 > 1.58 || supplementary2 < -1.58) {
+        if (supplementary2 > 1.88 || supplementary2 < -1.88) {
           ROS_WARN_STREAM("bro wtf is this: " << supplementary2);
         }
         wheel_info[wheel_idx][1] = supplementary2;
-        return omega_direc_;
     }
+    return omega_direc_;
 }
 
 bool SwerveDrive::getParams()
