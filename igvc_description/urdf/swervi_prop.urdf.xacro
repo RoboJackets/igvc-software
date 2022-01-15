@@ -60,6 +60,49 @@
     <xacro:property name="lidar_support_y_dim" value="0.08"/>
     <xacro:property name="lidar_support_z_dim" value="0.01"/>
 
+    <!-- IMU -->
+    <xacro:property name="imu_x" value="0.0"/>
+    <xacro:property name="imu_y" value="0.0"/>
+    <xacro:property name="imu_z" value="0.5"/>
+
+    <!-- Sensor Mast -->
+    <xacro:property name="sensor_mast_x" value="0.0"/>
+    <xacro:property name="sensor_mast_y" value="0.0"/>
+    <xacro:property name="sensor_mast_z" value="1.2"/>
+    <xacro:property name="sensor_mast_x_dim" value="0.05"/>
+    <xacro:property name="sensor_mast_y_dim" value="0.5"/>
+    <xacro:property name="sensor_mast_z_dim" value="0.05"/>
+
+    <!-- Center Camera -->
+    <xacro:property name="center_camera_x" value="0.1"/>
+    <xacro:property name="center_camera_y" value="0.0"/>
+    <xacro:property name="center_camera_z" value="0.0"/>
+    <xacro:property name="center_camera_pitch" value="0.5"/>
+
+    <!-- Left Camera -->
+    <xacro:property name="left_camera_x" value="0.0"/>
+    <xacro:property name="left_camera_y" value="-0.25"/>
+    <xacro:property name="left_camera_z" value="0.0"/>
+    <xacro:property name="left_camera_pitch" value="0.5"/>
+    <xacro:property name="left_camera_yaw" value="-2"/>
+
+    <!-- Right Camera -->
+    <xacro:property name="right_camera_x" value="0.0"/>
+    <xacro:property name="right_camera_y" value="0.25"/>
+    <xacro:property name="right_camera_z" value="0.0"/>
+    <xacro:property name="right_camera_pitch" value="0.5"/>
+    <xacro:property name="right_camera_yaw" value="2"/>
+
+    <!-- GPS -->
+    <xacro:property name="gps_x" value="0.0"/>
+    <xacro:property name="gps_y" value="0.1"/>
+    <xacro:property name="gps_z" value="0.0"/>
+
+    <!-- Magnetometer -->
+    <xacro:property name="magnetometer_x" value="0.0"/>
+    <xacro:property name="magnetometer_y" value="0.0"/>
+    <xacro:property name="magnetometer_z" value="0.0"/>
+
     <!-- gives small geometry so it show up in rviz -->
     <xacro:macro name="null_link">
         <inertial>
