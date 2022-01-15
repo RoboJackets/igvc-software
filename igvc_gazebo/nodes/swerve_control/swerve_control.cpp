@@ -50,6 +50,8 @@ SwerveControl::SwerveControl() : pNh{ "~" }
   assertions::param(pNh, "max_effort", max_effort, 4.0);
   assertions::param(pNh, "rate", rate_var, 60.0);
 
+  assertions::param(pNh, "alpha", alpha, 0.5);
+
   // joint names
   joint_names = { "fl_wheel_axle", "fr_wheel_axle", "bl_wheel_axle", "br_wheel_axle",
                   "fl_swivel_rev", "fr_swivel_rev", "bl_swivel_rev", "br_swivel_rev" };
@@ -101,9 +103,11 @@ void SwerveControl::ControlLoop()
     for (size_t i = 0; i < motors_end; ++i)
     {
       double error = motors[i].set_point - motors[i].measured;
-      double dError = (error - motors[i].last_error) / dt;
-      motors[i].error_accum += error;
-      motors[i].last_error = error;
+      double filtered_error = alpha * error + (1 - alpha) * motors[i].last_error;
+      double dError = (dt == 0) ? 0 : (filtered_error - motors[i].last_error) / dt;
+      
+      motors[i].error_accum += error * dt;
+      motors[i].last_error = filtered_error;
       motors[i].effort += motors[i].P * error + motors[i].D * dError + motors[i].I * motors[i].error_accum;
       motors[i].effort = std::min(max_effort, std::max(-max_effort, motors[i].effort));
       std_msgs::Float64 effort_msg;
@@ -188,7 +192,7 @@ void SwerveControl::jointStateCallback(const sensor_msgs::JointStateConstPtr &ms
     if (iter != msg->name.end())
     {
       auto index = std::distance(msg->name.begin(), iter);
-      motors[i].measured = (msg->velocity[index]) * (wheel_radius);
+      motors[i].measured = msg->velocity[index] * wheel_radius;
     }
   }
 
