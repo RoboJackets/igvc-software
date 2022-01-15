@@ -62,7 +62,8 @@ private:
   double speed_D_fl, speed_D_fr, speed_D_bl, speed_D_br;
   double rate_var;
   double wheel_radius;
-  double max_effort = 0.0;
+  double max_effort;
+  double alpha;
 
   std::vector<controlInfo> motors;
 
