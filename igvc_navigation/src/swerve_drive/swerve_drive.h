@@ -21,7 +21,6 @@ private:
   ros::Subscriber mbf_twist_;
   ros::Publisher vel_pub_;
 
-  std::array<double, 4> radii_list;
   std::array<std::array<double, 2>, 4> positions_list;
   std::array<std::array<double, 2>, 4> limits_list;
   std::array<std::array<double, 2>, 4> wheel_info;

@@ -132,33 +132,7 @@ int SwerveDrive::set_command_angle(const double& target, const int wheel_idx)
 bool SwerveDrive::getParams()
 {
   XmlRpc::XmlRpcValue xml_list;
-  // radii
-  if (!nh.getParam("swerve_drive/radii", xml_list))
-  {
-    ROS_ERROR_STREAM("Unable to retrieve radii list");
-    return false;
-  }
-  if (xml_list.getType() != XmlRpc::XmlRpcValue::TypeArray)
-  {
-    ROS_ERROR_STREAM("radii list not of type array");
-    return false;
-  }
   const int num_wheels = 4;
-  if (xml_list.size() != num_wheels)
-  {
-    ROS_ERROR_STREAM("radii list not of size 4");
-    return false;
-  }
-  for (int i = 0; i < num_wheels; ++i)
-  {
-    if (xml_list[i].getType() != XmlRpc::XmlRpcValue::TypeDouble &&
-        xml_list[i].getType() != XmlRpc::XmlRpcValue::TypeInt)
-    {
-      ROS_ERROR_STREAM("radii #" << i << " is not of type double or int");
-      return false;
-    }
-    radii_list[i] = static_cast<double>(xml_list[i]);
-  }
 
   // positions
   if (!nh.getParam("swerve_drive/positions", xml_list))
