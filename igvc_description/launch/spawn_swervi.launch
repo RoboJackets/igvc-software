@@ -15,7 +15,7 @@
     <!-- End of arguments list -->
 
     <!-- Spawn the vehicle. -->
-    <param name="robot_description" command="$(find xacro)/xacro $(arg model) gpu:=$(arg gpu)" />
+    <param name="robot_description" command="$(find xacro)/xacro $(find igvc_description)/urdf/swervi.urdf.xacro gpu:=$(arg gpu)" />
 
     <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
         args="-param robot_description
