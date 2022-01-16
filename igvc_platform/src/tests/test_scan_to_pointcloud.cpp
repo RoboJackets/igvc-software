@@ -51,7 +51,7 @@ TEST_F(TestScanToPointCloud, ComparisonTest)
         (p1.points[0].x - p2.points[0].x) + (p1.points[0].y - p2.points[0].y) + (p1.points[0].z - p2.points[0].z);
     return (difference < .1);
   };
-
+  
   mock_pub.publish(createPointCloudMsg(offset1));
   ASSERT_TRUE(mock_sub.spinUntilMessages());
   const pcl::PointCloud<pcl::PointXYZ>& response1 = mock_sub.front();

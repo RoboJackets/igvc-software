@@ -1,13 +1,22 @@
 #include "scan_to_pointcloud.h"
 
-scan_to_pointcloud::scan_to_pointcloud()
-  : _pointcloud_pub{ node_handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/pc2", 1) }
-  , _pointcloud_sub{ node_handle.subscribe("/scan", 1, &scan_to_pointcloud::scanCallback, this) }
-  , private_node_handle{ "~" }
+scan_to_pointcloud::scan_to_pointcloud() : private_node_handle{"~"}
 {
+  _pointcloud_pub = node_handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/pc2", 1);
+  _pointcloud_sub = node_handle.subscribe("/scan", 1, &scan_to_pointcloud::scanCallback, this);
+
   assertions::getParam(private_node_handle, "min_dist", min_dist);
   assertions::getParam(private_node_handle, "neighbor_dist", neighbor_dist);
   assertions::getParam(private_node_handle, "offset", offset);
+  scan_to_pointcloud::spinnerUpdate();
+}
+
+void scan_to_pointcloud::spinnerUpdate()
+{
+  while(ros::ok())
+  {
+    ros::spinOnce();
+  }
 }
 
 void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr &msg)
@@ -50,6 +59,7 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr &ms
   fromROSMsg(cloud, *cloud_for_pub);
   tf::Quaternion quaternion_mag;
   quaternion_mag.setRPY(0, 0, offset);
+
   tf::Transform trans;
   trans.setRotation(quaternion_mag);
   pcl_ros::transformPointCloud(*cloud_for_pub, *cloud_for_pub, trans);
@@ -59,6 +69,6 @@ void scan_to_pointcloud::scanCallback(const sensor_msgs::LaserScan::ConstPtr &ms
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "scan_to_pointcloud");
-  scan_to_pointcloud scan_object();
+  scan_to_pointcloud scan_object;
   ros::spin();
 }

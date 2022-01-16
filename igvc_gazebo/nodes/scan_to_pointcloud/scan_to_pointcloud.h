@@ -13,6 +13,9 @@
 
 class scan_to_pointcloud
 {
+public:
+  scan_to_pointcloud();
+
 private:
   ros::Publisher _pointcloud_pub;
   ros::Subscriber _pointcloud_sub;
@@ -24,9 +27,8 @@ private:
   double neighbor_dist;
   double offset;
 
-public:
-  explicit scan_to_pointcloud();
   void scanCallback(const sensor_msgs::LaserScan::ConstPtr &msg);
+  void spinnerUpdate();
 };
 
 #endif
