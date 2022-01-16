@@ -1,4 +1,8 @@
 <launch>
-    <node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" required="true"/>
+    <node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" required="true">
+        <param name= "min_dist"      value="0.1"/>
+        <param name= "neighbor_dist" value="0.2"/>
+        <param name= "offset"        value="2.35619449019"/>
+    </node>
     <test test-name="test_scan_to_pointcloud" pkg="igvc_platform" type="TestScanToPointCloud"/>
 </launch>

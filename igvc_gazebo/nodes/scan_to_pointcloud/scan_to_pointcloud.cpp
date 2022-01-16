@@ -1,6 +1,6 @@
 #include "scan_to_pointcloud.h"
 
-scan_to_pointcloud::scan_to_pointcloud() : private_node_handle{"~"}
+scan_to_pointcloud::scan_to_pointcloud() : private_node_handle{ "~" }
 {
   _pointcloud_pub = node_handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/pc2", 1);
   _pointcloud_sub = node_handle.subscribe("/scan", 1, &scan_to_pointcloud::scanCallback, this);
@@ -13,7 +13,7 @@ scan_to_pointcloud::scan_to_pointcloud() : private_node_handle{"~"}
 
 void scan_to_pointcloud::spinnerUpdate()
 {
-  while(ros::ok())
+  while (ros::ok())
   {
     ros::spinOnce();
   }

@@ -24,23 +24,35 @@ protected:
 // slight modification of lines 44-56 of scan_to_pointcloud.cpp
 pcl::PointCloud<pcl::PointXYZ> createPointCloudMsg(double offset)
 {
-  sensor_msgs::PointCloud2 cloud;
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  pcl::PointXYZ point(0, 1, 0);
+  cloud.points.push_back(point);
   cloud.header.frame_id = "/lidar";
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_for_pub(new pcl::PointCloud<pcl::PointXYZ>());
-  fromROSMsg(cloud, *cloud_for_pub);
   tf::Quaternion quaternion_mag;
   quaternion_mag.setRPY(0, 0, offset);
   tf::Transform trans;
   trans.setRotation(quaternion_mag);
-  pcl_ros::transformPointCloud(*cloud_for_pub, *cloud_for_pub, trans);
-  return (*cloud_for_pub);
+  pcl_ros::transformPointCloud(cloud, cloud, trans);
+  return cloud;
 }
 
 TEST_F(TestScanToPointCloud, ComparisonTest)
 {
   double offset1{ M_PI / 2 };
   double offset2{ 5 * M_PI / 2 };
+
+  double min_dist;
+  node_handle.getParam("scan_to_pointcloud/min_dist", min_dist);
+  ASSERT_TRUE(min_dist == 0.1);
+
+  double neighbor_dist;
+  node_handle.getParam("scan_to_pointcloud/neighbor_dist", neighbor_dist);
+  ASSERT_TRUE(neighbor_dist == 0.2);
+
+  double offset;
+  node_handle.getParam("scan_to_pointcloud/offset", offset);
+  ASSERT_TRUE(offset == 2.35619449019);
 
   MockSubscriber<pcl::PointCloud<pcl::PointXYZ>> mock_sub("/pc2");
   ASSERT_TRUE(mock_sub.waitForPublisher());
@@ -51,7 +63,12 @@ TEST_F(TestScanToPointCloud, ComparisonTest)
         (p1.points[0].x - p2.points[0].x) + (p1.points[0].y - p2.points[0].y) + (p1.points[0].z - p2.points[0].z);
     return (difference < .1);
   };
-  
+
+  pcl::PointCloud<pcl::PointXYZ> test1;
+  pcl::PointXYZ point(0, 1, 0);
+  test1.points.push_back(point);
+  test1.header.frame_id = "/lidar";
+
   mock_pub.publish(createPointCloudMsg(offset1));
   ASSERT_TRUE(mock_sub.spinUntilMessages());
   const pcl::PointCloud<pcl::PointXYZ>& response1 = mock_sub.front();
