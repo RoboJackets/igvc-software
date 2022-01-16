@@ -78,7 +78,6 @@ TEST_F(TestSwerveDrive, ForwardTest)
   EXPECT_EQ(response.br_angle, stop);
 }
 
-
 TEST_F(TestSwerveDrive, TurnTest)
 {
   MockSubscriber<igvc_msgs::velocity_quad> mock_sub("/motors");

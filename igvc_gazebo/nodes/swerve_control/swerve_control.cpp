@@ -105,7 +105,7 @@ void SwerveControl::ControlLoop()
       double error = motors[i].set_point - motors[i].measured;
       double filtered_error = alpha * error + (1 - alpha) * motors[i].last_error;
       double dError = (dt == 0) ? 0 : (filtered_error - motors[i].last_error) / dt;
-      
+
       motors[i].error_accum += error * dt;
       motors[i].last_error = filtered_error;
       motors[i].effort += motors[i].P * error + motors[i].D * dError + motors[i].I * motors[i].error_accum;

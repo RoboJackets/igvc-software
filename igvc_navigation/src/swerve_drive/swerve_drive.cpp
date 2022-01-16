@@ -246,7 +246,8 @@ bool SwerveDrive::getParams()
 
 double SwerveDrive::theta_map(const double& theta)
 {
-  if (isclose(theta, M_PI)) {
+  if (isclose(theta, M_PI))
+  {
     return M_PI;  // to keep the 180 as is
   }
   return fmod((theta + M_PI), 2 * M_PI) - M_PI;
