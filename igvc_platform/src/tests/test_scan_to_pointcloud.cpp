@@ -4,9 +4,6 @@
 #include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
-#include <tf/transform_datatypes.h>
-#include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
 #include <mocking_utils/mock_subscriber.h>
 
 class TestScanToPointCloud : public testing::Test
@@ -25,7 +22,7 @@ protected:
 pcl::PointCloud<pcl::PointXYZ> createPointCloudMsg(double offset)
 {
   pcl::PointCloud<pcl::PointXYZ> cloud;
-  pcl::PointXYZ point(0, 1, 0);
+  pcl::PointXYZ point(1, 1, 1);
   cloud.points.push_back(point);
   cloud.header.frame_id = "/lidar";
 
@@ -39,9 +36,6 @@ pcl::PointCloud<pcl::PointXYZ> createPointCloudMsg(double offset)
 
 TEST_F(TestScanToPointCloud, ComparisonTest)
 {
-  double offset1{ M_PI / 2 };
-  double offset2{ 5 * M_PI / 2 };
-
   double min_dist;
   node_handle.getParam("scan_to_pointcloud/min_dist", min_dist);
   ASSERT_TRUE(min_dist == 0.1);
@@ -61,25 +55,20 @@ TEST_F(TestScanToPointCloud, ComparisonTest)
   auto cloudComparer = [](const pcl::PointCloud<pcl::PointXYZ>& p1, const pcl::PointCloud<pcl::PointXYZ>& p2) {
     double difference =
         (p1.points[0].x - p2.points[0].x) + (p1.points[0].y - p2.points[0].y) + (p1.points[0].z - p2.points[0].z);
-    return (difference < .1);
+    return (difference < .01);
   };
 
-  pcl::PointCloud<pcl::PointXYZ> test1;
-  pcl::PointXYZ point(0, 1, 0);
-  test1.points.push_back(point);
-  test1.header.frame_id = "/lidar";
+  pcl::PointCloud<pcl::PointXYZ> test_cloud;
+  pcl::PointXYZ point(-1.4142136, 0, 1);
+  test_cloud.points.push_back(point);
+  test_cloud.header.frame_id = "/lidar";
 
-  mock_pub.publish(createPointCloudMsg(offset1));
+  mock_pub.publish(createPointCloudMsg(offset));
   ASSERT_TRUE(mock_sub.spinUntilMessages());
-  const pcl::PointCloud<pcl::PointXYZ>& response1 = mock_sub.front();
-  ASSERT_TRUE(response1.size() > 0);
+  const pcl::PointCloud<pcl::PointXYZ>& response_cloud = mock_sub.front();
+  ASSERT_TRUE(response_cloud.size() > 0);
 
-  mock_pub.publish(createPointCloudMsg(offset2));
-  ASSERT_TRUE(mock_sub.spinUntilMessages());
-  const pcl::PointCloud<pcl::PointXYZ>& response2 = mock_sub.front();
-  ASSERT_TRUE(response2.size() > 0);
-
-  ASSERT_TRUE(cloudComparer(response1, response2));
+  ASSERT_TRUE(cloudComparer(response_cloud, test_cloud));
 }
 
 int main(int argc, char** argv)
