@@ -55,7 +55,7 @@ TEST_F(TestScanToPointCloud, ComparisonTest)
   auto cloudComparer = [](const pcl::PointCloud<pcl::PointXYZ>& p1, const pcl::PointCloud<pcl::PointXYZ>& p2) {
     double difference =
         (p1.points[0].x - p2.points[0].x) + (p1.points[0].y - p2.points[0].y) + (p1.points[0].z - p2.points[0].z);
-    return (difference < .01);
+    return (abs(difference) < .01);
   };
 
   pcl::PointCloud<pcl::PointXYZ> test_cloud;
