@@ -62,10 +62,10 @@
         <mu2>0.2</mu2>
     </gazebo>
 
-    <xacro:swerve_module prefix="fl" x_pos="${wheel_offset_x}" y_pos="${-wheel_offset_y}"/> 
-    <xacro:swerve_module prefix="bl" x_pos="${-wheel_offset_x}" y_pos="${-wheel_offset_y}"/> 
-    <xacro:swerve_module prefix="br" x_pos="${-wheel_offset_x}" y_pos="${wheel_offset_y}"/> 
-    <xacro:swerve_module prefix="fr" x_pos="${wheel_offset_x}" y_pos="${wheel_offset_y}"/> 
+    <xacro:swerve_module prefix="fl" x_pos="${wheel_offset_x}" y_pos="${wheel_offset_y}"/> 
+    <xacro:swerve_module prefix="bl" x_pos="${-wheel_offset_x}" y_pos="${wheel_offset_y}"/> 
+    <xacro:swerve_module prefix="br" x_pos="${-wheel_offset_x}" y_pos="${-wheel_offset_y}"/> 
+    <xacro:swerve_module prefix="fr" x_pos="${wheel_offset_x}" y_pos="${-wheel_offset_y}"/> 
 
     <!-- LIDAR -->
     <link name="lidar_support">

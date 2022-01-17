@@ -108,7 +108,7 @@ void SwerveControl::ControlLoop()
 
       motors[i].error_accum += error * dt;
       motors[i].last_error = filtered_error;
-      motors[i].effort += motors[i].P * error + motors[i].D * dError + motors[i].I * motors[i].error_accum;
+      motors[i].effort = motors[i].P * error + motors[i].D * dError + motors[i].I * motors[i].error_accum;
       motors[i].effort = std::min(max_effort, std::max(-max_effort, motors[i].effort));
       std_msgs::Float64 effort_msg;
       effort_msg.data = motors[i].effort;

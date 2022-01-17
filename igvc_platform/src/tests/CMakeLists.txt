@@ -17,3 +17,7 @@ target_link_libraries(TestScanToPointCloud ${catkin_LIBRARIES})
 add_rostest_gtest(TestSwerveControl test/test_swerve_control.test test_swerve_control.cpp)
 add_dependencies(TestSwerveControl ${catkin_EXPORTED_TARGETS} swerve_control)
 target_link_libraries(TestSwerveControl ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestSwerveDrive test/test_swerve_drive.test test_swerve_drive.cpp)
+add_dependencies(TestSwerveDrive ${catkin_EXPORTED_TARGETS} swerve_drive)
+target_link_libraries(TestSwerveDrive ${catkin_LIBRARIES})

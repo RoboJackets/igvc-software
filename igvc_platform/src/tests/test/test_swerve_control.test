@@ -16,6 +16,7 @@
       <param name="wheel_radius" value="0.3429"/>
       <param name="max_effort" value="8.0"/>
       <param name="rate" value="60.0"/>
+      <param name="alpha" value="0.5"/>
   </node>
   <test test-name="test_swerve_control" pkg="igvc_platform" type="TestSwerveControl"/>
 
