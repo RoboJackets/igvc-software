@@ -14,17 +14,17 @@ SwerveDrive::SwerveDrive() : pNh{ "~" }
   vel_pub_ = nh.advertise<igvc_msgs::velocity_quad>("/motors", 1);
 }
 
-void SwerveDrive::twistToVelocity(geometry_msgs::Twist twist)
+void SwerveDrive::twistToVelocity(const geometry_msgs::TwistConstPtr& twist)
 {
-  if (!std::isfinite(twist.linear.x) || !std::isfinite(twist.linear.y) || !std::isfinite(twist.angular.z))
+  if (!std::isfinite(twist->linear.x) || !std::isfinite(twist->linear.y) || !std::isfinite(twist->angular.z))
   {
     ROS_WARN_THROTTLE(1.0, "Recieved NaN in velocity command. Ignoring.");
     return;
   }
 
-  const double speedX = twist.linear.x;
-  const double speedY = twist.linear.y;
-  const double rotation = twist.angular.z;
+  const double speedX = twist->linear.x;
+  const double speedY = twist->linear.y;
+  const double rotation = twist->angular.z;
 
   double localMax = INT_MIN;
 
@@ -66,13 +66,10 @@ void SwerveDrive::twistToVelocity(geometry_msgs::Twist twist)
   vel_pub_.publish(vel_msg);
 }
 
-int SwerveDrive::set_command_angle(const double& target, const int wheel_idx)
+int SwerveDrive::set_command_angle(const double& target, const int& wheel_idx)
 {
-  bool triple_point = false;
-  if (isclose(target, 0) || isclose(target, M_PI) || isclose(target, -M_PI))
-  {
-    triple_point = true;
-  }
+  bool triple_point = isclose(target, 0) || isclose(target, M_PI) || isclose(target, -M_PI);
+  
   auto supplementary = theta_map(target + M_PI);
 
   std::array<double, 3> ranges;

@@ -24,11 +24,11 @@ private:
   std::array<std::array<double, 2>, 4> positions_list;
   std::array<std::array<double, 2>, 4> limits_list;
   std::array<std::array<double, 2>, 4> wheel_info;
-  double max_vel_{};
+  double max_vel_;
 
-  void twistToVelocity(geometry_msgs::Twist twist);
+  void twistToVelocity(const geometry_msgs::TwistConstPtr& twist);
   bool getParams();
-  int set_command_angle(const double& target, const int wheel_idx);
+  int set_command_angle(const double& target, const int& wheel_idx);
   double theta_map(const double& theta);
   double isclose(const double& a, const double& b, const double tol = 0.00001, const double bias = 0);
 };
