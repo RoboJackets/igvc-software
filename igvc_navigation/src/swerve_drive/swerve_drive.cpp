@@ -69,7 +69,7 @@ void SwerveDrive::twistToVelocity(const geometry_msgs::TwistConstPtr& twist)
 int SwerveDrive::set_command_angle(const double& target, const int& wheel_idx)
 {
   bool triple_point = isclose(target, 0) || isclose(target, M_PI) || isclose(target, -M_PI);
-  
+
   auto supplementary = theta_map(target + M_PI);
 
   std::array<double, 3> ranges;
