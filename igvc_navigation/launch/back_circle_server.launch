@@ -1,5 +1,5 @@
 <launch>
     <node name="back_circle" pkg="igvc_navigation" type="back_circle" output="screen" required="true">
-        <rosparam file="$(find igvc_navigation)/config/back_circle.yaml" command="load">
+        <rosparam file="$(find igvc_navigation)/config/back_circle.yaml" command="load"/>
     </node>
 </launch>

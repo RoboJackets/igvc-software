@@ -24,11 +24,11 @@ bool BackCircleServer::backCircleCallback(igvc_msgs::BackCircle::Request &req, i
   double width, length, grid_size, thickness, offset;
   std::vector<double> xVec, yVec;
 
-  assertions::getParam(pNh, std::string("width"), width);
-  assertions::getParam(pNh, std::string("length"), length);
-  assertions::getParam(pNh, std::string("grid_size"), grid_size);
-  assertions::getParam(pNh, std::string("thickness"), thickness);
-  assertions::getParam(pNh, std::string("offset"), offset);
+  assertions::getParam(pNh, std::string("back_circle/width"), width);
+  assertions::getParam(pNh, std::string("back_circle/length"), length);
+  assertions::getParam(pNh, std::string("back_circle/grid_size"), grid_size);
+  assertions::getParam(pNh, std::string("back_circle/thickness"), thickness);
+  assertions::getParam(pNh, std::string("back_circle/offset"), offset);
   double meters = (length + width) * 2;
 
   int img_size = static_cast<int>(std::round(meters / grid_size));
