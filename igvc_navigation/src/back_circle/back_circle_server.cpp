@@ -22,7 +22,7 @@ bool BackCircleServer::backCircleCallback(igvc_msgs::BackCircle::Request &req, i
   ros::NodeHandle pNh("~");
 
   double width, length, grid_size, thickness, offset;
-  std::vector<double> xVec, yVec, zVec;
+  std::vector<double> xVec, yVec;
 
   assertions::getParam(pNh, std::string("width"), width);
   assertions::getParam(pNh, std::string("length"), length);
@@ -61,12 +61,10 @@ bool BackCircleServer::backCircleCallback(igvc_msgs::BackCircle::Request &req, i
   {
     xVec.push_back(back_circle_pointcloud_odom.points[i].x);
     yVec.push_back(back_circle_pointcloud_odom.points[i].y);
-    zVec.push_back(back_circle_pointcloud_odom.points[i].z);
   }
 
   res.x = xVec;
   res.y = yVec;
-  res.z = zVec;
 
   ROS_INFO("Back circle points created.");
 

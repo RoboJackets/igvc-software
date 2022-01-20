@@ -31,10 +31,6 @@ void BackCircleLayer::updateBounds(double robot_x, double robot_y, double robot_
 
 void BackCircleLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-  uint8_t *master_array = master_grid.getCharMap();
-  uint8_t *line_array = getCharMap();
-  unsigned int span = master_grid.getSizeInCellsX();
-
   for (size_t i = 0; i < xVals.size(); ++i)
   {
     // If costmap contains the back circle point, add it to the costmap
