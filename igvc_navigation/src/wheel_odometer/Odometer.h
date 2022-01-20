@@ -3,6 +3,9 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
+#include <sensor_msgs/Imu.h>
+#include <math.h>
+#include <nav_msgs/Odometry.h>
 
 class Odometer
 {

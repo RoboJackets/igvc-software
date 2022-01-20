@@ -1,9 +1,4 @@
 #include "Odometer.h"
-#include <igvc_msgs/velocity_pair.h>
-#include <math.h>
-#include <nav_msgs/Odometry.h>
-#include <ros/ros.h>
-#include "Odometer.h"
 
 double wheel_separation;
 
@@ -78,7 +73,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   odom.header.seq = seq++;
 
   // setting reference frames
-  odom.header.frame_id = "wheel_odom";
+  odom.header.frame_id = "odom";
   odom.child_frame_id = "base_footprint";
 
   // set time then publish
@@ -99,7 +94,19 @@ Odometer::Odometer(ros::NodeHandle& nh)
   // initialize position - map published is relative to position at time t=0
   x = 0;
   y = 0;
-  yaw = 0;
+
+  sensor_msgs::Imu initImuMsg;
+  sensor_msgs::ImuConstPtr msg = ros::topic::waitForMessage<sensor_msgs::Imu>("/magnetometer", ros::Duration(1));
+  if (msg == NULL)
+  {
+    ROS_INFO("No messages received");
+  }
+  else
+  {
+    initImuMsg = *msg;
+  }
+  tf::Quaternion orientation(msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
+  yaw = tf::getYaw(orientation);
 }
 
 int main(int argc, char** argv)

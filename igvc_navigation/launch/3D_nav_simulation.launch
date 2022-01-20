@@ -1,0 +1,29 @@
+<launch>
+    <arg name="read_from_file" default="true"/>
+
+    <!-- Localization -->
+    <include file="$(find igvc_perception)/launch/slam.launch" />
+
+    <!-- Launch navigation (simulation version) -->
+    <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
+
+    <!-- Launch navigation server -->
+    <include file="$(find igvc_navigation)/launch/navigation_server.launch"/>
+
+    <!-- Launch navigation client -->
+    <include file="$(find igvc_navigation)/launch/navigation_client.launch">
+        <arg name="read_from_file" value="$(arg read_from_file)"/>
+    </include>
+
+    <!-- Launch differential drive controller -->
+    <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
+
+    <!-- pointcloud filter -->
+    <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
+
+    <!-- elevation mapping -->
+    <include file="$(find igvc_perception)/launch/elevation_mapping.launch" />
+
+    <!-- traversability filter -->
+    <include file="$(find igvc_perception)/launch/slope_filter.launch"/>
+</launch>
