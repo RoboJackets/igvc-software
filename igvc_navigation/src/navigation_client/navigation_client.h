@@ -5,6 +5,7 @@
 
 #include <actionlib/client/simple_action_client.h>
 #include <igvc_msgs/NavigateWaypointAction.h>
+#include <igvc_msgs/BackCircle.h>
 #include <tf/transform_listener.h>
 
 #include <fstream>
@@ -33,6 +34,10 @@ public:
 private:
   // action lib client
   MoveBaseClient client = MoveBaseClient("/move_to_waypoint", true);
+
+  // back circle service client
+  ros::ServiceClient back_circle_client;
+  ros::Publisher back_circle_response_pub_;
 
   // params
   bool reading_from_file_;          // true if reading from waypoint file, false if from rviz
@@ -79,6 +84,11 @@ private:
   Sends all waypoints to navigation server
    */
   void sendWaypoints(const std::vector<geometry_msgs::PointStamped>& waypoints);
+
+  /**
+  calls the BackCicle service to prevent robot from pathing backwards
+   */
+  void callBackCircleService();
 
   /**
   sends `pose` as a goal and waits if `waiting` is true

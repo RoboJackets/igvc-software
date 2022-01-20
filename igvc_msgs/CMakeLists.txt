@@ -26,6 +26,12 @@ add_message_files(
     barrels.msg
 )
 
+add_service_files(
+    DIRECTORY srv
+    FILES
+    BackCircle.srv
+)
+
 add_action_files(
     DIRECTORY action
     FILES
@@ -44,4 +50,6 @@ generate_messages(
 catkin_package(
     CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs actionlib_msgs message_runtime
 )
+
+
 
