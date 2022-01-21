@@ -386,7 +386,7 @@
             <headingDrift>0.0 0.0 0.0</headingDrift>
             <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
             <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-            <yawOffset>1.57079632679</yawOffset>
+            <yawOffset>-1.57079632679</yawOffset>
         </plugin>
 
         <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
@@ -406,7 +406,7 @@
             <headingDrift>0.0 0.0 0.0</headingDrift>
             <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
             <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-            <yawOffset>0</yawOffset>
+            <yawOffset>-1.57079632679</yawOffset>
         </plugin>
 
         <plugin name="magnetometer" filename="libhector_gazebo_ros_magnetic.so">
