@@ -7,7 +7,7 @@ global_costmap:
         - {name: back_circle_layer, type: "back_circle_layer::BackCircleLayer"}
         - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
-    footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]
+    footprint: [[-0.4318,0.3048],[0.4318,0.3048],[0.4318,-0.3048],[-0.4318,-0.3048]]
     width: 200
     height: 200
     origin_x: -100
