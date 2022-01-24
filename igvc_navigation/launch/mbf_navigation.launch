@@ -13,8 +13,8 @@
             <param name="robot_frame" value="base_link" />
             <param name="global_frame" value="odom" />
             <param name="map_frame" value="odom" />
-            <rosparam file="$(find igvc_navigation)/config/global_costmap_params.yaml" command="load" />
-            <rosparam file="$(find igvc_navigation)/config/local_costmap_params.yaml" command="load" />
+            <rosparam file="$(find igvc_navigation)/config/global_costmap_params_jessi.yaml" command="load" />
+            <rosparam file="$(find igvc_navigation)/config/local_costmap_params_jessi.yaml" command="load" />
             <rosparam file="$(find igvc_navigation)/config/teb_local_planner_params_jessi.yaml" command="load" />
             <rosparam file="$(find igvc_navigation)/config/planners.yaml" command="load" />
             <rosparam file="$(find igvc_navigation)/config/controllers.yaml" command="load" />
@@ -33,8 +33,8 @@
             <param name="robot_frame" value="base_link" />
             <param name="global_frame" value="odom" />
             <param name="map_frame" value="odom" />
-            <rosparam file="$(find igvc_navigation)/config/global_costmap_params.yaml" command="load" />
-            <rosparam file="$(find igvc_navigation)/config/local_costmap_params.yaml" command="load" />
+            <rosparam file="$(find igvc_navigation)/config/global_costmap_params_swervi.yaml" command="load" />
+            <rosparam file="$(find igvc_navigation)/config/local_costmap_params_swervi.yaml" command="load" />
             <rosparam file="$(find igvc_navigation)/config/teb_local_planner_params_swervi.yaml" command="load" />
             <rosparam file="$(find igvc_navigation)/config/planners.yaml" command="load" />
             <rosparam file="$(find igvc_navigation)/config/controllers.yaml" command="load" />
