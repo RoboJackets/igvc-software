@@ -20,11 +20,11 @@
     <arg name="y" value="13.5" if="$(eval track == 3)"/>
     <arg name="y" value="9" if="$(eval track == 4)"/>
     <arg name="y" value="3.5" if="$(eval track == 5)"/>
-    <arg name="y" value="-1" if="$(eval track == 6)"/>
-    <arg name="y" value="-4.5" if="$(eval track == 7)"/>
+    <arg name="y" value="0" if="$(eval track == 6)"/>
+    <arg name="y" value="-3" if="$(eval track == 7)"/>
     <arg name="y" value="-9" if="$(eval track == 8)"/>
     <arg name="y" value="-14.5" if="$(eval track == 9)"/>
-    <arg name="y" value="-19" if="$(eval track == 10)"/>
+    <arg name="y" value="-18" if="$(eval track == 10)"/>
 
     <include file="$(find igvc_gazebo)/launch/simulation.launch">
         <arg name="world_name" value="$(find igvc_description)/urdf/worlds/qualification.world"/>
