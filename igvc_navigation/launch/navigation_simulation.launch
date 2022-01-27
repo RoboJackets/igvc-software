@@ -22,8 +22,13 @@
         <arg name="read_from_file" value="$(arg read_from_file)"/>
     </include>
 
-    <!-- Launch differential drive controller -->
-    <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
+    <!-- Launch drive controller -->
+    <group if="$(eval arg('model') == 0)">
+        <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
+    </group>
+    <group if="$(eval arg('model') == 1)">
+        <include file="$(find igvc_navigation)/launch/swerve_drive.launch" />
+    </group>
 
     <!-- pointcloud filter -->
     <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
