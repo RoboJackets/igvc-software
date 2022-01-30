@@ -5,9 +5,11 @@
 
 
 
-
+//constructor
 SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"} 
 {
+
+    //TODO add .launch file and its params
 
     // cameras to obtain images from
     std::vector<std::string> camera_names;
@@ -19,37 +21,37 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
     std::vector<std::string> semantic_suffixes;
     assertions::getParam(pNh, "semantic_info_topic_suffix", semantic_suffixes);
 
-
     assertions::getParam(pNh, "image_info_base_topic", image_info_base_topic);
 
     assertions::getParam(pNh, "output_width", output_width);
     assertions::getParam(pNh, "output_height", output_height);
 
+    assertions::getParam(pNh, "segmented_publisher_path", seg_cam_path);
+
+
+    //publish for each cam
     for (size_t i = 0; i < camera_names.size(); i++)
     {
         auto camera_name = camera_names[i];
-        auto prefix = semantic_prefixes[i];
+        auto prefix = semantic_prefixes[i]; //prefix is topic
         auto suffix = semantic_suffixes[i];
 
-        std::string semantic_info_topic = prefix + line_topic;
+        std::string semantic_info_topic = prefix + camera_name;
         semantic_info_topic.append(suffix);
 
-        // subscriber
-        image_transport::CameraSubscriber cam_sub = image_transport.subscribeCamera(
-            camera_name + image_info_base_topic, 1, boost::bind(ScaleCameraInfo, _1, _2, _3, camera_name));
-        subs.push_back(cam_sub);
+        // subscriber, also calls scalecamerainfo
+        ros::Subscriber cam_msg_sub = nh.subscribe( semantic_info_topic, std::bind(SegmentedcameraInfoPublisher::ScaleCameraInfo, _1, output_width, output_height, camera_name) );
+        subs.push_back(std::move(cam_msg_sub)); //may error
 
-        // publish segented camera info
-        image_transport::CameraPublisher cam_pub = image_transport.advertiseCamera(semantic_info_topic, 1);
-
-        //TODO: figure out where we want to publish the info
-        ros::Publisher info_pub = nh.advertise<sensor_msgs::Image>(camera_name + camera_info, 1);
+        //ie subscribe name/raw/info -> name/segmented/info
+        ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name + seg_cam_path, 1);
+        g_pubs.insert ( std::pair<std::string, ros::Publisher>(camera_name,info_pub) );
+        
     }
 }
 
 void SegmentedcameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height, std::string camera_name) 
 {
-    //direct copypasta from nodes/sim_color_detector/main
     sensor_msgs::CameraInfo changed_camera_info = camera_info;
     changed_camera_info.D = camera_info.D;
     changed_camera_info.distortion_model = camera_info.distortion_model;
@@ -69,7 +71,6 @@ void SegmentedcameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfo
     changed_camera_info.P = { { camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
                                 camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0 } };
 
-    // publish segmented camera info
     g_pubs.at(camera_name).publish(changed_camera_info);
 }
 
@@ -80,4 +81,5 @@ int main(int argc, char** argv)
     SegmentedCameraInfoPublisher segmented_camera_info_publisher;
     //spin
     ros::spin();
+    return 0;
 }
