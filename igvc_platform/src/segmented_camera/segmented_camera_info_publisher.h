@@ -22,8 +22,10 @@ private:
   // map of camera name to line and barrel publishers
   std::map<std::string, ros::Publisher> g_pubs;
   std::vector<ros::Subscriber> subs;
-  static void ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height,
+  void ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height,
                        std::string camera_name);
 };
+
+// SegmentedCameraInfoPublisher::g_pubs;
 
 #endif  // SEGMENTED_CAMERA_H

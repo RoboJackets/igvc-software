@@ -39,11 +39,11 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
         semantic_info_topic.append(suffix);
 
         // subscriber, also calls scalecamerainfo
-        ros::Subscriber cam_msg_sub = nh.subscribe<sensor_msgs::CameraInfo>(semantic_info_topic, 10, std::bind(semantic_info_topic, SegmentedCameraInfoPublisher::ScaleCameraInfo, _1, output_width, output_height, camera_name) );
-        subs.push_back(std::move(cam_msg_sub)); //may error
+        subs.push_back(nh.subscribe<sensor_msgs::CameraInfo>(semantic_info_topic, 10, boost::bind(&SegmentedCameraInfoPublisher::ScaleCameraInfo, this, _1, output_width, output_height, camera_name) ) );
 
         //ie subscribe name/raw/info -> name/segmented/info
         ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name + seg_cam_path, 1);
+        //g_pubs[camera_name] = info_pub;
         g_pubs.insert ( std::pair<std::string, ros::Publisher>(camera_name,info_pub) );
         
     }
@@ -52,24 +52,19 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
 void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height, std::string camera_name) 
 {
     sensor_msgs::CameraInfo changed_camera_info = *camera_info;
-    changed_camera_info.D = camera_info.D;
-    changed_camera_info.distortion_model = camera_info.distortion_model;
-    changed_camera_info.R = camera_info.R;
-    changed_camera_info.roi = camera_info.roi;
-    changed_camera_info.binning_x = camera_info.binning_x;
-    changed_camera_info.binning_y = camera_info.binning_y;
 
-    double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info.width);
-    double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info.height);
+    double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info->width);
+    double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info->height);
 
     changed_camera_info.width = static_cast<unsigned int>(width);
     changed_camera_info.height = static_cast<unsigned int>(height);
 
-    changed_camera_info.K = { { camera_info.K[0] * w_ratio, 0, camera_info.K[2] * w_ratio, 0, camera_info.K[4] * h_ratio,
-                                camera_info.K[5] * h_ratio, 0, 0, 1 } };
-    changed_camera_info.P = { { camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
-                                camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0 } };
+    changed_camera_info.K = { { camera_info->K[0] * w_ratio, 0, camera_info->K[2] * w_ratio, 0, camera_info->K[4] * h_ratio,
+                                camera_info->K[5] * h_ratio, 0, 0, 1 } };
+    changed_camera_info.P = { { camera_info->P[0] * w_ratio, 0, camera_info->P[2] * w_ratio, 0, 0,
+                                camera_info->P[5] * h_ratio, camera_info->P[6] * h_ratio, 0, 0, 0, 1, 0 } };
 
+    //g_pubs[camera_name] = changed_camera_info;
     g_pubs.at(camera_name).publish(changed_camera_info);
 }
 
