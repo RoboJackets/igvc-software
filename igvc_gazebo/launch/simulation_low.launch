@@ -37,41 +37,19 @@
         <arg name="debug" value="false"/>
     </include>
 
-    <group if="$(eval arg('model') == 0)">
-        <include file="$(find igvc_description)/launch/spawn_jessii.launch">
-            <arg name="x" value="$(arg x)"/>
-            <arg name="y" value="$(arg y)"/>
-            <arg name="z" value="$(arg z)"/>
-            <arg name="roll" value="$(arg roll)"/>
-            <arg name="pitch" value="$(arg pitch)"/>
-            <arg name="yaw" value="$(arg yaw)"/>
+    <include file="$(find igvc_description)/launch/spawn_swervi.launch">
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+        <arg name="roll" value="$(arg roll)"/>
+        <arg name="pitch" value="$(arg pitch)"/>
+        <arg name="yaw" value="$(arg yaw)"/>
 
-            <!-- accelerate lidar with GPU -->
-            <arg name="gpu" value="$(arg gpu)"/>
-        </include>
-    </group>
+        <!-- accelerate lidar with GPU -->
+        <arg name="gpu" value="$(arg gpu)"/>
+    </include>
 
-    <group if="$(eval arg('model') == 1)">
-        <include file="$(find igvc_description)/launch/spawn_swervi.launch">
-            <arg name="x" value="$(arg x)"/>
-            <arg name="y" value="$(arg y)"/>
-            <arg name="z" value="$(arg z)"/>
-            <arg name="roll" value="$(arg roll)"/>
-            <arg name="pitch" value="$(arg pitch)"/>
-            <arg name="yaw" value="$(arg yaw)"/>
-
-            <!-- accelerate lidar with GPU -->
-            <arg name="gpu" value="$(arg gpu)"/>
-        </include>
-    </group>
-
-    <group if="$(eval arg('model') == 0)">
-        <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
-    </group>
-
-    <group if="$(eval arg('model') == 1)">
-        <include file="$(find igvc_gazebo)/launch/swervi_control.launch" />
-    </group>
+    <include file="$(find igvc_gazebo)/launch/swervi_control.launch" />
 
     <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen" required="true">
         <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>

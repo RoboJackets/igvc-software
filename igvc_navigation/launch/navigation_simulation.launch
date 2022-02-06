@@ -23,12 +23,7 @@
     </include>
 
     <!-- Launch drive controller -->
-    <group if="$(eval arg('model') == 0)">
-        <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
-    </group>
-    <group if="$(eval arg('model') == 1)">
-        <include file="$(find igvc_navigation)/launch/swerve_drive.launch" />
-    </group>
+    <include file="$(find igvc_navigation)/launch/swerve_drive.launch" />
 
     <!-- pointcloud filter -->
     <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />

@@ -210,7 +210,6 @@ target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 add_subdirectory(src/back_circle)
 add_subdirectory(src/back_up_recovery)
-add_subdirectory(src/differential_drive)
 add_subdirectory(src/swerve_drive)
 add_subdirectory(src/mapper)
 add_subdirectory(src/navigation_client)
