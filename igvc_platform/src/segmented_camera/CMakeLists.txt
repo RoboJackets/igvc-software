@@ -1,5 +1,4 @@
 find_package(PkgConfig REQUIRED)
-pkg_search_module(GLIBTOP REQUIRED libgtop-2.0)
 
 
 add_executable(segmented_camera_info_publisher segmented_camera_info_publisher.cpp)

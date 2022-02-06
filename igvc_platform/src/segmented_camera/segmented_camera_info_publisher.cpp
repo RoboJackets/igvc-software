@@ -20,7 +20,7 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
     std::vector<std::string> semantic_suffixes;
     assertions::getParam(pNh, "semantic_info_topic_suffix", semantic_suffixes);
 
-    assertions::getParam(pNh, "image_info_base_topic", image_info_base_topic);
+    //assertions::getParam(pNh, "image_info_base_topic", image_info_base_topic);
 
     assertions::getParam(pNh, "output_width", output_width);
     assertions::getParam(pNh, "output_height", output_height);
@@ -39,7 +39,7 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
         semantic_info_topic.append(suffix);
 
         // subscriber, also calls scalecamerainfo
-        ros::Subscriber cam_msg_sub = nh.subscribe( semantic_info_topic, std::bind(SegmentedcameraInfoPublisher::ScaleCameraInfo, _1, output_width, output_height, camera_name) );
+        ros::Subscriber cam_msg_sub = nh.subscribe<sensor_msgs::CameraInfo>(semantic_info_topic, 10, std::bind(semantic_info_topic, SegmentedCameraInfoPublisher::ScaleCameraInfo, _1, output_width, output_height, camera_name) );
         subs.push_back(std::move(cam_msg_sub)); //may error
 
         //ie subscribe name/raw/info -> name/segmented/info
@@ -49,9 +49,9 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
     }
 }
 
-void SegmentedcameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height, std::string camera_name) 
+void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height, std::string camera_name) 
 {
-    sensor_msgs::CameraInfo changed_camera_info = camera_info;
+    sensor_msgs::CameraInfo changed_camera_info = *camera_info;
     changed_camera_info.D = camera_info.D;
     changed_camera_info.distortion_model = camera_info.distortion_model;
     changed_camera_info.R = camera_info.R;
