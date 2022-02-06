@@ -1,49 +1,36 @@
 #include "segmented_camera_info_publisher.h"
 
-
-
-
-
 //constructor
 SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"} 
 {
 
-    //TODO add .launch file and its params
 
     // cameras to obtain images from
     std::vector<std::string> camera_names;
     assertions::getParam(pNh, "camera_names", camera_names);
 
-
-    std::vector<std::string> semantic_prefixes;
-    assertions::getParam(pNh, "semantic_info_topic_prefix", semantic_prefixes);
-    std::vector<std::string> semantic_suffixes;
-    assertions::getParam(pNh, "semantic_info_topic_suffix", semantic_suffixes);
-
-    //assertions::getParam(pNh, "image_info_base_topic", image_info_base_topic);
-
     assertions::getParam(pNh, "output_width", output_width);
     assertions::getParam(pNh, "output_height", output_height);
 
-    assertions::getParam(pNh, "segmented_publisher_path", seg_cam_path);
+    std::string seg_cam_pub_path, seg_cam_sub_path;
+    assertions::getParam(pNh, "segmented_publisher_path", seg_cam_pub_path);
+    assertions::getParam(pNh, "segmented_subscriber_path", seg_cam_sub_path);
 
 
     //publish for each cam
     for (size_t i = 0; i < camera_names.size(); i++)
     {
         auto camera_name = camera_names[i];
-        auto prefix = semantic_prefixes[i]; //prefix is topic
-        auto suffix = semantic_suffixes[i];
+        auto subscriber_suffix_path = seg_cam_sub_path;
+        auto publisher_suffix_path = seg_cam_pub_path;
 
-        std::string semantic_info_topic = prefix + camera_name;
-        semantic_info_topic.append(suffix);
+        std::string semantic_info_topic = camera_name + seg_cam_sub_path;
 
         // subscriber, also calls scalecamerainfo
         subs.push_back(nh.subscribe<sensor_msgs::CameraInfo>(semantic_info_topic, 10, boost::bind(&SegmentedCameraInfoPublisher::ScaleCameraInfo, this, _1, output_width, output_height, camera_name) ) );
 
         //ie subscribe name/raw/info -> name/segmented/info
-        ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name + seg_cam_path, 1);
-        //g_pubs[camera_name] = info_pub;
+        ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name + publisher_suffix_path, 1);
         g_pubs.insert ( std::pair<std::string, ros::Publisher>(camera_name,info_pub) );
         
     }
