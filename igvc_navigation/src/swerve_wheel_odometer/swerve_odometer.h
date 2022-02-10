@@ -34,20 +34,22 @@ private:
   double yaw;      // [rad]
 
   // Current velocity:
-  double linear_x;  //   [m/s]
-  double linear_y;  //   [m/s]
-  double angular;   // [rad/s]
+  double linear_x_;  //   [m/s]
+  double linear_y_;  //   [m/s]
+  double angular_;   // [rad/s]
 
   double inf_tol;
   double intersection_tol_;
   double alpha;
+
+  ros::Time prev_time;
 
   // callback for encoder subscriber
   void enc_callback(const igvc_msgs::velocity_quad msg);
   bool getParams();
   void integrateRungeKutta2(double linear_x, double linear_y, double angular, const double dt);
   double theta_map(const double& theta);
-  double isclose(const double& a, const double& b, const double tol = 0.00001, const double bias = 0);
+  double isclose(const double& a, const double& b, const double tol = 0.001, const double bias = 0);
 
 };
 #endif

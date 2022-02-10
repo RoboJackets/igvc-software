@@ -4,10 +4,10 @@
 <launch>
     <node name="swerve_odometer" pkg="igvc_navigation" type="swerve_odometer" output="screen" required="true">
         <rosparam file="$(find igvc_navigation)/config/swerve_drive.yaml" />
-        <param name="inf_tol" value="0.1"/>
-        <param name="intersection_tol_" value="1000.0"/>
-        <param name="alpha" value="0.5"/>
-        <param name="wheel_radius" value="0.5"/>
+        <param name="inf_tol" value="1000.0"/>
+        <param name="intersection_tol_" value="0.5"/>
+        <param name="alpha" value="0.7"/>
+        <param name="wheel_radius" value="0.1375"/>
     </node>
 
 </launch>
