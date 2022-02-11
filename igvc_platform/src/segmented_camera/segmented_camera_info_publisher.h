@@ -2,7 +2,7 @@
 #define SEGMENTED_CAMERA_H
 
 #include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/Image.h> //is this needed?
 #include <parameter_assertions/assertions.h>
 #include <ros/ros.h>
 

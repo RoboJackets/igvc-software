@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <igvc_msgs/velocity_pair.h>
-#include <ros/ros.h>
+#include <ros/ros.h> 
 #include <geometry_msgs/Twist.h>
 #include <mocking_utils/mock_subscriber.h>
 
@@ -69,9 +69,6 @@ TEST_F(TestDifferentialDrive, StopTest)
 
 TEST_F(TestDifferentialDrive, ForwardTest)
 {
-  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
-  ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub));
 
   const float forward = 2.0;
   mock_pub.publish(createTwistMsg(forward, 0.0));
