@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <mocking_utils/mock_subscriber.h>
+#include <parameter_assertions/assertions.h>
 
 class TestSegmentedCamera : public testing::Test
 {
@@ -9,20 +10,18 @@ class TestSegmentedCamera : public testing::Test
 public:
   TestSegmentedCamera() : pNH{"~"}
   {
-    adsfasdfasdfasdfasdf
+
     // cameras to obtain images from
-    std::vector<std::string> camera_names;
-    assertions::getParam(pNH, "camera_names", camera_names);
+    assertions::getParam(nh, "segmented_camera/camera_names", camera_names);
 
-    assertions::getParam(pNh, "output_width", output_width);
-    assertions::getParam(pNh, "output_height", output_height);
+    assertions::getParam(nh, "segmented_camera/output_width", output_width);
+    assertions::getParam(nh, "segmented_camera/output_height", output_height);
 
-    std::string seg_cam_pub_path, seg_cam_sub_path;
-    assertions::getParam(pNH, "segmented_publisher_path", seg_cam_pub_path);
-    assertions::getParam(pNH, "segmented_subscriber_path", seg_cam_sub_path);
+    assertions::getParam(nh, "segmented_camera/segmented_publisher_path", seg_cam_pub_path);
+    assertions::getParam(nh, "segmented_camera/segmented_subscriber_path", seg_cam_sub_path);
 
 
-    //mock_pubs will be a vector of [camers_names.size()] publishers
+    //mock_pub will be a vector of [camers_names.size()] publishers
     for (size_t i = 0; i < camera_names.size(); i++)
     {
         auto camera_name = camera_names[i];
@@ -31,16 +30,20 @@ public:
 
         //We publish to each camera's topic
         ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(semantic_info_topic, 1);
-        mock_pubs.push_back(info_pub);
+        mock_pub.push_back(info_pub);
     }
 
   }
-
 protected:
   //the private node handle will let us retrieve desired launch file params later 
   ros::NodeHandle pNH;
+  ros::NodeHandle nh;
+  std::vector<std::string> camera_names;
+  std::string seg_cam_pub_path, seg_cam_sub_path;
   //fake publisher we can use for testing
-  std::vector<ros::Publisher> mock_pubs;
+  std::vector<ros::Publisher> mock_pub;
+
+  double output_width, output_height;
 
 };
 
@@ -63,19 +66,19 @@ sensor_msgs::CameraInfo createCameraInfoMsg() {
 }
 
 //fake camera info message - hard coded transform of createCameraInfoMsg()
-sensor_msgs::CameraInfo* cameraInfoTransformedMsg(double width, double height) {
-  sensor_msgs::CameraInfo *camera_info = &createCameraInfoMsg();
+sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height) {
+  sensor_msgs::CameraInfo camera_info;// = &createCameraInfoMsg();
 
-  double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info->width);
-  double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info->height);
+  double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info.width);
+  double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info.height);
 
   camera_info.width = static_cast<unsigned int>(width);
   camera_info.height = static_cast<unsigned int>(height);
 
-  camera_info.K = { { camera_info->K[0] * w_ratio, 0, camera_info->K[2] * w_ratio, 0, camera_info->K[4] * h_ratio,
-                              camera_info->K[5] * h_ratio, 0, 0, 1 } };
-  camera_info.P = { { camera_info->P[0] * w_ratio, 0, camera_info->P[2] * w_ratio, 0, 0,
-                              camera_info->P[5] * h_ratio, camera_info->P[6] * h_ratio, 0, 0, 0, 1, 0 } };
+  camera_info.K = { camera_info.K[0] * w_ratio, 0, camera_info.K[2] * w_ratio, 0, camera_info.K[4] * h_ratio,
+                              camera_info.K[5] * h_ratio, 0, 0, 1 };
+  camera_info.P = { camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
+                              camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0 };
 
   return camera_info;
 }
@@ -85,29 +88,31 @@ TEST_F(TestSegmentedCamera, NormalScalingTest) {
   //publish fake camera info msgs to seg_cam's topics
   //TODO: put the subscribers in a map later
 
-  //this needs to be mock subs
-  MockSubscriber<sensor_msgs::CameraInfo> mock_sub_left(camera_name + publisher_suffix_path);
-  ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pubs[0]));
+  for(std::string camera_name : camera_names){
+    //this needs to be mock subs
+    MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_name + seg_cam_sub_path);
+    ASSERT_TRUE(mock_sub.waitForPublisher());
+    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[0]));
 
-  for (size_t i = 0; i < mock_pubs.size(); i++) {
-    mock_pub[i].publish(createCameraInfoMsg());
-  }
-  //wait for responses
-  ASSERT_TRUE(mock_sub.spinUntilMessages());
-  
-  //make sure responses are each correct
-  sensor_msgs::CameraInfo correctResponse = *cameraInfoTransformedMsg(output_width, output_height);
-  sensor_msgs::CameraInfo responseLeft = mock_sub.front();
-  //compare - also make this for each
-  EXPECT_DOUBLE_EQ(correctResponse -> width, responseLeft.width);
-  EXPECT_DOUBLE_EQ(correctResponse -> height, responseLeft.height);
+    for (size_t i = 0; i < mock_pub.size(); i++) {
+      mock_pub[i].publish(createCameraInfoMsg());
+    }
+    //wait for responses
+    ASSERT_TRUE(mock_sub.spinUntilMessages());
+    
+    //make sure responses are each correct
+    sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
+    sensor_msgs::CameraInfo responseLeft = mock_sub.front();
+    //compare - also make this for each
+    EXPECT_DOUBLE_EQ(correctResponse.width, responseLeft.width);
+    EXPECT_DOUBLE_EQ(correctResponse.height, responseLeft.height);
 
-  for (int i = 0; i < correctResponse -> K[0]; i++) {
-    EXPECT_DOUBLE_EQ(correctResponse->K[0][i], responseLeft.K[0][i]);
-  }
-  for (int i = 0; i < correctResponse -> P[0]; i++) {
-    EXPECT_DOUBLE_EQ(correctResponse->P[0][i], responseLeft.P[0][i]);
+    for (int i = 0; i < 9; i++) {
+      EXPECT_DOUBLE_EQ(correctResponse.K[i], responseLeft.K[i]);
+    }
+    for (int i = 0; i < correctResponse.P[0]; i++) {
+      EXPECT_DOUBLE_EQ(correctResponse.P[i], responseLeft.P[i]);
+    }
   }
 }
 
@@ -115,6 +120,7 @@ TEST_F(TestSegmentedCamera, NormalScalingTest) {
 //TODO: Maybe compare against the gazebo node's output? Should not be mandatory
 
 int main(int argc, char** argv)
+
 {
   ros::init(argc, argv, "test_segmented_camera");
   testing::InitGoogleTest(&argc, argv);

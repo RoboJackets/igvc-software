@@ -1,14 +1,16 @@
 <launch>
     <node name="segmented_camera" pkg="igvc_platform" type="segmented_camera_info_publisher" output="screen" required="true" >
         <rosparam param="camera_names">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
-        <rosparam param="semantic_info_topic_prefix">["", "", ""]</rosparam>
-        <rosparam param="semantic_info_topic_suffix">["/raw/camera_info", "/raw/camera_info", "/raw/camera_info"]</rosparam>
+        
+        <!-- <param name="cam1" value="/cam/center"/>
+        <param name="cam1" value="/cam/center"/>
+        <param name="cam1" value="/cam/center"/> -->
 
-        <param name="image_info_base_topic" value="/raw/camera_info" />
-        <param name="segmented_publisher_path" value="/segmented/info" />
+        <param name="segmented_publisher_path" value="/segmented/info"/>
+        <param name="segmented_subscriber_path" value="/raw/camera_info"/>
         
         <param name="output_width" value="400" />
         <param name="output_height" value="400" />
     </node>
-    <test test-name="test_segmented_camera" pkg="igvc_platform" type="test_segmented_camera"/>
+    <test test-name="test_segmented_camera" pkg="igvc_platform" type="TestSegmentedCamera"/>
 </launch>
