@@ -55,7 +55,7 @@ sensor_msgs::CameraInfo createCameraInfoMsg() {
   camera_info.width = 720;
   //these are probably not reasonable values, but they represent 3x3 matrices and that's what matters
   camera_info.K = {1000, 0, 200, 3000, 120, 490, 0, 0, 1};
-  camera_info.P = {480, 290, 1, 600, 1000, 0, 0, 120, 0};
+  camera_info.P = {480, 290, 1, 600, 1000, 0, 0, 120, 0, 0, 0, 0};
 
   //other properties
   //camera_info.distortion_model = "plumb_bob";
@@ -67,7 +67,7 @@ sensor_msgs::CameraInfo createCameraInfoMsg() {
 
 //fake camera info message - hard coded transform of createCameraInfoMsg()
 sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height) {
-  sensor_msgs::CameraInfo camera_info;// = &createCameraInfoMsg();
+  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg();// = &createCameraInfoMsg();
 
   double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info.width);
   double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info.height);
@@ -75,10 +75,10 @@ sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height) {
   camera_info.width = static_cast<unsigned int>(width);
   camera_info.height = static_cast<unsigned int>(height);
 
-  camera_info.K = { camera_info.K[0] * w_ratio, 0, camera_info.K[2] * w_ratio, 0, camera_info.K[4] * h_ratio,
-                              camera_info.K[5] * h_ratio, 0, 0, 1 };
-  camera_info.P = { camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
-                              camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0 };
+  camera_info.K = {camera_info.K[0] * w_ratio, 0, camera_info.K[2] * w_ratio, 0, camera_info.K[4] * h_ratio,
+                              camera_info.K[5] * h_ratio, 0, 0, 1};
+  camera_info.P = {camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
+                              camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0};
 
   return camera_info;
 }
@@ -88,31 +88,34 @@ TEST_F(TestSegmentedCamera, NormalScalingTest) {
   //publish fake camera info msgs to seg_cam's topics
   //TODO: put the subscribers in a map later
 
-  for(std::string camera_name : camera_names){
-    //this needs to be mock subs
-    MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_name + seg_cam_sub_path);
-    ASSERT_TRUE(mock_sub.waitForPublisher());
-    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[0]));
+  MockSubscriber<sensor_msgs::CameraInfo> mock_sub("/cam/left" + seg_cam_sub_path);
 
-    for (size_t i = 0; i < mock_pub.size(); i++) {
-      mock_pub[i].publish(createCameraInfoMsg());
-    }
-    //wait for responses
-    ASSERT_TRUE(mock_sub.spinUntilMessages());
-    
-    //make sure responses are each correct
-    sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
-    sensor_msgs::CameraInfo responseLeft = mock_sub.front();
-    //compare - also make this for each
-    EXPECT_DOUBLE_EQ(correctResponse.width, responseLeft.width);
-    EXPECT_DOUBLE_EQ(correctResponse.height, responseLeft.height);
+  // for(std::string camera_name : camera_names){
+  //   MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_name + seg_cam_sub_path);
+  // }
 
-    for (int i = 0; i < 9; i++) {
-      EXPECT_DOUBLE_EQ(correctResponse.K[i], responseLeft.K[i]);
-    }
-    for (int i = 0; i < correctResponse.P[0]; i++) {
-      EXPECT_DOUBLE_EQ(correctResponse.P[i], responseLeft.P[i]);
-    }
+  ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[1]));
+
+  for (size_t i = 0; i < mock_pub.size(); i++) {
+    mock_pub[i].publish(createCameraInfoMsg());
+  }
+  //wait for responses
+  ASSERT_TRUE(mock_sub.spinUntilMessages());
+  
+  //make sure responses are each correct
+  sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
+  sensor_msgs::CameraInfo responseLeft = mock_sub.front();
+
+  //compare - also make this for each
+  EXPECT_NEAR(correctResponse.width, responseLeft.width, 1E-100);
+  EXPECT_NEAR(correctResponse.height, responseLeft.height, 1E-100);
+
+  for (int i = 0; i < 9; i++) {
+    EXPECT_NEAR(correctResponse.K[i], responseLeft.K[i], 1E-100);
+  }
+  for (int i = 0; i < 12; i++) {
+    EXPECT_NEAR(correctResponse.P[i], responseLeft.P[i], 1E-100);
   }
 }
 

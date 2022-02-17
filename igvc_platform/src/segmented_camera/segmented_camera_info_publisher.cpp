@@ -46,10 +46,11 @@ void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfo
     changed_camera_info.width = static_cast<unsigned int>(width);
     changed_camera_info.height = static_cast<unsigned int>(height);
 
-    changed_camera_info.K = { { camera_info->K[0] * w_ratio, 0, camera_info->K[2] * w_ratio, 0, camera_info->K[4] * h_ratio,
-                                camera_info->K[5] * h_ratio, 0, 0, 1 } };
-    changed_camera_info.P = { { camera_info->P[0] * w_ratio, 0, camera_info->P[2] * w_ratio, 0, 0,
-                                camera_info->P[5] * h_ratio, camera_info->P[6] * h_ratio, 0, 0, 0, 1, 0 } };
+    //changed from 2-D to 1-D arrays - does this matter?
+    changed_camera_info.K = { camera_info->K[0] * w_ratio, 0, camera_info->K[2] * w_ratio, 0, camera_info->K[4] * h_ratio,
+                                camera_info->K[5] * h_ratio, 0, 0, 1 };
+    changed_camera_info.P = { camera_info->P[0] * w_ratio, 0, camera_info->P[2] * w_ratio, 0, 0,
+                                camera_info->P[5] * h_ratio, camera_info->P[6] * h_ratio, 0, 0, 0, 1, 0 };
 
     //g_pubs[camera_name] = changed_camera_info;
     g_pubs.at(camera_name).publish(changed_camera_info);
