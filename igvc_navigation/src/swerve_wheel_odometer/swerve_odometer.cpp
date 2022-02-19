@@ -19,7 +19,10 @@ SwerveOdometer::SwerveOdometer() : pNh{"~"}
 
   prev_time = ros::Time::now();
   sub = nh.subscribe("/encoders", 10, &SwerveOdometer::enc_callback, this);
+  subAng = nh.subscribe("/ground_truth", 10, &SwerveOdometer::ang_callback, this);
   pub = nh.advertise<nav_msgs::Odometry>("/wheel_odometry", 10);
+  intersectionPub = nh.advertise<geometry_msgs::PointStamped>("/wheel_odometry_intersection", 10);
+  intersectionPubAvg = nh.advertise<geometry_msgs::PointStamped>("/wheel_odometry_intersection_avg", 10);
 
   // initializing sequence number for messages
   seq = 0;
@@ -28,6 +31,11 @@ SwerveOdometer::SwerveOdometer() : pNh{"~"}
   x = 0;
   y = 0;
   yaw = 0;
+}
+
+void SwerveOdometer::ang_callback(const nav_msgs::Odometry msg)
+{
+  actual_angular_ = msg.twist.twist.angular.z;
 }
 
 void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
@@ -89,13 +97,20 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
       b = positions_list[i][1]- m * positions_list[i][0];
 
-      if ( isclose(theta1,theta) || isclose(theta1,theta,0.05,2*M_PI) ) 
+      if ( isclose(theta1,theta) || isclose(theta1,theta,0.01,2*M_PI) ) 
       {
         intersections.push_back({INFINITY,INFINITY});
       }
-      else if ( isclose(theta1,theta,0.05,M_PI) || isclose(theta1,theta,0.05,-M_PI) ) 
+      else if ( isclose(theta1,theta,0.01,M_PI) || isclose(theta1,theta,0.01,-M_PI) ) 
       {
         intersections.push_back({(positions_list[j][0]+positions_list[i][0])/2 , (positions_list[j][1]+positions_list[i][1])/2});
+        geometry_msgs::PointStamped intersectionMsg;
+        intersectionMsg.header.frame_id = "base_link";
+        intersectionMsg.header.stamp = ros::Time::now();
+        intersectionMsg.point.x = (positions_list[j][0]+positions_list[i][0])/2;
+        intersectionMsg.point.y = (positions_list[j][1]+positions_list[i][1])/2;
+        intersectionPub.publish(intersectionMsg);
+        
       }
       else
       {
@@ -103,24 +118,33 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
           intersections.push_back({INFINITY,INFINITY});
           continue;
         }
-        double h = ((m*positions_list[i][0] - m1*positions_list[j][0]) - (positions_list[i][1] - positions_list[j][1])) / (m - m1);
-        double k = m1 * (h - positions_list[j][0]) + positions_list[j][1];
+        // double h = ((m*positions_list[i][0] - m1*positions_list[j][0]) - (positions_list[i][1] - positions_list[j][1])) / (m - m1);
+        // double k = m1 * (h - positions_list[j][0]) + positions_list[j][1];
 
-        if (fabs(((b1-b)/(m-m1)))>inf_tol || fabs(((m*b1-m1*b)/(m-m1)))>inf_tol )
+        double h = ((b1-b)/(m-m1));
+        double k = ((m*b1-m1*b)/(m-m1));
+
+        if (fabs(h)>inf_tol || fabs(k)>inf_tol )
         {
           intersections.push_back({INFINITY,INFINITY});
         }
         else
         {
-          intersections.push_back({ ((b1-b)/(m-m1)) ,((m*b1-m1*b)/(m-m1)) });
+          intersections.push_back({ h , k });
           // ROS_INFO_STREAM("H: " << ((b1-b)/(m-m1)) << ", K: " << ((m*b1-m1*b)/(m-m1)));
           // ROS_INFO_STREAM("H_new: " << h << ", K_new: " << k);
+          geometry_msgs::PointStamped intersectionMsg;
+          intersectionMsg.header.frame_id = "base_link";
+          intersectionMsg.header.stamp = ros::Time::now();
+          intersectionMsg.point.x = h;
+          intersectionMsg.point.y = k;
+          intersectionPub.publish(intersectionMsg);
         }
       }
     }
   }
 
-  double linear_x,linear_x_vh,linear_y,linear_y_vh,angular = 0;
+  double linear_x = 0,linear_x_vh = 0,linear_y = 0,linear_y_vh = 0,angular = 0;
   std::array<double,2> average_intersection = {0,0} ;
 
   //detecting if all or some of the intersections is inf
@@ -148,6 +172,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
   }
   else
   {
+    double furthest_dist = 0;
     for (size_t i=1; i<intersections.size(); ++i)
     {
       if((fabs(intersections[i][0]-intersections[i-1][0])>intersection_tol_ || fabs(intersections[i][1]-intersections[i-1][1])>intersection_tol_))
@@ -165,12 +190,26 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
       }
       else
       {
-          average_intersection[0] += intersections[i][0];
-          average_intersection[1] += intersections[i][1];
+        double dist = std::hypot(intersections[i][0], intersections[i][1]);
+        if (dist > furthest_dist) {
+          average_intersection[0] = intersections[i][0];
+          average_intersection[1] = intersections[i][1];
+          furthest_dist = dist;
+        }
+          // average_intersection[0] += intersections[i][0];
+          // average_intersection[1] += intersections[i][1];
       }
     }
-    average_intersection[0] /= intersections.size();
-    average_intersection[1] /= intersections.size();
+    // average_intersection[0] /= intersections.size();
+    // average_intersection[1] /= intersections.size();
+
+    geometry_msgs::PointStamped intersectionMsg;
+    intersectionMsg.header.frame_id = "base_link";
+    intersectionMsg.header.stamp = ros::Time::now();
+    intersectionMsg.point.x = average_intersection[0];
+    intersectionMsg.point.y = average_intersection[1];
+    intersectionPubAvg.publish(intersectionMsg);
+    
     // ROS_INFO_STREAM("average intersection: "<<average_intersection[0]<<" "<<average_intersection[1]);
     for (int i=0; i<num_wheels; ++i)
     {
@@ -180,19 +219,34 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
         continue;
       }
       auto icr_wh = std::array<double,2>{positions_list[i][0]-average_intersection[0] , positions_list[i][1]-average_intersection[1]};
+      // auto icr_wh = std::array<double,2>{fabs(positions_list[i][0]-average_intersection[0]) , fabs(positions_list[i][1]-average_intersection[1])};
       if (isinf(icr_wh[0])||isinf(icr_wh[1]))
           ROS_WARN_STREAM("icr_wh is inf");
       if (isclose(icr_wh[0],0)||isclose(icr_wh[1],0))
           ROS_WARN_STREAM("icr_wh for wheel "<< i <<" is zero. icr is just over it!");
+      
+      double rad = std::hypot(icr_wh[0], icr_wh[1]);
+      double ang_computed = wheel_radius * wheel_info[i][0] / rad;
+      // angular += ang_computed;
 
-      angular += (wheel_info[i][0]*wheel_radius*sin(wheel_info[i][1]))/(2*icr_wh[0]) - (wheel_info[i][0]*wheel_radius*cos(wheel_info[i][1]))/(2*icr_wh[1]);
-      ROS_INFO_STREAM("angular: " << angular);
-      // angular += (wheels_omega[i]*wheels_radii_[i]*sin(holders_theta[i]))/(2*icr_wh[0]) - (wheels_omega[i]*wheels_radii_[i]*cos(holders_theta[i]))/(2*icr_wh[1]);
+      double ang_x = (wheel_info[i][0]*wheel_radius*sin(wheel_info[i][1]))/(icr_wh[0]);
+      double ang_y = (wheel_info[i][0]*wheel_radius*cos(wheel_info[i][1]))/(icr_wh[1]);
+      double ang_computed1 = ang_x/2 - ang_y/2;
+
+      ROS_INFO_STREAM("angular: " << ang_computed);
+      ROS_INFO_STREAM("angular1: " << ang_computed1);
+
+      angular += ang_computed1;
+
       if (isinf(angular)) ROS_WARN_STREAM("angular is the problem");
     }
     angular/=num_wheels; 
+    // ROS_INFO_STREAM("angular: " << angular);
     linear_x_vh =      average_intersection[1] * angular;
     linear_y_vh = -1 * average_intersection[0] * angular;
+
+    // linear_x_vh =      average_intersection[1] * actual_angular_;
+    // linear_y_vh = -1 * average_intersection[0] * actual_angular_;
   }
 
   if(isnan(linear_x_vh)||isnan(linear_y_vh)||isnan(angular))
@@ -241,7 +295,8 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
 
   /// Integrate odometry:
-  integrateRungeKutta2(linear_x, linear_y, angular, deltaT);
+  integrateRungeKutta2(linear_x, linear_y, angular_, deltaT);
+  // integrateRungeKutta2(linear_x, linear_y, actual_angular_, deltaT);
 
 
   /// Estimate speeds using a rolling mean to filter them out:
@@ -256,6 +311,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
   linear_x_ = (alpha * linear_x) + (1.0 - alpha) * linear_x_;
   linear_y_ = (alpha * linear_y) + (1.0 - alpha) * linear_y_;
   angular_ = (alpha * angular) + (1.0 - alpha) * angular_;
+  // angular_ = actual_angular_;
   
   // ROS_INFO_STREAM(std::endl);
   // return true;
@@ -362,14 +418,14 @@ bool SwerveOdometer::getParams()
 
 void SwerveOdometer::integrateRungeKutta2(double linear_x, double linear_y, double angular, const double dt)
 {
-  const double direction = yaw + angular;
-
   /// Runge-Kutta 2nd order integration:
-  x       += ( linear_x * cos(direction) - linear_y * sin(direction) ) * dt;
-  y       += ( linear_x * sin(direction) + linear_y * cos(direction) ) * dt;
   yaw     += angular * dt;
+  x       += linear_x * dt;
+  y       += linear_y * dt;
   // ROS_INFO_STREAM("x  : " << x);
   // ROS_INFO_STREAM("y  : " << y);
+  // ROS_INFO_STREAM("dt: " << dt);
+  // ROS_INFO_STREAM("angular: " << angular);
   // ROS_INFO_STREAM("yaw: " << yaw);
 }
 

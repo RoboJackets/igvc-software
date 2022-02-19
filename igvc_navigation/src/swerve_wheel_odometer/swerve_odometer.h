@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <math.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/PointStamped.h>
 #include <tf/transform_broadcaster.h>
 
 class SwerveOdometer
@@ -17,7 +18,10 @@ private:
   ros::NodeHandle pNh;
 
   ros::Publisher pub;
+  ros::Publisher intersectionPub;
+  ros::Publisher intersectionPubAvg;
   ros::Subscriber sub;
+  ros::Subscriber subAng;
   tf::TransformBroadcaster odom_broadcaster;
   int seq;
 
@@ -37,6 +41,7 @@ private:
   double linear_x_;  //   [m/s]
   double linear_y_;  //   [m/s]
   double angular_;   // [rad/s]
+  double actual_angular_;   // [rad/s]
 
   double inf_tol;
   double intersection_tol_;
@@ -49,7 +54,8 @@ private:
   bool getParams();
   void integrateRungeKutta2(double linear_x, double linear_y, double angular, const double dt);
   double theta_map(const double& theta);
-  double isclose(const double& a, const double& b, const double tol = 0.001, const double bias = 0);
+  double isclose(const double& a, const double& b, const double tol = 0.01, const double bias = 0);
+  void ang_callback(const nav_msgs::Odometry msg);
 
 };
 #endif
