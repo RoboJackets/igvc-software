@@ -6,7 +6,7 @@
         <rosparam file="$(find igvc_navigation)/config/swerve_drive.yaml" />
         <param name="inf_tol" value="5.0"/>
         <param name="intersection_tol_" value="1"/>
-        <param name="alpha" value="0.7"/>
+        <param name="alpha" value="0.5"/>
         <param name="wheel_radius" value="0.1375"/>
     </node>
 

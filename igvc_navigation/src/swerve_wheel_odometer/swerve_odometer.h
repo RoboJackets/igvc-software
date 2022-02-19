@@ -21,7 +21,6 @@ private:
   ros::Publisher intersectionPub;
   ros::Publisher intersectionPubAvg;
   ros::Subscriber sub;
-  ros::Subscriber subAng;
   tf::TransformBroadcaster odom_broadcaster;
   int seq;
 
@@ -52,9 +51,8 @@ private:
   // callback for encoder subscriber
   void enc_callback(const igvc_msgs::velocity_quad msg);
   bool getParams();
-  void integrateRungeKutta2(double linear_x, double linear_y, double angular, const double dt);
   double theta_map(const double& theta);
-  double isclose(const double& a, const double& b, const double tol = 0.01, const double bias = 0);
+  double isclose(const double& a, const double& b, const double tol = 0.025, const double bias = 0);
   void ang_callback(const nav_msgs::Odometry msg);
 
 };
