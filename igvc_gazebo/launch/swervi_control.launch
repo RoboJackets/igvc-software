@@ -17,10 +17,10 @@
       <param name="speed_P_fr" value="5.0"/>
       <param name="speed_P_bl" value="5.0"/>
       <param name="speed_P_br" value="5.0"/>
-      <param name="speed_I_fl" value="1.0"/>
-      <param name="speed_I_fr" value="1.0"/>
-      <param name="speed_I_bl" value="1.0"/>
-      <param name="speed_I_br" value="1.0"/>
+      <param name="speed_I_fl" value="0.0"/>
+      <param name="speed_I_fr" value="0.0"/>
+      <param name="speed_I_bl" value="0.0"/>
+      <param name="speed_I_br" value="0.0"/>
       <param name="speed_D_fl" value="1.0"/>
       <param name="speed_D_fr" value="1.0"/>
       <param name="speed_D_bl" value="1.0"/>

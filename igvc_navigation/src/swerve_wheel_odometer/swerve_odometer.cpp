@@ -3,7 +3,7 @@
 #include "swerve_odometer.h"
 
 /**
- * Converts wheel velocities to odometry message using trigonometry for calculations
+ * Converts wheel velocities to odometry message using Instantaneous Centre of Rotation (ICR) for calculations
  * In the ros coordinate convention x is forward, y is leftward, and z is upward relative to the robot
  * The position is published in an absolute reference frame relative to the initial position
  * The velocities (twist) is in a reference frame relative to the robot
