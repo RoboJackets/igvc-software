@@ -24,8 +24,7 @@ private:
   tf::TransformBroadcaster odom_broadcaster;
   int seq;
 
-  // robot constant
-  double wheel_sep;
+  // robot constants
   std::array<std::array<double, 2>, 4> positions_list;
   std::array<std::array<double, 2>, 4> wheel_info;
   const int num_wheels = 4;
@@ -40,7 +39,6 @@ private:
   double linear_x_;        //   [m/s]
   double linear_y_;        //   [m/s]
   double angular_;         // [rad/s]
-  double actual_angular_;  // [rad/s]
 
   double inf_tol;
   double intersection_tol_;
