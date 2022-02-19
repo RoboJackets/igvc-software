@@ -36,9 +36,9 @@ private:
   double yaw;  // [rad]
 
   // Current velocity:
-  double linear_x_;        //   [m/s]
-  double linear_y_;        //   [m/s]
-  double angular_;         // [rad/s]
+  double linear_x_;  //   [m/s]
+  double linear_y_;  //   [m/s]
+  double angular_;   // [rad/s]
 
   double inf_tol;
   double intersection_tol_;
