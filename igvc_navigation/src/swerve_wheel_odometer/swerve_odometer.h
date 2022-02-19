@@ -32,15 +32,15 @@ private:
   double wheel_radius;
 
   // Current pose:
-  double x;        //   [m]
-  double y;        //   [m]
-  double yaw;      // [rad]
+  double x;    //   [m]
+  double y;    //   [m]
+  double yaw;  // [rad]
 
   // Current velocity:
-  double linear_x_;  //   [m/s]
-  double linear_y_;  //   [m/s]
-  double angular_;   // [rad/s]
-  double actual_angular_;   // [rad/s]
+  double linear_x_;        //   [m/s]
+  double linear_y_;        //   [m/s]
+  double angular_;         // [rad/s]
+  double actual_angular_;  // [rad/s]
 
   double inf_tol;
   double intersection_tol_;
@@ -54,6 +54,5 @@ private:
   double theta_map(const double& theta);
   double isclose(const double& a, const double& b, const double tol = 0.025, const double bias = 0);
   void ang_callback(const nav_msgs::Odometry msg);
-
 };
 #endif
