@@ -12,8 +12,8 @@ JoystickDriver::JoystickDriver() : nhp{ "~" }
   assertions::param(nhp, "absoluteMaxVel", absoluteMaxVel, 1.0);
   assertions::param(nhp, "maxVel", maxVel, 1.6);
   assertions::param(nhp, "maxVelIncr", maxVelIncr, 0.1);
-  assertions::param(nhp, "leftAxis", leftJoyAxis, 1);
-  assertions::param(nhp, "rightAxis", rightJoyAxis, 4);
+  assertions::param(nhp, "leftJoyAxis", leftJoyAxis, 1);
+  assertions::param(nhp, "rightJoyAxis", rightJoyAxis, 4);
   assertions::param(nhp, "leftInverted", leftInverted, false);
   assertions::param(nhp, "rightInverted", rightInverted, false);
 }
