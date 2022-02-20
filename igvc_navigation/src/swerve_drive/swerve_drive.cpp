@@ -132,7 +132,7 @@ bool SwerveDrive::getParams()
   const int num_wheels = 4;
 
   // positions
-  if (!nh.getParam("swerve_drive/positions", xml_list))
+  if (!pNh.getParam("swerve_drive/positions", xml_list))
   {
     ROS_ERROR_STREAM("Unable to retrieve position list");
     return false;
@@ -173,7 +173,7 @@ bool SwerveDrive::getParams()
   }
 
   // limits
-  if (!nh.getParam("swerve_drive/limits", xml_list))
+  if (!pNh.getParam("swerve_drive/limits", xml_list))
   {
     ROS_ERROR_STREAM("Unable to retrieve limits list");
     return false;
