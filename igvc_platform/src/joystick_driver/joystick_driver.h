@@ -11,10 +11,10 @@
 #include <memory>
 #include <diagnostic_updater/publisher.h>
 
-class JoystickDirver
+class JoystickDriver
 {
 public:
-    explicit JoystickDriver();
+    JoystickDriver();
 
 private:
 
