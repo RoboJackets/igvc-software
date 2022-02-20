@@ -14,30 +14,27 @@
 class JoystickDriver
 {
 public:
-    JoystickDriver();
+  JoystickDriver();
 
 private:
+  // node handles
+  ros::NodeHandle nhp;
+  ros::NodeHandle nh;
 
-    //node handles
-    ros::NodeHandle nhp;
-    ros::NodeHandle nh;
+  // publisher
+  ros::Publisher cmd_pub;
 
-    //publisher
-    ros::Publisher cmd_pub;
+  // subscriber
+  ros::Subscriber joy_sub;
 
-    //subscriber
-    ros::Subscriber joy_sub;
+  std::unique_ptr<diagnostic_updater::Updater> updater_ptr;
 
-    std::unique_ptr<diagnostic_updater::Updater> updater_ptr;
+  double absoluteMaxVel, maxVel, maxVelIncr;
+  int leftJoyAxis, rightJoyAxis;
+  bool leftInverted, rightInverted;
 
-    double absoluteMaxVel, maxVel, maxVelIncr;
-    int leftJoyAxis, rightJoyAxis;
-    bool leftInverted, rightInverted;
-
-    void joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
-    void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
-
-
+  void joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
+  void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
 };
 
-#endif //JOYSTICKDRIVER_H
+#endif  // JOYSTICKDRIVER_H

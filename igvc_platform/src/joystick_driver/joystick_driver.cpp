@@ -2,7 +2,6 @@
 
 JoystickDriver::JoystickDriver() : nhp{ "~" }
 {
-  
   cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   joy_sub = nh.subscribe("/joy", 1, &JoystickDriver::joyCallback, this);
 
@@ -17,11 +16,9 @@ JoystickDriver::JoystickDriver() : nhp{ "~" }
   assertions::param(nhp, "rightAxis", rightJoyAxis, 4);
   assertions::param(nhp, "leftInverted", leftInverted, false);
   assertions::param(nhp, "rightInverted", rightInverted, false);
-
-
 }
 
-void JoystickDriver::joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat) 
+void JoystickDriver::joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
   stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Joystick Online");
   stat.add("absolute_max_velocity", absoluteMaxVel);
@@ -29,11 +26,14 @@ void JoystickDriver::joystick_diagnostic(diagnostic_updater::DiagnosticStatusWra
   stat.add("max_velocity_increment", maxVelIncr);
 }
 
-void JoystickDriver::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) 
+void JoystickDriver::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
-  if (msg->buttons[1]) {
+  if (msg->buttons[1])
+  {
     maxVel -= maxVelIncr;
-  } else if (msg->buttons[3]) {
+  }
+  else if (msg->buttons[3])
+  {
     maxVel += maxVelIncr;
   }
   maxVel = std::min(maxVel, absoluteMaxVel);
