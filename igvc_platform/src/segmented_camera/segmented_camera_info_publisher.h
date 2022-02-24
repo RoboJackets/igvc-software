@@ -22,6 +22,7 @@ private:
   std::vector<ros::Subscriber> subs;
   void ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height,
                        std::string camera_name);
+  void spinnerUpdate();
 };
 
 #endif  // SEGMENTED_CAMERA_H

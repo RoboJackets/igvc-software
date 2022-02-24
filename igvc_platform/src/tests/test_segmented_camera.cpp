@@ -26,6 +26,7 @@ public:
     {
         auto camera_name = camera_names[i];
 
+        // cam_center/raw/info
         std::string semantic_info_topic = camera_name + seg_cam_sub_path;
 
         //We publish to each camera's topic
@@ -86,38 +87,34 @@ sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height) {
 //test a normal scaling output ig
 TEST_F(TestSegmentedCamera, NormalScalingTest) {
   //publish fake camera info msgs to seg_cam's topics
-  //TODO: put the subscribers in a map later
+  for (size_t i = 0; i < camera_names.size(); i++) {
+      MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
+      ASSERT_TRUE(mock_sub.waitForPublisher());
+      ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
 
-  MockSubscriber<sensor_msgs::CameraInfo> mock_sub("/cam/left" + seg_cam_sub_path);
 
-  // for(std::string camera_name : camera_names){
-  //   MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_name + seg_cam_sub_path);
-  // }
+      mock_pub[i].publish(createCameraInfoMsg());
+      ASSERT_TRUE(mock_sub.spinUntilMessages());
+      
+      sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
+      sensor_msgs::CameraInfo response = mock_sub.front();
+      EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
+      EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
 
-  ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[1]));
-
-  for (size_t i = 0; i < mock_pub.size(); i++) {
-    mock_pub[i].publish(createCameraInfoMsg());
-  }
-  //wait for responses
-  ASSERT_TRUE(mock_sub.spinUntilMessages());
-  
-  //make sure responses are each correct
-  sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
-  sensor_msgs::CameraInfo responseLeft = mock_sub.front();
-
-  //compare - also make this for each
-  EXPECT_NEAR(correctResponse.width, responseLeft.width, 1E-100);
-  EXPECT_NEAR(correctResponse.height, responseLeft.height, 1E-100);
-
-  for (int i = 0; i < 9; i++) {
-    EXPECT_NEAR(correctResponse.K[i], responseLeft.K[i], 1E-100);
-  }
-  for (int i = 0; i < 12; i++) {
-    EXPECT_NEAR(correctResponse.P[i], responseLeft.P[i], 1E-100);
+      for (int i = 0; i < 9; i++) {
+        EXPECT_NEAR(correctResponse.K[i], response.K[i], 1E-100);
+      }
+      for (int i = 0; i < 12; i++) {
+        EXPECT_NEAR(correctResponse.P[i], response.P[i], 1E-100);
+      }
   }
 }
+
+//tests output when we input all zeros
+// TEST_F(TestSegmentedCamera, ZeroTest) {
+
+
+// }
 
 
 //TODO: Maybe compare against the gazebo node's output? Should not be mandatory

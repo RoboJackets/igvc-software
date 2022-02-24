@@ -33,7 +33,16 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{"~"}
         ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name + publisher_suffix_path, 1);
         g_pubs.insert ( std::pair<std::string, ros::Publisher>(camera_name,info_pub) );
         
+        spinnerUpdate();
     }
+}
+
+void SegmentedCameraInfoPublisher::spinnerUpdate()
+{
+  while (ros::ok())
+  {
+    ros::spinOnce();
+  }
 }
 
 void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height, std::string camera_name) 
