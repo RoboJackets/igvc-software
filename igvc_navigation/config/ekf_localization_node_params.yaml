@@ -83,7 +83,7 @@ odom0: /wheel_odometry
 odom0_config: [ false, false, false,
                 false, false, false,
                 true, true, false,
-                false, false, false,
+                false, false, true,
                 false, false, false]
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
@@ -139,7 +139,7 @@ imu0_config: [ false, false, false,
                false, false, false,
                false, false, false,
                false,  false, true,
-               true,  false,  false]
+               true,  true,  false]
 imu0_nodelay: false
 imu0_differential: false
 imu0_relative: false
@@ -147,6 +147,13 @@ imu0_queue_size: 5
 #imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
 #imu0_twist_rejection_threshold: 0.8                #
 #imu0_linear_acceleration_rejection_threshold: 0.8  #
+
+# imu1: /magnetometer
+# imu1_config: [ false, false, false,
+#                false, false, true,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
@@ -173,15 +180,15 @@ control_timeout: 0.2
 # Which velocities are being controlled. Order is vx, vy, vz, vroll, vpitch, vyaw.
 control_config: [true, false, false, false, false, true]
 # Places limits on how large the acceleration term will be. Should match your robot's kinematics.
-acceleration_limits: [1.3, 0.0, 0.0, 0.0, 0.0, 3.4]
+acceleration_limits: [1.3, 1.3, 0.0, 0.0, 0.0, 3.4]
 # Acceleration and deceleration limits are not always the same for robots.
-deceleration_limits: [1.3, 0.0, 0.0, 0.0, 0.0, 4.5]
+deceleration_limits: [1.3, 1.3, 0.0, 0.0, 0.0, 4.5]
 # If your robot cannot instantaneously reach its acceleration limit, the permitted change can be controlled with these
 # gains
-acceleration_gains: [0.8, 0.0, 0.0, 0.0, 0.0, 0.9]
+acceleration_gains: [0.8, 0.8, 0.0, 0.0, 0.0, 0.9]
 # If your robot cannot instantaneously reach its deceleration limit, the permitted change can be controlled with these
 # gains
-deceleration_gains: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+deceleration_gains: [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
 
 # [ADVANCED] The process noise covariance matrix can be difficult to tune, and can vary for each application, so it is
 # exposed as a configuration parameter. This matrix represents the noise we add to the total error after each
