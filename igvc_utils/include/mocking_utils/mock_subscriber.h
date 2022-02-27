@@ -26,7 +26,6 @@ public:
   MockSubscriber(MockSubscriber&&) noexcept {};
   MockSubscriber& operator=(MockSubscriber&&) noexcept {};
 
-
   void init(const std::string& topic, int queue_size = 1);
 
   [[nodiscard]] bool waitForPublisher(const ros::Duration& timeout = ros::Duration{ 5 }) const;

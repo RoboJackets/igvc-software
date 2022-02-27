@@ -6,11 +6,9 @@
 
 class TestSegmentedCamera : public testing::Test
 {
-
 public:
-  TestSegmentedCamera() : pNH{"~"}
+  TestSegmentedCamera() : pNH{ "~" }
   {
-
     // cameras to obtain images from
     assertions::getParam(nh, "segmented_camera/camera_names", camera_names);
 
@@ -20,55 +18,55 @@ public:
     assertions::getParam(nh, "segmented_camera/segmented_publisher_path", seg_cam_pub_path);
     assertions::getParam(nh, "segmented_camera/segmented_subscriber_path", seg_cam_sub_path);
 
-
-    //mock_pub will be a vector of [camers_names.size()] publishers
+    // mock_pub will be a vector of [camers_names.size()] publishers
     for (size_t i = 0; i < camera_names.size(); i++)
     {
-        auto camera_name = camera_names[i];
+      auto camera_name = camera_names[i];
 
-        // cam_center/raw/info
-        std::string semantic_info_topic = camera_name + seg_cam_sub_path;
+      // cam_center/raw/info
+      std::string semantic_info_topic = camera_name + seg_cam_sub_path;
 
-        //We publish to each camera's topic
-        ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(semantic_info_topic, 1);
-        mock_pub.push_back(info_pub);
+      // We publish to each camera's topic
+      ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(semantic_info_topic, 1);
+      mock_pub.push_back(info_pub);
     }
-
   }
+
 protected:
-  //the private node handle will let us retrieve desired launch file params later 
+  // the private node handle will let us retrieve desired launch file params later
   ros::NodeHandle pNH;
   ros::NodeHandle nh;
   std::vector<std::string> camera_names;
   std::string seg_cam_pub_path, seg_cam_sub_path;
-  //fake publisher we can use for testing
+  // fake publisher we can use for testing
   std::vector<ros::Publisher> mock_pub;
 
   double output_width, output_height;
-
 };
 
-//make a fake CameraInfo message to transform
-sensor_msgs::CameraInfo createCameraInfoMsg() {
+// make a fake CameraInfo message to transform
+sensor_msgs::CameraInfo createCameraInfoMsg()
+{
   sensor_msgs::CameraInfo camera_info;
-  //all the properties that segmented_camera_info_publisher's ScaleCameraInfo() changes
+  // all the properties that segmented_camera_info_publisher's ScaleCameraInfo() changes
   camera_info.height = 1080;
   camera_info.width = 720;
-  //these are probably not reasonable values, but they represent 3x3 matrices and that's what matters
-  camera_info.K = {1000, 0, 200, 3000, 120, 490, 0, 0, 1};
-  camera_info.P = {480, 290, 1, 600, 1000, 0, 0, 120, 0, 0, 0, 0};
+  // these are probably not reasonable values, but they represent 3x3 matrices and that's what matters
+  camera_info.K = { 1000, 0, 200, 3000, 120, 490, 0, 0, 1 };
+  camera_info.P = { 480, 290, 1, 600, 1000, 0, 0, 120, 0, 0, 0, 0 };
 
-  //other properties
-  //camera_info.distortion_model = "plumb_bob";
-  //camera_info.D = [];
-  //camera_info.R = [];
+  // other properties
+  // camera_info.distortion_model = "plumb_bob";
+  // camera_info.D = [];
+  // camera_info.R = [];
 
   return camera_info;
 }
 
-//fake camera info message - hard coded transform of createCameraInfoMsg()
-sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height) {
-  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg();// = &createCameraInfoMsg();
+// fake camera info message - hard coded transform of createCameraInfoMsg()
+sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height)
+{
+  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg();  // = &createCameraInfoMsg();
 
   double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info.width);
   double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info.height);
@@ -76,48 +74,66 @@ sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height) {
   camera_info.width = static_cast<unsigned int>(width);
   camera_info.height = static_cast<unsigned int>(height);
 
-  camera_info.K = {camera_info.K[0] * w_ratio, 0, camera_info.K[2] * w_ratio, 0, camera_info.K[4] * h_ratio,
-                              camera_info.K[5] * h_ratio, 0, 0, 1};
-  camera_info.P = {camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
-                              camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0};
+  camera_info.K = { camera_info.K[0] * w_ratio,
+                    0,
+                    camera_info.K[2] * w_ratio,
+                    0,
+                    camera_info.K[4] * h_ratio,
+                    camera_info.K[5] * h_ratio,
+                    0,
+                    0,
+                    1 };
+  camera_info.P = { camera_info.P[0] * w_ratio,
+                    0,
+                    camera_info.P[2] * w_ratio,
+                    0,
+                    0,
+                    camera_info.P[5] * h_ratio,
+                    camera_info.P[6] * h_ratio,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0 };
 
   return camera_info;
 }
 
-//test a normal scaling output ig
-TEST_F(TestSegmentedCamera, NormalScalingTest) {
-  //publish fake camera info msgs to seg_cam's topics
-  for (size_t i = 0; i < camera_names.size(); i++) {
-      MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
-      ASSERT_TRUE(mock_sub.waitForPublisher());
-      ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
+// test a normal scaling output ig
+TEST_F(TestSegmentedCamera, NormalScalingTest)
+{
+  // publish fake camera info msgs to seg_cam's topics
+  for (size_t i = 0; i < camera_names.size(); i++)
+  {
+    MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
+    ASSERT_TRUE(mock_sub.waitForPublisher());
+    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
 
+    mock_pub[i].publish(createCameraInfoMsg());
+    ASSERT_TRUE(mock_sub.spinUntilMessages());
 
-      mock_pub[i].publish(createCameraInfoMsg());
-      ASSERT_TRUE(mock_sub.spinUntilMessages());
-      
-      sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
-      sensor_msgs::CameraInfo response = mock_sub.front();
-      EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
-      EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
+    sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width, output_height);
+    sensor_msgs::CameraInfo response = mock_sub.front();
+    EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
+    EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
 
-      for (int i = 0; i < 9; i++) {
-        EXPECT_NEAR(correctResponse.K[i], response.K[i], 1E-100);
-      }
-      for (int i = 0; i < 12; i++) {
-        EXPECT_NEAR(correctResponse.P[i], response.P[i], 1E-100);
-      }
+    for (int i = 0; i < 9; i++)
+    {
+      EXPECT_NEAR(correctResponse.K[i], response.K[i], 1E-100);
+    }
+    for (int i = 0; i < 12; i++)
+    {
+      EXPECT_NEAR(correctResponse.P[i], response.P[i], 1E-100);
+    }
   }
 }
 
-//tests output when we input all zeros
+// tests output when we input all zeros
 // TEST_F(TestSegmentedCamera, ZeroTest) {
-
 
 // }
 
-
-//TODO: Maybe compare against the gazebo node's output? Should not be mandatory
+// TODO: Maybe compare against the gazebo node's output? Should not be mandatory
 
 int main(int argc, char** argv)
 
