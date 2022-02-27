@@ -29,13 +29,15 @@
       <param name="zero_altitude" value="true"/>
 
       <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
-      <param name="broadcast_utm_transform" value="true"/>
+      <param name="broadcast_cartesian_transform" value="true"/>
 
       <!-- publishes the lat and long of the robot position -->
       <param name="publish_filtered_gps" value="true"/>
 
       <!-- if true uses yaw angle from the input odom source -->
       <param name="use_odometry_yaw" value="false"/>
+    
+      <param name="wait_for_datum" value="false"/>
 
       <!-- input remapping -->
       <remap from="/imu/data" to="/magnetometer"/>
