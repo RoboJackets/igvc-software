@@ -9,13 +9,13 @@ JoystickDriver::JoystickDriver() : nhp{ "~" }
   updater_ptr->setHardwareID("Joystick");
   updater_ptr->add("Joystick Diagnostic", this, &JoystickDriver::joystick_diagnostic);
 
-  assertions::param(nhp, "absoluteMaxVel", absoluteMaxVel, 1.0);
-  assertions::param(nhp, "maxVel", maxVel, 1.6);
-  assertions::param(nhp, "maxVelIncr", maxVelIncr, 0.1);
-  assertions::param(nhp, "leftJoyAxis", leftJoyAxis, 1);
-  assertions::param(nhp, "rightJoyAxis", rightJoyAxis, 4);
-  assertions::param(nhp, "leftInverted", leftInverted, false);
-  assertions::param(nhp, "rightInverted", rightInverted, false);
+  assertions::param(pNh, "absoluteMaxVel", absoluteMaxVel, 1.0);
+  assertions::param(pNh, "maxVel", maxVel, 1.6);
+  assertions::param(pNh, "maxVelIncr", maxVelIncr, 0.1);
+  assertions::param(pNh, "leftJoyAxis", leftJoyAxis, 1);
+  assertions::param(pNh, "rightJoyAxis", rightJoyAxis, 4);
+  assertions::param(pNh, "leftInverted", leftInverted, false);
+  assertions::param(pNh, "rightInverted", rightInverted, false);
 }
 
 void JoystickDriver::joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
@@ -39,7 +39,7 @@ void JoystickDriver::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
   maxVel = std::min(maxVel, absoluteMaxVel);
   maxVel = std::max(maxVel, 0.0);
 
-  nhp.setParam("maxVel", maxVel);
+  pNh.setParam("maxVel", maxVel);
 
   updater_ptr->update();
 

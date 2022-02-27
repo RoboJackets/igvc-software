@@ -18,7 +18,7 @@ public:
 
 private:
   // node handles
-  ros::NodeHandle nhp;
+  ros::NodeHandle pNh;
   ros::NodeHandle nh;
 
   // publisher
