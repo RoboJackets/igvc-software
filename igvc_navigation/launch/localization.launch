@@ -23,7 +23,7 @@
       <param name="two_d_mode" value="false"/>
 
       <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
-      <param name="yaw_offset" value="1.57079632679"/>
+      <param name="yaw_offset" value="0"/>
 
       <!-- sets altitude to 0 -->
       <param name="zero_altitude" value="true"/>
