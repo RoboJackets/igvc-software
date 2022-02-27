@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
     DIRECTORY msg
     FILES
+    velocity_pair.msg
     velocity_quad.msg
     lights.msg
     system_stats.msg
