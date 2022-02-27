@@ -63,6 +63,22 @@ sensor_msgs::CameraInfo createCameraInfoMsg()
   return camera_info;
 }
 
+sensor_msgs::CameraInfo createEmptyCameraInfoMsg()
+{
+  sensor_msgs::CameraInfo camera_info;
+  camera_info.height = 0;
+  camera_info.width = 0;
+  camera_info.K = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  camera_info.P = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+  // other properties
+  // camera_info.distortion_model = "plumb_bob";
+  // camera_info.D = [];
+  // camera_info.R = [];
+
+  return camera_info;
+}
+
 // fake camera info message - hard coded transform of createCameraInfoMsg()
 sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height)
 {
@@ -100,6 +116,7 @@ sensor_msgs::CameraInfo cameraInfoTransformedMsg(double width, double height)
 }
 
 // test a normal scaling output ig
+//ERROR: how to change output dimensions in seg_cam_info_publisher cpp for this test specifically
 TEST_F(TestSegmentedCamera, NormalScalingTest)
 {
   // publish fake camera info msgs to seg_cam's topics
@@ -128,12 +145,63 @@ TEST_F(TestSegmentedCamera, NormalScalingTest)
   }
 }
 
-// tests output when we input all zeros
-// TEST_F(TestSegmentedCamera, ZeroTest) {
+TEST_F(TestSegmentedCamera, OverScalingTest) //scale to larger than original
+{
+  // publish fake camera info msgs to seg_cam's topics
+  for (size_t i = 0; i < camera_names.size(); i++)
+  {
+    MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
+    ASSERT_TRUE(mock_sub.waitForPublisher());
+    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
 
-// }
+    mock_pub[i].publish(createCameraInfoMsg());
+    ASSERT_TRUE(mock_sub.spinUntilMessages());
 
-// TODO: Maybe compare against the gazebo node's output? Should not be mandatory
+    sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(output_width * 10, output_height * 10);
+    sensor_msgs::CameraInfo response = mock_sub.front(); // how to pass in 10x to regular response?
+    EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
+    EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
+
+    for (int i = 0; i < 9; i++)
+    {
+      EXPECT_NEAR(correctResponse.K[i], response.K[i], 1E-100);
+    }
+    for (int i = 0; i < 12; i++)
+    {
+      EXPECT_NEAR(correctResponse.P[i], response.P[i], 1E-100);
+    }
+  }
+}
+
+//input all zeros
+//ERROR: how to change output dimensions in seg_cam_info_publisher cpp for this test specifically
+TEST_F(TestSegmentedCamera, ZeroTest)
+{
+  // publish fake camera info msgs to seg_cam's topics
+  for (size_t i = 0; i < camera_names.size(); i++)
+  {
+    MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
+    ASSERT_TRUE(mock_sub.waitForPublisher());
+    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
+
+    mock_pub[i].publish(createEmptyCameraInfoMsg()); //all zero? is this correct
+    ASSERT_TRUE(mock_sub.spinUntilMessages());
+
+    sensor_msgs::CameraInfo correctResponse = cameraInfoTransformedMsg(0, 0);
+    sensor_msgs::CameraInfo response = mock_sub.front(); //how to make this adjust (make output dimensions 0)
+    EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
+    EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
+
+    for (int i = 0; i < 9; i++)
+    {
+      EXPECT_NEAR(correctResponse.K[i], response.K[i], 1E-100);
+    }
+    for (int i = 0; i < 12; i++)
+    {
+      EXPECT_NEAR(correctResponse.P[i], response.P[i], 1E-100);
+    }
+  }
+}
 
 int main(int argc, char** argv)
 

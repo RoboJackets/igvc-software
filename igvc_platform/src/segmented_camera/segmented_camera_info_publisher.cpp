@@ -48,6 +48,10 @@ void SegmentedCameraInfoPublisher::spinnerUpdate()
 void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width,
                                                    double height, std::string camera_name)
 {
+  if (width <= 0 || height <= 0)
+  {
+    throw std::invalid_argument("non-positive output dimensions requested in SegmentedCameraInfoPublisher");
+  }
   sensor_msgs::CameraInfo changed_camera_info = *camera_info;
 
   double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info->width);
