@@ -1,6 +1,6 @@
 #include "joystick_driver.h"
 
-JoystickDriver::JoystickDriver() : nhp{ "~" }
+JoystickDriver::JoystickDriver() : pNh{ "~" }
 {
   cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   joy_sub = nh.subscribe("/joy", 1, &JoystickDriver::joyCallback, this);
