@@ -160,7 +160,6 @@ install(DIRECTORY include
 
 add_subdirectory(src/pid_tester)
 add_subdirectory(src/ethernet)
-add_subdirectory(src/speed_compare)
 add_subdirectory(src/system_stats)
 add_subdirectory(src/quaternion_to_rpy)
 add_subdirectory(src/state)

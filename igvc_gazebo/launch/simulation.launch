@@ -17,9 +17,6 @@
     <arg name="pitch" default="0.0"/>
     <arg name="yaw" default="0"/>
 
-    <!-- Vehicle Type (0 for jessi, 1 for swervi)-->
-    <arg name="model" default="0"/> 
-
     <param name="/use_sim_time" value="true"/>
 
     <include file="$(find igvc_navigation)/launch/set_waypoint_file_path.launch">
