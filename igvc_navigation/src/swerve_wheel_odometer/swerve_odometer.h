@@ -40,10 +40,13 @@ private:
   double linear_y_;  //   [m/s]
   double angular_;   // [rad/s]
 
+  double angular_limit_; 
+
   double inf_tol;
   double intersection_tol_;
   double alpha;
 
+  ros::Time curr_time;
   ros::Time prev_time;
 
   // callback for encoder subscriber
@@ -52,5 +55,6 @@ private:
   double theta_map(const double& theta);
   double isclose(const double& a, const double& b, const double tol = 0.025, const double bias = 0);
   void ang_callback(const nav_msgs::Odometry msg);
+  void pubOdometry();
 };
 #endif
