@@ -40,7 +40,7 @@ private:
   double linear_y_;  //   [m/s]
   double angular_;   // [rad/s]
 
-  double angular_limit_; 
+  double angular_limit_;
 
   double inf_tol;
   double intersection_tol_;

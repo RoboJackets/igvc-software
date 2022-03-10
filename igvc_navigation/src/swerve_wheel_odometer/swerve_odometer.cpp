@@ -208,11 +208,13 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
       auto icr_wh = std::array<double, 2>{ positions_list[i][0] - average_intersection[0],
                                            positions_list[i][1] - average_intersection[1] };
 
-      if (isinf(icr_wh[0]) || isinf(icr_wh[1])) {
+      if (isinf(icr_wh[0]) || isinf(icr_wh[1]))
+      {
         ROS_DEBUG_STREAM("icr_wh is inf! Discarding!");
         continue;
       }
-      if (isclose(icr_wh[0], 0) || isclose(icr_wh[1], 0)) {
+      if (isclose(icr_wh[0], 0) || isclose(icr_wh[1], 0))
+      {
         ROS_DEBUG_STREAM("icr_wh for wheel " << i << " is zero! Discarding!");
         continue;
       }
@@ -252,7 +254,8 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
   SwerveOdometer::pubOdometry();
 }
 
-void SwerveOdometer::pubOdometry() {
+void SwerveOdometer::pubOdometry()
+{
   geometry_msgs::Vector3 linearVelocities;
   linearVelocities.z = 0;
   linearVelocities.x = linear_x_;
