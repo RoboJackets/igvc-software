@@ -32,8 +32,6 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{ "~" }
     // ie subscribe name/raw/info -> name/segmented/info
     ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(camera_name + publisher_suffix_path, 1);
     g_pubs.insert(std::pair<std::string, ros::Publisher>(camera_name, info_pub));
-
-    spinnerUpdate();
   }
 }
 
@@ -50,7 +48,13 @@ void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfo
 {
   if (width <= 0 || height <= 0)
   {
-    throw std::invalid_argument("non-positive output dimensions requested in SegmentedCameraInfoPublisher");
+    ROS_ERROR("non-positive output dimensions requested in SegmentedCameraInfoPublisher");
+    return;
+  }
+  else if (camera_info->height <= 0 || camera_info->width <= 0)
+  {
+    ROS_ERROR("non-positive camera info dimensions in SegmentedCameraInfoPublisher");
+    return;
   }
   sensor_msgs::CameraInfo changed_camera_info = *camera_info;
 
