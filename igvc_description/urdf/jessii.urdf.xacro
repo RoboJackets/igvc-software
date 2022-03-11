@@ -1,0 +1,670 @@
+<?xml version="1.0"?>
+
+<robot name="igvc_platform" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- include other xacro files to use their macros -->
+  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+
+  <!-- passed in parameters -->
+  <xacro:arg name="gpu" default="false" />
+
+  <!-- constants -->
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+
+  <xacro:property name="chassis_mass" value="20" />
+
+  <!-- wheels -->
+  <xacro:property name="drive_tire_diameter" value="0.305"/>
+  <xacro:property name="drive_tire_width" value="0.0762"/>
+  <!-- TODO set proper mass values -->
+  <xacro:property name="drive_wheel_mass" value="5.0"/>
+
+  <xacro:property name="wheelbase" value="0.556"/>
+
+  <!-- wheel acuator limits -->
+  <xacro:property name="drive_wheel_eff_limit" value="8"/>
+  <xacro:property name="drive_wheel_vel_limit" value="10"/>
+
+  <!-- drive shock params-->
+  <!-- how far the drive wheel shock can move (m)-->
+  <xacro:property name="drive_wheel_travel" value="0.1"/>
+  <xacro:property name="drive_shock_eff_limit" value="500.0"/>
+  <xacro:property name="drive_shock_vel_limit" value="0.1"/>
+
+  <!-- casters -->
+  <xacro:property name="caster_radius" value="0.1016"/>
+  <xacro:property name="caster_mass" value="1.0"/>
+  <!-- how far forward from base_link it is -->
+  <xacro:property name="caster_x" value="0.612978"/>
+
+  <!-- center camera params, relative to the magnetometer -->
+  <xacro:property name="center_camera_y" value="0.0"/>
+  <xacro:property name="center_camera_x" value="0.0"/>
+  <xacro:property name="center_camera_pitch" value="0.418879"/>
+  <xacro:property name="center_camera_z" value="0.043942"/>
+
+  <!-- right camera params, relative to the magnetometer -->
+  <xacro:property name="right_camera_y" value="-0.33147"/>
+  <xacro:property name="right_camera_x" value="0.019812"/>
+  <xacro:property name="right_camera_pitch" value="1.06465"/>
+  <xacro:property name="right_camera_yaw" value="-1.13446"/>
+  <xacro:property name="right_camera_z" value="0"/>
+
+  <!-- left camera params, relative to the magnetometer -->
+  <xacro:property name="left_camera_y" value="0.33147"/>
+  <xacro:property name="left_camera_x" value="0.019812"/>
+  <xacro:property name="left_camera_pitch" value="1.06465"/>
+  <xacro:property name="left_camera_yaw" value="1.13446"/>
+  <xacro:property name="left_camera_z" value="0.0"/>
+
+  <!-- lidar params relative to base_link-->
+  <xacro:property name="lidar_pitch" value="0.174533"/>
+  <xacro:property name="lidar_x" value="0.680364"/>
+  <xacro:property name="lidar_z" value="0.237121"/>
+  <xacro:property name="lidar_hz" value="10"/>
+  <xacro:property name="lidar_samples" value="500"/>
+
+  <!-- gps, relative to base_link -->
+  <xacro:property name="gps_z" value="1.354330"/>
+  <xacro:property name="gps_y" value="0.198120"/>
+  <xacro:property name="gps_x" value="0.216371"/>
+
+  <!-- imu bottom, relative to base_link -->
+  <xacro:property name="imu_z" value="0.221742"/>
+  <xacro:property name="imu_y" value="0.0"/>
+  <xacro:property name="imu_x" value="-0.024638"/>
+
+  <!-- imu top, relative to base_link -->
+  <xacro:property name="magnetometer_z" value="1.238758"/>
+  <xacro:property name="magnetometer_y" value="0.0"/>
+  <xacro:property name="magnetometer_x" value="0.216371"/>
+
+
+  <!-- gives small geometry so it show up in rviz -->
+  <xacro:macro name="null_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </xacro:macro>
+
+  <!-- makes shock for drive wheel -->
+  <xacro:macro name="drive_shock"
+               params="lr_prefix lr_reflect">
+
+    <joint name="${lr_prefix}_drive_shock" type="prismatic">
+      <parent link="base_link"/>
+      <child link="${lr_prefix}_axle_carrier"/>
+      <origin xyz="0 ${lr_reflect * wheelbase / 2} 0"
+              rpy="0 0 0"/>
+      <axis xyz="0 0 -1"/>
+      <limit lower="${-drive_wheel_travel / 2}" upper="${drive_wheel_travel / 2}"
+              effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
+      <!-- TODO tune for actual shocks -->
+      <!-- damping = viscous dampening coeff -->
+      <!-- friction, physical static friction -->
+      <!-- spring stiffness = spring constant N/m-->
+      <dynamics damping="100" friction="1.0"
+                spring_stiffness="113832.44275" spring_reference="0.08"/>
+    </joint>
+    <transmission name="${lr_prefix}_drive_shock_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${lr_prefix}_drive_shock">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${lr_prefix}_drive_shock_act">
+        <!-- This hardwareInterface element exists for compatibility
+             with ROS Hydro. -->
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <!-- TODO parameterize to make consistent PID values work -->
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <!-- The "wheel" macro defines an axle carrier, axle, and wheel. -->
+  <xacro:macro name="wheel" params="lr_prefix lr_reflect tire_diameter wheel_mass axle_eff_limit wheel_width">
+    <link name="${lr_prefix}_axle_carrier">
+      <xacro:null_link/>
+    </link>
+
+    <!-- The left and right axles have the same axis so that identical
+         rotation values cause the wheels to rotate in the same direction. -->
+    <joint name="${lr_prefix}_axle" type="continuous">
+      <parent link="${lr_prefix}_axle_carrier"/>
+      <child link="${lr_prefix}_wheel"/>
+      <origin xyz="0 0 0" rpy="${M_PI / 2} 0 0"/>
+      <axis xyz="0 0 -1"/>
+      <limit effort="${drive_wheel_eff_limit}" velocity="${drive_wheel_vel_limit}"/>
+      <dynamics damping="0.001" friction="0.5"/>
+    </joint>
+
+    <transmission name="${lr_prefix}_axle_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${lr_prefix}_axle">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${lr_prefix}_axle_act">
+        <!--This hardwareInterface element exists for compatibility
+             with ROS Hydro-->
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <link name="${lr_prefix}_wheel">
+      <visual>
+        <geometry>
+          <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
+        </geometry>
+        <max_contacts>10</max_contacts>
+        <surface>
+          <contact>
+            <ode>
+              <soft_cfm>0.000000001</soft_cfm>
+              <soft_erp>0.2</soft_erp>
+              <kp>1e+10</kp>
+              <kd>10</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.005</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" />
+        <mass value="${wheel_mass}"/>
+        <inertia  ixx="${1 / 12 * wheel_mass * wheel_width**2 + 1/4 * wheel_mass * (tire_diameter / 2)**2}"
+                  ixy="0.0"
+                  ixz="0.0"
+                  iyy="${1 / 12 * wheel_mass * wheel_width**2 + 1/4 * wheel_mass * (tire_diameter / 2)**2}"
+                  iyz="0.0"
+                  izz="${1/2 * wheel_mass * (tire_diameter / 2)**2}" />
+      </inertial>
+    </link>
+
+    <xacro:drive_shock lr_prefix="${lr_prefix}" lr_reflect="${lr_reflect}"/>
+
+    <gazebo reference="${lr_prefix}_wheel">
+      <mu1>0.7</mu1>
+      <mu2>0.75</mu2>
+    </gazebo>
+
+  </xacro:macro>
+
+  <!-- macro used to define casters -->
+  <xacro:macro name="caster" params="ball_radius ball_mass tire_diameter x y">
+    <link name="caster">
+      <inertial>
+        <mass value="${ball_mass}" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia  ixx="${2 / 5 * ball_mass * ball_radius ** 2}" ixy="0.0" ixz="0.0"
+                  iyy="${2 / 5 * ball_mass * ball_radius ** 2}" iyz="0.0"
+                  izz="${2 / 5 * ball_mass * ball_radius ** 2}" />
+      </inertial>
+      <visual>
+        <geometry>
+          <sphere radius="${ball_radius}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <sphere radius="${ball_radius}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="base_link_to_caster" type="fixed">
+      <parent link="base_link"/>
+      <child link="caster"/>
+      <origin xyz="${x} ${y} ${ball_radius - tire_diameter / 2}" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="caster">
+      <mu1>0.2</mu1>
+      <mu2>0.25</mu2>
+    </gazebo>
+
+    <gazebo>
+      <joint name='base_link_to_caster' type='ball'>
+        <parent>base_link</parent>
+        <child>caster</child>
+        <pose frame=''>0 0 0 0 0 0</pose>
+        <physics>
+          <ode>
+            <limit>
+              <cfm>0</cfm>
+              <erp>0.2</erp>
+            </limit>
+            <suspension>
+              <cfm>0</cfm>
+              <erp>0.2</erp>
+            </suspension>
+          </ode>
+        </physics>
+      </joint>
+    </gazebo>
+  </xacro:macro>
+
+
+  <link name="cam/center">
+      <visual>
+          <geometry>
+              <box size="0.1 0.1 0.1"/>
+          </geometry>
+      </visual>
+  </link>
+
+  <joint name="magnetometer_to_center_cam" type="fixed">
+      <origin xyz="${center_camera_x} ${center_camera_y} ${center_camera_z}" rpy="0 ${center_camera_pitch} 0" />
+      <parent link="magnetometer"/>
+      <child link="cam/center"/>
+  </joint>
+
+  <!-- the optical joint is in the correct frame for transforms -->
+  <link name="cam/center_optical"/>
+
+  <joint name="cam/center_optical_joint" type="fixed">
+      <parent link="cam/center"/>
+      <child link="cam/center_optical"/>
+      <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <gazebo reference="cam/center">
+      <sensor name="center_cam_sensor" type="camera">
+          <camera>
+              <!-- hov in radians -->
+              <horizontal_fov>1.2290609</horizontal_fov>
+              <image>
+                <width>640</width>
+                <height>480</height>
+              </image>
+              <clip>
+                <near>0.1</near>
+                <far>100</far>
+              </clip>
+              <!--
+                  <distortion>
+                  <k1>-0.25</k1>
+                  <k2>0.12</k2>
+                  <k3>0.0</k3>
+                  <p1>-0.00028</p1>
+                  <p2>-0.00005</p2>
+                  <center>0.5 0.5</center>
+                  </distortion>
+              -->
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>30</updateRate>
+              <cameraName>cam/center/raw</cameraName>
+              <imageTopicName>image</imageTopicName>
+              <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+              <frameName>cam/center_optical</frameName>
+              <hackBaseline>0.0</hackBaseline>
+              <distortionK1>0.0</distortionK1>
+              <distortionK2>0.0</distortionK2>
+              <distortionK3>0.0</distortionK3>
+              <distortionT1>0.0</distortionT1>
+              <distortionT2>0.0</distortionT2>
+          </plugin>
+      </sensor>
+  </gazebo>
+
+  <link name="cam/right">
+      <visual>
+          <geometry>
+              <box size="0.1 0.1 0.1"/>
+          </geometry>
+      </visual>
+  </link>
+
+  <joint name="magnetometer_to_right_cam" type="fixed">
+      <origin xyz="${right_camera_x} ${right_camera_y} ${right_camera_z}" rpy="0 ${right_camera_pitch} ${right_camera_yaw}" />
+      <parent link="magnetometer"/>
+      <child link="cam/right"/>
+  </joint>
+
+  <!-- the optical joint is in the correct frame for transforms -->
+  <link name="cam/right_optical"/>
+
+  <joint name="cam/right_optical_joint" type="fixed">
+      <parent link="cam/right"/>
+      <child link="cam/right_optical"/>
+      <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <gazebo reference="cam/right">
+      <sensor name="right_cam_sensor" type="camera">
+          <camera>
+              <!-- hov in radians -->
+              <horizontal_fov>1.2290609</horizontal_fov>
+              <image>
+                <width>640</width>
+                <height>480</height>
+              </image>
+              <clip>
+                <near>0.1</near>
+                <far>100</far>
+              </clip>
+              <!--
+                  <distortion>
+                  <k1>-0.25</k1>
+                  <k2>0.12</k2>
+                  <k3>0.0</k3>
+                  <p1>-0.00028</p1>
+                  <p2>-0.00005</p2>
+                  <center>0.5 0.5</center>
+                  </distortion>
+              -->
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>30</updateRate>
+              <cameraName>cam/right/raw</cameraName>
+              <imageTopicName>image</imageTopicName>
+              <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+              <frameName>cam/right_optical</frameName>
+              <hackBaseline>0.0</hackBaseline>
+              <distortionK1>0.0</distortionK1>
+              <distortionK2>0.0</distortionK2>
+              <distortionK3>0.0</distortionK3>
+              <distortionT1>0.0</distortionT1>
+              <distortionT2>0.0</distortionT2>
+          </plugin>
+      </sensor>
+  </gazebo>
+
+  <link name="cam/left">
+      <visual>
+          <geometry>
+              <box size="0.1 0.1 0.1"/>
+          </geometry>
+      </visual>
+  </link>
+
+  <joint name="magnetometer_to_left_cam" type="fixed">
+      <origin xyz="${left_camera_x} ${left_camera_y} ${left_camera_z}" rpy="0 ${left_camera_pitch} ${left_camera_yaw}" />
+      <parent link="magnetometer"/>
+      <child link="cam/left"/>
+  </joint>
+
+  <!-- the optical joint is in the correct frame for transforms -->
+  <link name="cam/left_optical"/>
+
+  <joint name="cam/left_optical_joint" type="fixed">
+      <parent link="cam/left"/>
+      <child link="cam/left_optical"/>
+      <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <gazebo reference="cam/left">
+      <sensor name="left_cam_sensor" type="camera">
+          <camera>
+              <!-- hov in radians -->
+              <horizontal_fov>1.2290609</horizontal_fov>
+              <image>
+                <width>640</width>
+                <height>480</height>
+              </image>
+              <clip>
+                <near>0.1</near>
+                <far>100</far>
+              </clip>
+              <!--
+                  <distortion>
+                  <k1>-0.25</k1>
+                  <k2>0.12</k2>
+                  <k3>0.0</k3>
+                  <p1>-0.00028</p1>
+                  <p2>-0.00005</p2>
+                  <center>0.5 0.5</center>
+                  </distortion>
+              -->
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>30</updateRate>
+              <cameraName>cam/left/raw</cameraName>
+              <imageTopicName>image</imageTopicName>
+              <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+              <frameName>cam/left_optical</frameName>
+              <hackBaseline>0.0</hackBaseline>
+              <distortionK1>0.0</distortionK1>
+              <distortionK2>0.0</distortionK2>
+              <distortionK3>0.0</distortionK3>
+              <distortionT1>0.0</distortionT1>
+              <distortionT2>0.0</distortionT2>
+          </plugin>
+      </sensor>
+  </gazebo>
+
+
+  <!-- base of the robot, should be ground level directly below center points of wheels -->
+  <link name="base_link">
+    <xacro:null_link/>
+  </link>
+  <gazebo reference="base_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <link name="base_footprint">
+    <xacro:null_link/>
+  </link>
+  <gazebo reference="base_footprint">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 ${drive_tire_diameter / 2}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+  <gazebo reference="body">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <!-- collision range = min sensing distance -->
+  <!-- gpu does gpu acceleration -->
+  <xacro:VLP-16 parent="base_link" name="lidar" topic="/velodyne_points" hz="${lidar_hz}" samples="${lidar_samples}" gpu="$(arg gpu)">
+    <origin xyz="${lidar_x} 0.0 ${lidar_z}" rpy="0 ${lidar_pitch} 0" />
+  </xacro:VLP-16>
+
+  <xacro:wheel lr_prefix="left" lr_reflect="1" tire_diameter="${drive_tire_diameter}"
+               wheel_mass="${drive_wheel_mass}" axle_eff_limit="${drive_wheel_eff_limit}" wheel_width="${drive_tire_width}"/>
+  <xacro:wheel lr_prefix="right" lr_reflect="-1" tire_diameter="${drive_tire_diameter}"
+               wheel_mass="${drive_wheel_mass}" axle_eff_limit="${drive_wheel_eff_limit}" wheel_width="${drive_tire_width}"/>
+
+  <xacro:caster ball_radius="${caster_radius}" ball_mass="${caster_mass}"
+                tire_diameter="${drive_tire_diameter}" x="${caster_x}" y="0"/>
+
+
+  <link name="body">
+      <inertial>
+          <mass value="${chassis_mass}" />
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <!-- approximate the intertial matrix as a sphere -->
+          <inertia  ixx="${2 / 5 * chassis_mass * 1 ** 2}" ixy="0.0" ixz="0.0"
+                    iyy="${2 / 5 * chassis_mass * 1 ** 2}" iyz="0.0"
+                    izz="${2 / 5 * chassis_mass * 1 ** 2}" />
+      </inertial>
+      <visual>
+          <geometry>
+              <mesh filename="package://igvc_description/urdf/meshes/jessi_simple.dae"/>
+          </geometry>
+      </visual>
+      <collision>
+          <geometry>
+              <mesh filename="package://igvc_description/urdf/meshes/jessi_simple.dae"/>
+          </geometry>
+      </collision>
+  </link>
+
+  <joint name="base_link_to_body" type="fixed">
+    <parent link="base_link"/>
+    <child link="body"/>
+    <origin xyz="0.2 0.0 0.17" rpy="0 0 ${M_PI / 2}"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+
+
+  <link name="magnetometer">
+    <visual>
+      <geometry>
+        <!-- TODO dimensions -->
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_magnetometer" type="fixed">
+    <parent link="base_link"/>
+    <child link="magnetometer"/>
+    <origin xyz="${magnetometer_x} ${magnetometer_y} ${magnetometer_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+  <link name="imu">
+    <visual>
+      <geometry>
+        <!-- TODO dimensions -->
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_imu" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu"/>
+    <origin xyz="${imu_x} ${imu_y} ${imu_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+
+  <link name="gps">
+    <visual>
+      <geometry>
+        <!-- TODO dimensions and inertial -->
+        <cylinder length="0.05" radius="0.1"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_gps" type="fixed">
+    <origin xyz="${gps_x} ${gps_y} ${gps_z}" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="gps"/>
+  </joint>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+
+    <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
+      <serviceName>/imu/calibrate</serviceName>
+      <updateRate>200.0</updateRate>
+      <bodyName>imu</bodyName>
+      <frameId>imu</frameId>
+      <topicName>/imu</topicName>
+      <rpyOffsets>0 0 0</rpyOffsets>
+      <gaussianNoise>0.00000005</gaussianNoise>
+      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
+      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
+      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0 0.0 0.0</headingDrift>
+      <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
+      <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
+      <yawOffset>0</yawOffset>
+    </plugin>
+
+    <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
+      <serviceName>/magnetometer/calibrate</serviceName>
+      <updateRate>200.0</updateRate>
+      <bodyName>magnetometer</bodyName>
+      <frameId>magnetometer</frameId>
+      <topicName>/magnetometer</topicName>
+      <rpyOffsets>0 0 0</rpyOffsets>
+      <gaussianNoise>0.00000005</gaussianNoise>
+      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
+      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
+      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0 0.0 0.0</headingDrift>
+      <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
+      <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
+      <yawOffset>0</yawOffset>
+    </plugin>
+
+    <plugin name="magnetometer" filename="libhector_gazebo_ros_magnetic.so">
+        <updateRate>200.0</updateRate>
+        <magnitude>.0000489162</magnitude>
+        <bodyName>magnetometer</bodyName>
+        <topicName>/magnetometer/vector</topicName>
+        <referenceHeading>0.0</referenceHeading>
+        <declination>-5.2290</declination>
+        <inclination>62.2126</inclination>
+        <offset>0 0 0</offset>
+        <drift>0 0 0</drift>
+        <driftFrequency>0 0 0</driftFrequency>
+        <gaussianNoise>0.00000005 0.00000005 0.00000005</gaussianNoise>
+    </plugin>
+
+    <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
+      <updateRate>20.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <frameId>base_link</frameId>
+      <topicName>/fix</topicName>
+      <velocityTopicName>/fix_velocity</velocityTopicName>
+      <referenceLatitude>33.774497</referenceLatitude>
+      <referenceLongitude>-84.405001</referenceLongitude>
+      <referenceHeading>90</referenceHeading>
+      <referenceAltitude>309.0</referenceAltitude>
+      <drift>0.001 0.001 0.001</drift>
+      <gaussianNoise>0.0001 0.0001 0.0001</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.005 0.005 0.05</velocityGaussianNoise>
+    </plugin>
+
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>200.0</updateRate>
+      <bodyName>base_footprint</bodyName>
+      <topicName>ground_truth/state_raw</topicName>
+      <gaussianNoise>0.00</gaussianNoise>
+      <frameName>world</frameName>
+      <!-- origin is at spawn location -->
+      <xyzOffset>0 0 0</xyzOffset>
+      <rpyOffset>0 0 0</rpyOffset>
+    </plugin>
+
+  </gazebo>
+
+
+</robot>

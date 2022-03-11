@@ -1,0 +1,7 @@
+<launch>
+    <node name="differential_drive" pkg="igvc_navigation" type="differential_drive" output="screen" required="true" >
+        <param name="axle_length" value="0.52"/>
+        <param name="max_vel" value="3.0"/>
+    </node>
+    <test test-name="test_differential_drive" pkg="igvc_platform" type="TestDifferentialDrive"/>
+</launch>
