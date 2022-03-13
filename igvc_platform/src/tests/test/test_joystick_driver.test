@@ -3,8 +3,8 @@
         <param name="absoluteMaxVel" value="1.2"/>
         <param name="maxVel" value="1.0"/>
         <param name="maxVelIncr" value="0.2"/>
-        <param name="leftAxis" value="1"/>
-        <param name="rightAxis" value="4"/>
+        <param name="leftJoyAxis" value="1"/>
+        <param name="rightJoyAxis" value="4"/>
         <param name="leftInverted" value="false"/>
         <param name="rightInverted" value="false"/>
     </node>
