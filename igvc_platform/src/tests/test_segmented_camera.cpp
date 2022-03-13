@@ -56,27 +56,6 @@ sensor_msgs::CameraInfo createCameraInfoMsg(double height_factor = 1.0, double w
   camera_info.K = { 1000, 0, 200, 3000, 120, 490, 0, 0, 1 };
   camera_info.P = { 480, 290, 1, 600, 1000, 0, 0, 120, 0, 0, 0, 0 };
 
-  // other properties
-  // camera_info.distortion_model = "plumb_bob";
-  // camera_info.D = [];
-  // camera_info.R = [];
-
-  return camera_info;
-}
-
-sensor_msgs::CameraInfo createEmptyCameraInfoMsg()
-{
-  sensor_msgs::CameraInfo camera_info;
-  camera_info.height = 0;
-  camera_info.width = 0;
-  camera_info.K = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  camera_info.P = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-  // other properties
-  // camera_info.distortion_model = "plumb_bob";
-  // camera_info.D = [];
-  // camera_info.R = [];
-
   return camera_info;
 }
 
