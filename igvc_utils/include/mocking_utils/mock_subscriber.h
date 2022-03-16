@@ -23,8 +23,6 @@ public:
   ~MockSubscriber();
   MockSubscriber(const MockSubscriber&) = delete;             // prohibits copying
   MockSubscriber& operator=(const MockSubscriber&) = delete;  // prohibits copying
-  MockSubscriber(MockSubscriber&&) noexcept {};
-  MockSubscriber& operator=(MockSubscriber&&) noexcept {};
 
   void init(const std::string& topic, int queue_size = 1);
 

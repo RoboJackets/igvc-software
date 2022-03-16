@@ -35,14 +35,6 @@ SegmentedCameraInfoPublisher::SegmentedCameraInfoPublisher() : pNh{ "~" }
   }
 }
 
-void SegmentedCameraInfoPublisher::spinnerUpdate()
-{
-  while (ros::ok())
-  {
-    ros::spinOnce();
-  }
-}
-
 void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width,
                                                    double height, std::string camera_name)
 {
@@ -58,13 +50,12 @@ void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfo
   }
   sensor_msgs::CameraInfo changed_camera_info = *camera_info;
 
-  double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info->width);
-  double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info->height);
+  double w_ratio = width / camera_info->width;
+  double h_ratio = height / camera_info->height;
 
   changed_camera_info.width = static_cast<unsigned int>(width);
   changed_camera_info.height = static_cast<unsigned int>(height);
 
-  // changed from 2-D to 1-D arrays - does this matter?
   changed_camera_info.K = { camera_info->K[0] * w_ratio,
                             0,
                             camera_info->K[2] * w_ratio,
@@ -87,7 +78,6 @@ void SegmentedCameraInfoPublisher::ScaleCameraInfo(const sensor_msgs::CameraInfo
                             1,
                             0 };
 
-  // g_pubs[camera_name] = changed_camera_info;
   g_pubs.at(camera_name).publish(changed_camera_info);
 }
 

@@ -1,10 +1,6 @@
 <launch>
     <node name="segmented_camera" pkg="igvc_platform" type="segmented_camera_info_publisher" output="screen" required="true" >
         <rosparam param="camera_names">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
-        
-        <!-- <param name="cam1" value="/cam/center"/>
-        <param name="cam1" value="/cam/center"/>
-        <param name="cam1" value="/cam/center"/> -->
 
         <param name="segmented_publisher_path" value="/segmented/info"/>
         <param name="segmented_subscriber_path" value="/raw/camera_info"/>
