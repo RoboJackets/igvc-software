@@ -115,6 +115,57 @@ TEST_F(TestJoystickDriver, HalfSpeedForward)
   EXPECT_EQ(response.right_velocity, half_speed);
 }
 
+TEST_F(TestJoystickDriver, HalfSpeedReverse)
+{
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  const float half_speed = 0.5;
+  mock_joy_pub.publish(createJoyMsg(-half_speed, -half_speed));
+
+  ASSERT_TRUE(mock_sub.spinUntilMessages());
+
+  ASSERT_EQ(mock_sub.messages().size(), 1LU);
+  const igvc_msgs::velocity_pair& response = mock_sub.front();
+
+  EXPECT_EQ(response.left_velocity, -half_speed);
+  EXPECT_EQ(response.right_velocity, -half_speed);
+}
+
+TEST_F(TestJoystickDriver, HalfSpinRight)
+{
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  const float half_speed = 0.5;
+  mock_joy_pub.publish(createJoyMsg(half_speed, -half_speed));
+
+  ASSERT_TRUE(mock_sub.spinUntilMessages());
+
+  ASSERT_EQ(mock_sub.messages().size(), 1LU);
+  const igvc_msgs::velocity_pair& response = mock_sub.front();
+
+  EXPECT_EQ(response.left_velocity, half_speed);
+  EXPECT_EQ(response.right_velocity, -half_speed);
+}
+
+TEST_F(TestJoystickDriver, HalfSpinLeft)
+{
+  MockSubscriber<igvc_msgs::velocity_pair> mock_sub("/motors");
+  ASSERT_TRUE(mock_sub.waitForPublisher());
+  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_joy_pub));
+  const float half_speed = 0.5;
+  mock_joy_pub.publish(createJoyMsg(-half_speed, half_speed));
+
+  ASSERT_TRUE(mock_sub.spinUntilMessages());
+
+  ASSERT_EQ(mock_sub.messages().size(), 1LU);
+  const igvc_msgs::velocity_pair& response = mock_sub.front();
+
+  EXPECT_EQ(response.left_velocity, -half_speed);
+  EXPECT_EQ(response.right_velocity, half_speed);
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_joystick_driver");

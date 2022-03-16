@@ -1,51 +1,45 @@
-#include <igvc_msgs/velocity_pair.h>
-#include <ros/publisher.h>
-#include <ros/ros.h>
-#include <ros/subscriber.h>
-#include <sensor_msgs/Joy.h>
-#include <diagnostic_updater/diagnostic_updater.h>
+#include "joystick_driver.h"
 
-#include <memory>
-#include <diagnostic_updater/publisher.h>
+JoystickDriver::JoystickDriver() : pNh{ "~" }
+{
+  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  joy_sub = nh.subscribe("/joy", 1, &JoystickDriver::joyCallback, this);
 
-ros::Publisher cmd_pub;
-ros::NodeHandle* nhp;
-std::unique_ptr<diagnostic_updater::Updater> updater_ptr;
+  updater_ptr = std::make_unique<diagnostic_updater::Updater>();
+  updater_ptr->setHardwareID("Joystick");
+  updater_ptr->add("Joystick Diagnostic", this, &JoystickDriver::joystick_diagnostic);
 
-void joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
+  assertions::param(pNh, "absoluteMaxVel", absoluteMaxVel, 1.0);
+  assertions::param(pNh, "maxVel", maxVel, 1.6);
+  assertions::param(pNh, "maxVelIncr", maxVelIncr, 0.1);
+  assertions::param(pNh, "leftJoyAxis", leftJoyAxis, 1);
+  assertions::param(pNh, "rightJoyAxis", rightJoyAxis, 4);
+  assertions::param(pNh, "leftInverted", leftInverted, false);
+  assertions::param(pNh, "rightInverted", rightInverted, false);
+}
+
+void JoystickDriver::joystick_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
   stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Joystick Online");
-  double absoluteMaxVel, maxVel, maxVelIncr;
-  nhp->param(std::string("absoluteMaxVel"), absoluteMaxVel, 1.0);
-  nhp->param(std::string("maxVel"), maxVel, 1.6);
-  nhp->param(std::string("maxVelIncr"), maxVelIncr, 0.1);
   stat.add("absolute_max_velocity", absoluteMaxVel);
   stat.add("max_velocity", maxVel);
   stat.add("max_velocity_increment", maxVelIncr);
 }
 
-void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
+void JoystickDriver::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
-  double absoluteMaxVel, maxVel, maxVelIncr;
-  nhp->param(std::string("absoluteMaxVel"), absoluteMaxVel, 1.0);
-  nhp->param(std::string("maxVel"), maxVel, 1.6);
-  nhp->param(std::string("maxVelIncr"), maxVelIncr, 0.1);
-
   if (msg->buttons[1])
+  {
     maxVel -= maxVelIncr;
+  }
   else if (msg->buttons[3])
+  {
     maxVel += maxVelIncr;
+  }
   maxVel = std::min(maxVel, absoluteMaxVel);
   maxVel = std::max(maxVel, 0.0);
 
-  nhp->setParam("maxVel", maxVel);
-
-  int leftJoyAxis, rightJoyAxis;
-  bool leftInverted, rightInverted;
-  nhp->param(std::string("leftAxis"), leftJoyAxis, 1);
-  nhp->param(std::string("rightAxis"), rightJoyAxis, 4);
-  nhp->param(std::string("leftInverted"), leftInverted, false);
-  nhp->param(std::string("rightInverted"), rightInverted, false);
+  pNh.setParam("maxVel", maxVel);
 
   updater_ptr->update();
 
@@ -60,18 +54,6 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "joystick_driver");
-  ros::NodeHandle nh;
-  nhp = new ros::NodeHandle("~");
-
-  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
-
-  ros::Subscriber joy_sub = nh.subscribe("/joy", 1, joyCallback);
-
-  updater_ptr = std::make_unique<diagnostic_updater::Updater>();
-  updater_ptr->setHardwareID("Joystick");
-  updater_ptr->add("Joystick Diagnostic", joystick_diagnostic);
-
+  JoystickDriver joystick_driver;
   ros::spin();
-  delete nhp;
-  return 0;
 }
