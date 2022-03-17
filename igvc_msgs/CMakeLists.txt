@@ -15,6 +15,7 @@ add_message_files(
     DIRECTORY msg
     FILES
     velocity_pair.msg
+    velocity_quad.msg
     lights.msg
     action_path.msg
     system_stats.msg
@@ -23,6 +24,12 @@ add_message_files(
     trajectory_point.msg
     trajectory.msg
     barrels.msg
+)
+
+add_service_files(
+    DIRECTORY srv
+    FILES
+    BackCircle.srv
 )
 
 add_action_files(
@@ -43,4 +50,6 @@ generate_messages(
 catkin_package(
     CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs actionlib_msgs message_runtime
 )
+
+
 

@@ -78,7 +78,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   odom.header.seq = seq++;
 
   // setting reference frames
-  odom.header.frame_id = "wheel_odom";
+  odom.header.frame_id = "odom";
   odom.child_frame_id = "base_footprint";
 
   // set time then publish
