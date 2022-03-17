@@ -5,3 +5,7 @@ target_link_libraries(TestJoystickDriver ${catkin_LIBRARIES})
 add_rostest_gtest(TestDifferentialDrive test/test_differential_drive.test test_differential_drive.cpp)
 add_dependencies(TestDifferentialDrive ${catkin_EXPORTED_TARGETS} differential_drive)
 target_link_libraries(TestDifferentialDrive ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestSimColorDetector test/test_sim_color_detector.test test_sim_color_detector.cpp)
+add_dependencies(TestSimColorDetector ${catkin_EXPORTED_TARGETS} test_sim_color_detector)
+target_link_libraries(TestSimColorDetector ${catkin_LIBRARIES})
