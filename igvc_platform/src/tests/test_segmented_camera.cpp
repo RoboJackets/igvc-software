@@ -18,7 +18,7 @@ public:
     assertions::getParam(nh, "segmented_camera/segmented_publisher_path", seg_cam_pub_path);
     assertions::getParam(nh, "segmented_camera/segmented_subscriber_path", seg_cam_sub_path);
 
-    // mock_pub will be a vector of [camers_names.size()] publishers
+    // mock_pub will be a vector of [camera_names.size()] publishers
     for (size_t i = 0; i < camera_names.size(); i++)
     {
       auto camera_name = camera_names[i];
@@ -27,7 +27,6 @@ public:
       std::string semantic_info_topic = camera_name + seg_cam_sub_path;
 
       // We publish to each camera's topic
-      // ros::Publisher info_pub = nh.advertise<sensor_msgs::CameraInfo>(semantic_info_topic, 1);
       mock_pub.push_back(nh.advertise<sensor_msgs::CameraInfo>(semantic_info_topic, 1));
     }
   }
@@ -63,7 +62,7 @@ sensor_msgs::CameraInfo createCameraInfoMsg(double height_factor = 1.0, double w
 sensor_msgs::CameraInfo cameraInfoTransformedMsg(double output_width, double output_height, double height_factor = 1.0,
                                                  double width_factor = 1.0)
 {
-  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg(height_factor, width_factor);  // = &createCameraInfoMsg();
+  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg(height_factor, width_factor); 
 
   double w_ratio = static_cast<double>(output_width) / static_cast<double>(camera_info.width);
   double h_ratio = static_cast<double>(output_height) / static_cast<double>(camera_info.height);
@@ -96,8 +95,6 @@ sensor_msgs::CameraInfo cameraInfoTransformedMsg(double output_width, double out
   return camera_info;
 }
 
-// test a normal scaling output ig
-// ERROR: how to change output dimensions in seg_cam_info_publisher cpp for this test specifically
 TEST_F(TestSegmentedCamera, NormalScalingTest)
 {
   // publish fake camera info msgs to seg_cam's topics
@@ -142,7 +139,7 @@ TEST_F(TestSegmentedCamera, OverScalingTest)  // scale to larger than original
 
     sensor_msgs::CameraInfo correctResponse =
         cameraInfoTransformedMsg(output_width, output_height, scale_factor, scale_factor);
-    sensor_msgs::CameraInfo response = mock_sub.front();  // how to pass in 10x to regular response?
+    sensor_msgs::CameraInfo response = mock_sub.front(); 
     EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
     EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
 
@@ -158,7 +155,6 @@ TEST_F(TestSegmentedCamera, OverScalingTest)  // scale to larger than original
 }
 
 // input all zeros
-// ERROR: how to change output dimensions in seg_cam_info_publisher cpp for this test specifically
 TEST_F(TestSegmentedCamera, ZeroTest)
 {
   // publish fake camera info msgs to seg_cam's topics
@@ -167,7 +163,7 @@ TEST_F(TestSegmentedCamera, ZeroTest)
     MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
     ASSERT_TRUE(mock_sub.waitForPublisher());
     ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
-    mock_pub[i].publish(createCameraInfoMsg(1.0, 1.0, 0, 0));  // all zero? is this correct
+    mock_pub[i].publish(createCameraInfoMsg(1.0, 1.0, 0, 0)); 
 
     // Expect no message publish since invalid inputs
     ASSERT_FALSE(mock_sub.spinUntilMessages());
@@ -191,7 +187,7 @@ TEST_F(TestSegmentedCamera, UnevenScaling)  // uneven scaling
 
     sensor_msgs::CameraInfo correctResponse =
         cameraInfoTransformedMsg(output_width, output_height, scale_factor1, scale_factor2);
-    sensor_msgs::CameraInfo response = mock_sub.front();  // how to pass in 10x to regular response?
+    sensor_msgs::CameraInfo response = mock_sub.front();  
     EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
     EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
 
