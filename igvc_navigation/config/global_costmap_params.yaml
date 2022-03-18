@@ -2,7 +2,7 @@ global_costmap:
     global_frame: odom
     robot_base_frame: base_link
     plugins:
-        - {name: traversability_layer, type: "traversability_layer::TraversabilityLayer"}
+        # - {name: traversability_layer, type: "traversability_layer::TraversabilityLayer"}
         - {name: line_layer,     type: "line_layer::LineLayer"}
         - {name: back_circle_layer, type: "back_circle_layer::BackCircleLayer"}
         - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
@@ -19,7 +19,7 @@ global_costmap:
     resolution: 0.1
     always_send_full_costmap: true
     inflation_layer:
-        inflation_radius: 5.0
+        inflation_radius: 2.0
 line_layer:
     map:
         frame_id: "odom"
@@ -100,4 +100,4 @@ traversability_layer:
             map_topic: "/slope/debug"
             enabled: false
     untraversable_probability: 0.8
-    slope_threshold: 0.45
+    slope_threshold: 0.8
