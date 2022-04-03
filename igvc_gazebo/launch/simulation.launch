@@ -76,6 +76,9 @@
     <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen" required="true">
         <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>
         <param name="ground_truth_pub_topic" value="/ground_truth"/>
+        <!--Add Noise to Simulation-->
+        <param name ="x_noise_std_dev" value = "5.0"/>
+        <param name ="y_noise_std_dev" value = "5.0"/>
     </node>
 
     <node name="mag_republisher" pkg="igvc_gazebo" type="mag_republisher" output="screen" required="true">

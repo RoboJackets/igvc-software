@@ -21,7 +21,6 @@ I am going to simulate noise for the x and y position of the robot using a rando
 
 I need to figure out how to use implement normal distributions in c++
 
-I also need to re-learn how launch files work in terms of which file I will add the parameter to.
 
 ## Overall Scope
 

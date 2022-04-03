@@ -6,13 +6,15 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
-#include <mutex>
+#include <random>
 
 ros::Publisher g_ground_truth_pub;
 // TODO make this a minimal object
 nav_msgs::Odometry g_og_pose;
 ros::Time g_last_estimate;
-
+double x_noise_std_dev = 0.0;
+double y_noise_std_dev = 0.0;
+std::default_random_engine engine(std::random_device{}());
 void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
   g_last_estimate = msg->header.stamp;
@@ -20,13 +22,18 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 
 void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
+  ROS_INFO_STREAM("x_noise_std_dev: " << x_noise_std_dev);
+  ROS_INFO_STREAM("y_noise_std_dev: " << y_noise_std_dev);
+  std::normal_distribution<double> x_distribution(0, x_noise_std_dev);
+  std::normal_distribution<double> y_distribution(0, y_noise_std_dev);
+
   // get the starting location as the origin
   if (g_og_pose.header.stamp.toSec() == 0)
   {
     g_og_pose.pose = msg->pose;
     g_og_pose.header = msg->header;
-    g_og_pose.pose.pose.position.x = msg->pose.pose.position.x;
-    g_og_pose.pose.pose.position.y = msg->pose.pose.position.y;
+    g_og_pose.pose.pose.position.x = msg->pose.pose.position.x + x_distribution(engine);
+    g_og_pose.pose.pose.position.y = msg->pose.pose.position.y + y_distribution(engine);
     ROS_INFO_STREAM("setting g_og_pose to " << g_og_pose.pose.pose.position.x << ", "
                                             << g_og_pose.pose.pose.position.y);
   }
@@ -36,8 +43,8 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     result.pose = msg->pose;
 
     // use the initial location as an offset (makes the starting location 0, 0)
-    result.pose.pose.position.x = msg->pose.pose.position.x - g_og_pose.pose.pose.position.x;
-    result.pose.pose.position.y = msg->pose.pose.position.y - g_og_pose.pose.pose.position.y;
+    result.pose.pose.position.x = msg->pose.pose.position.x - g_og_pose.pose.pose.position.x + x_distribution(engine);
+    result.pose.pose.position.y = msg->pose.pose.position.y - g_og_pose.pose.pose.position.y + y_distribution(engine);
 
     result.twist = msg->twist;
 
@@ -103,6 +110,9 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
+
+  assertions::param(pNh, "x_noise_std_dev", x_noise_std_dev, 0.0);
+  assertions::param(pNh, "y_noise_std_dev", y_noise_std_dev, 0.0);
 
   std::string ground_truth_topic, estimate_topic, pub_topic, diff_topic;
 
