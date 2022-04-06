@@ -22,8 +22,6 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 
 void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
-  ROS_INFO_STREAM("x_noise_std_dev: " << x_noise_std_dev);
-  ROS_INFO_STREAM("y_noise_std_dev: " << y_noise_std_dev);
   std::normal_distribution<double> x_distribution(0, x_noise_std_dev);
   std::normal_distribution<double> y_distribution(0, y_noise_std_dev);
 
