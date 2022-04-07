@@ -16,6 +16,7 @@ SwerveOdometer::SwerveOdometer() : pNh{ "~" }
     return;
   }
 
+  curr_time = ros::Time::now();
   prev_time = ros::Time::now();
   sub = nh.subscribe("/encoders", 10, &SwerveOdometer::enc_callback, this);
   pub = nh.advertise<nav_msgs::Odometry>("/wheel_odometry", 10);
@@ -55,7 +56,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
     }
   }
 
-  ros::Time curr_time = ros::Time::now();
+  curr_time = ros::Time::now();
   double deltaT = msg.duration;
 
   for (int i = 0; i < num_wheels; ++i)
@@ -208,9 +209,15 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
                                            positions_list[i][1] - average_intersection[1] };
 
       if (isinf(icr_wh[0]) || isinf(icr_wh[1]))
-        ROS_DEBUG_STREAM("icr_wh is inf");
+      {
+        ROS_DEBUG_STREAM("icr_wh is inf! Discarding!");
+        continue;
+      }
       if (isclose(icr_wh[0], 0) || isclose(icr_wh[1], 0))
-        ROS_DEBUG_STREAM("icr_wh for wheel " << i << " is zero. icr is just over it!");
+      {
+        ROS_DEBUG_STREAM("icr_wh for wheel " << i << " is zero! Discarding!");
+        continue;
+      }
 
       double ang_x = (wheel_info[i][0] * wheel_radius * sin(wheel_info[i][1])) / (icr_wh[0]);
       double ang_y = (wheel_info[i][0] * wheel_radius * cos(wheel_info[i][1])) / (icr_wh[1]);
@@ -218,7 +225,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
       angular += ang_computed;
 
-      if (isinf(angular))
+      if (isinf(angular) || angular > angular_limit_)
       {
         ROS_DEBUG_STREAM("angular is the problem");
         return;
@@ -243,6 +250,12 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
   x += linear_x_ * deltaT;
   y += linear_y_ * deltaT;
 
+  // publishes odometry message
+  SwerveOdometer::pubOdometry();
+}
+
+void SwerveOdometer::pubOdometry()
+{
   geometry_msgs::Vector3 linearVelocities;
   linearVelocities.z = 0;
   linearVelocities.x = linear_x_;
@@ -295,6 +308,7 @@ bool SwerveOdometer::getParams()
   assertions::param(pNh, "inf_tol", inf_tol, 5.0);
   assertions::param(pNh, "intersection_tol_", intersection_tol_, 0.8);
   assertions::param(pNh, "alpha", alpha, 0.5);
+  assertions::param(pNh, "angular_limit_", angular_limit_, 20.0);
 
   XmlRpc::XmlRpcValue xml_list;
 

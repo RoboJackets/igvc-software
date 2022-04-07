@@ -1,4 +1,0 @@
-<launch>
-    <node name="joystick_driver" pkg="igvc_platform" type="joystick_driver" output="screen" required="true"/>
-    <test test-name="test_joystick_driver" pkg="igvc_platform" type="TestJoystickDriver"/>
-</launch>
