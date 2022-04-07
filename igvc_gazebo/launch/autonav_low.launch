@@ -22,7 +22,6 @@
         <arg name="waypoint_folder_path" value="$(find igvc_gazebo)/config"/>
         <arg name="waypoint_file_name" value="waypoints_autonav_$(arg track).csv"/>
 
-        <arg name="model" value="$(arg model)"/>
         <arg name="x" value="$(arg x)"/>
         <arg name="y" value="$(arg y)"/>
         <arg name="z" value="$(arg z)"/>
