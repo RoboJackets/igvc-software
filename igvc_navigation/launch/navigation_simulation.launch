@@ -18,8 +18,8 @@
         <arg name="read_from_file" value="$(arg read_from_file)"/>
     </include>
 
-    <!-- Launch differential drive controller -->
-    <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
+    <!-- Launch swerve drive controller -->
+    <include file="$(find igvc_navigation)/launch/swerve_drive.launch" />
 
     <!-- pointcloud filter -->
     <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
