@@ -19,7 +19,7 @@
         <arg name="read_from_file" value="$(arg read_from_file)"/>
     </include>
 
-    <!-- Launch drive controller -->
+    <!-- Launch swerve drive controller -->
     <include file="$(find igvc_navigation)/launch/swerve_drive.launch" />
 
     <!-- pointcloud filter -->
