@@ -37,8 +37,7 @@ igvc_msgs::velocity_pair twistToVelocity(geometry_msgs::Twist twist, double axle
   double vel_left = speed - (rotation * axle_length_) / 2;
 
   double max_calc_vel = fmax(vel_right, vel_left);
-  if (max_calc_vel > max_vel_)
-  {
+  if (max_calc_vel > max_vel_) {
     vel_right *= max_vel_ / max_calc_vel;
     vel_left *= max_vel_ / max_calc_vel;
   }
@@ -84,6 +83,7 @@ TEST_F(TestDifferentialDrive, ForwardTest)
   EXPECT_EQ(response.left_velocity, forward);
   EXPECT_EQ(response.right_velocity, forward);
 }
+
 
 TEST_F(TestDifferentialDrive, TurnTest)
 {

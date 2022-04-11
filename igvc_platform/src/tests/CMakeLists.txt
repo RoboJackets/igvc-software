@@ -21,3 +21,7 @@ target_link_libraries(TestSwerveControl ${catkin_LIBRARIES})
 add_rostest_gtest(TestSwerveDrive test/test_swerve_drive.test test_swerve_drive.cpp)
 add_dependencies(TestSwerveDrive ${catkin_EXPORTED_TARGETS} swerve_drive)
 target_link_libraries(TestSwerveDrive ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestGroundTruth test/test_ground_truth.test test_ground_truth.cpp)
+add_dependencies(TestGroundTruth ${catkin_EXPORTED_TARGETS} ground_truth)
+target_link_libraries(TestGroundTruth ${catkin_LIBRARIES})
