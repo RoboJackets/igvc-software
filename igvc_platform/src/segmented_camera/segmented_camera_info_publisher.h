@@ -16,7 +16,7 @@ private:
   // Output size for the transform
   double output_width;
   double output_height;
-  //map of camera info publishers
+  // map of camera info publishers
   std::map<std::string, ros::Publisher> g_pubs;
   std::vector<ros::Subscriber> subs;
   void ScaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height,

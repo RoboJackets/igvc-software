@@ -62,7 +62,7 @@ sensor_msgs::CameraInfo createCameraInfoMsg(double height_factor = 1.0, double w
 sensor_msgs::CameraInfo cameraInfoTransformedMsg(double output_width, double output_height, double height_factor = 1.0,
                                                  double width_factor = 1.0)
 {
-  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg(height_factor, width_factor); 
+  sensor_msgs::CameraInfo camera_info = createCameraInfoMsg(height_factor, width_factor);
 
   double w_ratio = static_cast<double>(output_width) / static_cast<double>(camera_info.width);
   double h_ratio = static_cast<double>(output_height) / static_cast<double>(camera_info.height);
@@ -139,7 +139,7 @@ TEST_F(TestSegmentedCamera, OverScalingTest)  // scale to larger than original
 
     sensor_msgs::CameraInfo correctResponse =
         cameraInfoTransformedMsg(output_width, output_height, scale_factor, scale_factor);
-    sensor_msgs::CameraInfo response = mock_sub.front(); 
+    sensor_msgs::CameraInfo response = mock_sub.front();
     EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
     EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
 
@@ -163,7 +163,7 @@ TEST_F(TestSegmentedCamera, ZeroTest)
     MockSubscriber<sensor_msgs::CameraInfo> mock_sub(camera_names[i] + seg_cam_pub_path);
     ASSERT_TRUE(mock_sub.waitForPublisher());
     ASSERT_TRUE(mock_sub.waitForSubscriber(mock_pub[i]));
-    mock_pub[i].publish(createCameraInfoMsg(1.0, 1.0, 0, 0)); 
+    mock_pub[i].publish(createCameraInfoMsg(1.0, 1.0, 0, 0));
 
     // Expect no message publish since invalid inputs
     ASSERT_FALSE(mock_sub.spinUntilMessages());
@@ -187,7 +187,7 @@ TEST_F(TestSegmentedCamera, UnevenScaling)  // uneven scaling
 
     sensor_msgs::CameraInfo correctResponse =
         cameraInfoTransformedMsg(output_width, output_height, scale_factor1, scale_factor2);
-    sensor_msgs::CameraInfo response = mock_sub.front();  
+    sensor_msgs::CameraInfo response = mock_sub.front();
     EXPECT_NEAR(correctResponse.width, response.width, 1E-100);
     EXPECT_NEAR(correctResponse.height, response.height, 1E-100);
 
