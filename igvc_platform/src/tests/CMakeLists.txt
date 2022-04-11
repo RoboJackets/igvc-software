@@ -21,3 +21,7 @@ target_link_libraries(TestSwerveControl ${catkin_LIBRARIES})
 add_rostest_gtest(TestSwerveDrive test/test_swerve_drive.test test_swerve_drive.cpp)
 add_dependencies(TestSwerveDrive ${catkin_EXPORTED_TARGETS} swerve_drive)
 target_link_libraries(TestSwerveDrive ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestSegmentedCamera test/test_segmented_camera.test test_segmented_camera.cpp)
+add_dependencies(TestSegmentedCamera ${catkin_EXPORTED_TARGETS} segmented_camera)
+target_link_libraries(TestSegmentedCamera ${catkin_LIBRARIES})
