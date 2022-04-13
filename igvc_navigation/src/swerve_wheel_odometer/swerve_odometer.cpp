@@ -150,7 +150,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
   if (inf_all)
   {
-    //ROS_INFO_STREAM("inf_all");
+    // ROS_INFO_STREAM("inf_all");
     angular = 0;
     for (int i = 0; i < num_wheels; ++i)
     {
@@ -220,7 +220,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
       if (isinf(angular))
       {
-        //ROS_WARN_STREAM("angular is the problem");
+        // ROS_WARN_STREAM("angular is the problem");
         return;
       }
     }
