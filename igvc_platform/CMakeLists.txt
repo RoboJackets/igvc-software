@@ -170,5 +170,6 @@ endif ()
 
 add_subdirectory(src/imu)
 add_subdirectory(src/swerve_joystick_driver)
-#add_subdirectory(src/motor_controller)
+add_subdirectory(src/motor_controller)
+add_subdirectory(src/segmented_camera)
 #add_subdirectory(src/system_stats)
