@@ -28,37 +28,37 @@ class SimColorDetector
     image_transport::CameraPublisher camera;
     ros::Publisher barrel;
   };
-  
-  public:
-    SimColorDetector();
-  
-  private:
-    ros::NodeHandle nh;
-    ros::NodeHandle pNh;
 
-    std::vector<std::string> camera_names;
-    std::vector<std::string> semantic_prefixes;
-    std::vector<std::string> semantic_suffixes;
-    std::vector<image_transport::CameraSubscriber> subs;
+public:
+  SimColorDetector();
 
-    // Output topics
-    std::string line_topic;
-    std::string barrel_topic;
+private:
+  ros::NodeHandle nh;
+  ros::NodeHandle pNh;
 
-    std::string image_base_topic;
+  std::vector<std::string> camera_names;
+  std::vector<std::string> semantic_prefixes;
+  std::vector<std::string> semantic_suffixes;
+  std::vector<image_transport::CameraSubscriber> subs;
 
-    // Map of camera name to line and barrel publishers
-    std::map<std::string, LineBarrelPair> g_pubs;
+  // Output topics
+  std::string line_topic;
+  std::string barrel_topic;
 
-    // Output size of the image
-    cv::Size g_output_size;
+  std::string image_base_topic;
 
-    cv::Scalar g_lower_lines;
-    cv::Scalar g_upper_lines;
+  // Map of camera name to line and barrel publishers
+  std::map<std::string, LineBarrelPair> g_pubs;
 
-    sensor_msgs::CameraInfo scaleCameraInfo(const sensor_msgs::CameraInfo& camera_info, int width, int height);
+  // Output size of the image
+  cv::Size g_output_size;
 
-    // Recieves an input image and publishes two segmented images: one for lines and another for barrels
-    void handleImage(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& camera_info,
-                 std::string camera_name);
+  cv::Scalar g_lower_lines;
+  cv::Scalar g_upper_lines;
+
+  sensor_msgs::CameraInfo scaleCameraInfo(const sensor_msgs::CameraInfo& camera_info, int width, int height);
+
+  // Recieves an input image and publishes two segmented images: one for lines and another for barrels
+  void handleImage(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& camera_info,
+                   std::string camera_name);
 };
