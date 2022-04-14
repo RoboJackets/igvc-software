@@ -2,9 +2,25 @@ add_rostest_gtest(TestJoystickDriver test/test_joystick_driver.test test_joystic
 add_dependencies(TestJoystickDriver ${catkin_EXPORTED_TARGETS} joystick_driver)
 target_link_libraries(TestJoystickDriver ${catkin_LIBRARIES})
 
+add_rostest_gtest(TestSwerveJoystickDriver test/test_swerve_joystick_driver.test test_swerve_joystick_driver.cpp)
+add_dependencies(TestSwerveJoystickDriver ${catkin_EXPORTED_TARGETS} joystick_driver)
+target_link_libraries(TestSwerveJoystickDriver ${catkin_LIBRARIES})
+
 add_rostest_gtest(TestDifferentialDrive test/test_differential_drive.test test_differential_drive.cpp)
 add_dependencies(TestDifferentialDrive ${catkin_EXPORTED_TARGETS} differential_drive)
 target_link_libraries(TestDifferentialDrive ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestScanToPointCloud test/test_scan_to_pointcloud.test test_scan_to_pointcloud.cpp)
+add_dependencies(TestScanToPointCloud ${catkin_EXPORTED_TARGETS} scan_to_pointcloud)
+target_link_libraries(TestScanToPointCloud ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestSwerveControl test/test_swerve_control.test test_swerve_control.cpp)
+add_dependencies(TestSwerveControl ${catkin_EXPORTED_TARGETS} swerve_control)
+target_link_libraries(TestSwerveControl ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestSwerveDrive test/test_swerve_drive.test test_swerve_drive.cpp)
+add_dependencies(TestSwerveDrive ${catkin_EXPORTED_TARGETS} swerve_drive)
+target_link_libraries(TestSwerveDrive ${catkin_LIBRARIES})
 
 add_rostest_gtest(TestSimColorDetector test/test_sim_color_detector.test test_sim_color_detector.cpp)
 add_dependencies(TestSimColorDetector ${catkin_EXPORTED_TARGETS} test_sim_color_detector)

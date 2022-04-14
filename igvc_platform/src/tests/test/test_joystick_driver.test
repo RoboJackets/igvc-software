@@ -1,4 +1,12 @@
 <launch>
-    <node name="joystick_driver" pkg="igvc_platform" type="joystick_driver" output="screen" required="true"/>
+    <node name="joystick_driver" pkg="igvc_platform" type="joystick_driver" output="screen" required="true">
+        <param name="absoluteMaxVel" value="1.2"/>
+        <param name="maxVel" value="1.0"/>
+        <param name="maxVelIncr" value="0.2"/>
+        <param name="leftJoyAxis" value="1"/>
+        <param name="rightJoyAxis" value="4"/>
+        <param name="leftInverted" value="false"/>
+        <param name="rightInverted" value="false"/>
+    </node>
     <test test-name="test_joystick_driver" pkg="igvc_platform" type="TestJoystickDriver"/>
 </launch>

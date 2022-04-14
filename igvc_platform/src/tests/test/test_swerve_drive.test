@@ -1,0 +1,7 @@
+<launch>
+    <node name="swerve_drive" pkg="igvc_navigation" type="swerve_drive" output="screen" required="true" >
+        <rosparam file="$(find igvc_navigation)/config/swerve_drive.yaml" />
+        <param name="max_vel" value="4.0"/>
+    </node>
+    <test test-name="test_swerve_drive" pkg="igvc_platform" type="TestSwerveDrive"/>
+</launch>

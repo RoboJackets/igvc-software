@@ -4,6 +4,7 @@ global_costmap:
     plugins:
         - {name: traversability_layer, type: "traversability_layer::TraversabilityLayer"}
         - {name: line_layer,     type: "line_layer::LineLayer"}
+        - {name: back_circle_layer, type: "back_circle_layer::BackCircleLayer"}
         - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
     footprint: [[-0.24,0.32],[0.72,0.32],[0.72,-0.32],[-0.24,-0.32]]

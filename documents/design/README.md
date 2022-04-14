@@ -25,6 +25,11 @@
     * [Firmware Refactor](firmware_refactor.md)
     * [Testing Library](testing_library.md)
 
+## 2021/2022 Projects
+
+* **Simulation**
+    * [Simulating Swerve Modules](swerve_module.md)
+
 ## Templates
 
 * [New Member Projects](new_member_project.md)

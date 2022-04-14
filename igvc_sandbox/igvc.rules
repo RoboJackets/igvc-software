@@ -1,7 +1,14 @@
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_lidar", GROUP="plugdev"
 
-SUBSYSTEM=="tty", ATTRS{devpath}=="7", SYMLINK+="imu_bottom"
-SUBSYSTEM=="tty", ATTRS{devpath}=="8", SYMLINK+="imu_top"
+# TOP GOES THROUGH USB HUB
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2476", ATTRS{idProduct}=="1010", GOTO="read_imus"
+GOTO="skip_imus"
+LABEL="read_imus"
+SUBSYSTEM=="tty", ATTRS{product}=="USB3.0 Hub", MODE="0666", SYMLINK+="imu_top"
+ATTRS{product}=="USB3.0 Hub", GOTO="skip_imus"
+SUBSYSTEM=="tty", MODE="0666", SYMLINK+="imu_bottom"
+LABEL="skip_imus"
+# trust us
 
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDevice}=="0011", ATTRS{serial}=="F6CB206F", SYMLINK+="igvc_usb_cam_right"
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDevice}=="0011", ATTRS{serial}=="EBD81F4F", SYMLINK+="igvc_usb_cam_left"

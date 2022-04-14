@@ -16,6 +16,9 @@ NavigationClient::NavigationClient()
   }
 
   rviz_sub_ = nh_.subscribe("/move_base_simple/goal", 1, &NavigationClient::rvizWaypointCallback, this);
+  back_circle_response_pub_ = nh_.advertise<igvc_msgs::BackCircleResponse>("/back_circle_response", 1);
+
+  back_circle_client = nh_.serviceClient<igvc_msgs::BackCircle>("/back_circle_service");
 
   waitForTransform();
   waitForServer();
@@ -24,6 +27,7 @@ NavigationClient::NavigationClient()
   {
     std::vector<geometry_msgs::PointStamped> waypoints = loadWaypointsFromFile();
     ROS_INFO_STREAM("Reading from file.");
+    ros::Duration(2.0).sleep();  // give time for file to be read
     sendWaypoints(waypoints);
   }
   else
@@ -50,6 +54,11 @@ void NavigationClient::waitForServer()
     ROS_INFO_STREAM("Waiting for the navigation server to come up");
   }
   ROS_INFO_STREAM("Connected to navigation server!");
+  while (!back_circle_client.waitForExistence(ros::Duration(waiting_time)))
+  {
+    ROS_INFO_STREAM("Waiting for the back circle service client to come up");
+  }
+  ROS_INFO_STREAM("Connected to back circle service server!");
 }
 
 std::vector<geometry_msgs::PointStamped> NavigationClient::loadWaypointsFromFile()
@@ -169,6 +178,21 @@ void NavigationClient::sendWaypoints(const std::vector<geometry_msgs::PointStamp
   }
 }
 
+void NavigationClient::callBackCircleService()
+{
+  igvc_msgs::BackCircle srv;
+  bool confirm = back_circle_client.call(srv);
+  if (confirm)
+  {
+    ROS_INFO_STREAM("Calling service back_circle");
+    back_circle_response_pub_.publish(srv.response);
+  }
+  else
+  {
+    ROS_ERROR_STREAM("Failed to call service back_circle");
+  }
+}
+
 void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool waiting)
 {
   ROS_INFO_STREAM("Sending pose: (" << pose.pose.position.x << ", " << pose.pose.position.y
@@ -176,6 +200,8 @@ void NavigationClient::sendGoal(const geometry_msgs::PoseStamped& pose, bool wai
   igvc_msgs::NavigateWaypointGoal goal;
   goal.target_pose = pose;
   goal.fix_goal_orientation = false;
+
+  callBackCircleService();
 
   if (waiting)
   {
@@ -199,6 +225,8 @@ void NavigationClient::sendGoal(const geometry_msgs::PointStamped& point, bool w
   igvc_msgs::NavigateWaypointGoal goal;
   goal.target_pose = pose;
   goal.fix_goal_orientation = true;
+
+  callBackCircleService();
 
   if (waiting)
   {

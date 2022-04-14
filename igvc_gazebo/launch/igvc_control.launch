@@ -9,7 +9,7 @@
   <node name="controller_spawner" pkg="controller_manager" type="spawner"
     args="$(find igvc_gazebo)/config/igvc_joint_control.yaml"/>
 
-  <node name="igvc_control" pkg="igvc_gazebo" type="control" output="screen">
+  <node name="igvc_control" pkg="igvc_gazebo" type="control" output="screen" required="true">
       <!-- PID values for wheel speed -->
       <param name="speed_P_left" value="2.0"/>
       <param name="speed_P_right" value="2.0"/>
