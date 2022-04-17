@@ -1,3 +1,6 @@
+#ifndef GROUND_TRUTH_REPUBLISHER
+#define GROUND_TRUTH_REPUBLISHER
+
 #include <geometry_msgs/Vector3.h>
 #include <nav_msgs/Odometry.h>
 #include <parameter_assertions/assertions.h>
@@ -29,7 +32,7 @@ private:
 	tf::TransformBroadcaster br;
 	
 	//pose and estimate
-  	nav_msgs::Odometry pose;
+  	nav_msgs::Odometry og_pose;
 	ros::Time last_estimate;
 
 	//topics 

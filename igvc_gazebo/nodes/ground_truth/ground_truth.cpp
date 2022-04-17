@@ -13,26 +13,15 @@ ground_truth::ground_truth(): pNh("~") {
   
 	
   // initialize publishers and subscribers 
-  ground_truth_pub = nh.advertise(pub_topic, 1);
-  ground_truth_sub = nh.subscribe<nav_msgs::Odometry>(sub_topic, 10, groundTruthCallback);
-  estimate_sub = nh.subscribe(nh.subscribe<nav_msgs::Odometry>("/
-    odometry/filtered", 1, &ground_truth::odomCallback, this));
+  ground_truth_pub = nh.advertise<nav_msgs::Odometry>(pub_topic, 1);
+  ground_truth_sub = nh.subscribe(sub_topic, 10, &ground_truth::groundTruthCallback, this);
+  estimate_sub = nh.subscribe("/odometry/filtered", 1, &ground_truth::odomCallback, this);
 
   RobotLocalization::NavsatConversions::UTM(latitude, longitude, &utm_x, &utm_y);
   utm_to_odom.setOrigin(
-    tf::Vector3(utm_x - pose.pose.pose.position.x, utm_y - pose.pose.pose.position.y, 0.0));
+    tf::Vector3(utm_x - og_pose.pose.pose.position.x, utm_y - og_pose.pose.pose.position.y, 0.0));
   utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
-  utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
-  
-  ground_truth.spinnerUpdate();
-}
-
-void ground_truth::spinnerUpdate()
-{
-  while (ros::ok())
-  {
-    ros::spinOnce();
-  } 
+  utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(&ground_truth::utm_callback, this, _1, utm_to_odom.inverse()));
 }
 
 
@@ -42,20 +31,20 @@ void ground_truth:: odomCallback(const nav_msgs::Odometry::ConstPtr msg){
 
 void ground_truth::groundTruthCallback(const nav_msgs::Odometry::ConstPtr msg){
 	// get the starting location as the origin
-  if  (og_pose.header.stamp.toSec() == 0)
+  if  (msg->header.stamp.toSec() == 0)
   {
     og_pose.pose = msg->pose;
     og_pose.header = msg->header;
     og_pose.pose.pose.position.x = msg->pose.pose.position.x;
     og_pose.pose.pose.position.y = msg->pose.pose.position.y;
-    ROS_INFO_STREAM("setting pose to " << pose.pose.pose.position.x << ", "
-                                            << pose.pose.pose.position.y);
+    ROS_INFO_STREAM("setting og_pose to " << og_pose.pose.pose.position.x << ", "
+                                            << og_pose.pose.pose.position.y);
 
     nav_msgs::Odometry initial;
     initial.twist = msg->twist;
     initial.header = msg->header;
     initial.child_frame_id = "base_footprint";
-    initial.header.frbame_id = "odom";
+    initial.header.frame_id = "odom";
 
     ground_truth_pub.publish(initial);
     //publishes a (0, 0) message to /ground_truth_state_raw
@@ -66,15 +55,15 @@ void ground_truth::groundTruthCallback(const nav_msgs::Odometry::ConstPtr msg){
     result.pose = msg->pose;
 
     // use the initial location as an offset (makes the starting location 0, 0)
-    result.pose.pose.position.x = msg->pose.pose.position.x - pose.pose.pose.position.x;
-    result.pose.pose.position.y = msg->pose.pose.position.y - pose.pose.pose.position.y;
+    result.pose.pose.position.x = msg->pose.pose.position.x - og_pose.pose.pose.position.x;
+    result.pose.pose.position.y = msg->pose.pose.position.y - og_pose.pose.pose.position.y;
 
     result.twist = msg->twist;
 
     // set up the correct header
     result.header = msg->header;
     result.child_frame_id = "base_footprint";
-    result.header.frbame_id = "odom";
+    result.header.frame_id = "odom";
 
     //result done
 

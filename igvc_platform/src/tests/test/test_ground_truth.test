@@ -1,9 +1,9 @@
 <launch>
-	<node name="ground_truth" pkg="igvc_gazebo" type="ground_truth" output="screen" required="truth">
-		<param name="ground_truth_sub_topic" value= "/ground_truth/state_raw"/>
-		<param name="ground_truth_pub_topic" value= "ground_truth"/>
+    <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen" required="true" >
+        <param name="ground_truth_sub_topic" value= "/ground_truth/state_raw"/>
+		<param name="ground_truth_pub_topic" value= "/ground_truth"/>
 		<param name="longitude" value= "-84.405001"/>
 		<param name="latitude" value= "33.774497"/>
-	</node>
-	<test test-name= "test_ground_truth" pkg="igvc_platform" type="TestGroundTruth"/>
+    </node>
+    <test test-name="test_ground_truth" pkg="igvc_platform" type="TestGroundTruth"/>
 </launch>
