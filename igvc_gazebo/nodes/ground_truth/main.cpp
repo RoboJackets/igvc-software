@@ -8,7 +8,6 @@
 #include <tf/transform_listener.h>
 #include <random>
 
-
 ros::Publisher g_ground_truth_pub;
 // TODO make this a minimal object
 nav_msgs::Odometry g_og_pose;
@@ -41,9 +40,8 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     g_og_pose.pose.pose.position.x = msg->pose.pose.position.x + x_distribution(engine);
     g_og_pose.pose.pose.position.y = msg->pose.pose.position.y + y_distribution(engine);
     g_og_pose.pose.pose.position.z = msg->pose.pose.position.z + z_distribution(engine);
-    ROS_INFO_STREAM("setting g_og_pose to " << g_og_pose.pose.pose.position.x << ", "
-                                            << g_og_pose.pose.pose.position.y << ", "
-                                            << g_og_pose.pose.pose.position.z);
+    ROS_INFO_STREAM("setting g_og_pose to " << g_og_pose.pose.pose.position.x << ", " << g_og_pose.pose.pose.position.y
+                                            << ", " << g_og_pose.pose.pose.position.z);
   }
   else
   {
@@ -61,18 +59,15 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     result.child_frame_id = "base_footprint";
     result.header.frame_id = "odom";
 
-    tf::Quaternion quat(
-        msg->pose.pose.orientation.x,
-        msg->pose.pose.orientation.y,
-        msg->pose.pose.orientation.z,
-        msg->pose.pose.orientation.w);
+    tf::Quaternion quat(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z,
+                        msg->pose.pose.orientation.w);
     tf::Matrix3x3 m(quat);
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
     roll = roll + roll_distribution(engine);
     pitch = pitch + pitch_distribution(engine);
     yaw = yaw + yaw_distribution(engine);
-    quat = tf::createQuaternionFromRPY(roll,pitch,yaw);
+    quat = tf::createQuaternionFromRPY(roll, pitch, yaw);
 
     tf::Vector3 pos;
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
@@ -138,13 +133,12 @@ int main(int argc, char** argv)
   assertions::param(pNh, "pitch_noise_std_dev", pitch_noise_std_dev, 0.0);
   assertions::param(pNh, "yaw_noise_std_dev", yaw_noise_std_dev, 0.0);
 
-  x_distribution = std::normal_distribution<double>(0,x_noise_std_dev);
-  y_distribution = std::normal_distribution<double>(0,y_noise_std_dev);
-  z_distribution = std::normal_distribution<double>(0,z_noise_std_dev);
-  roll_distribution = std::normal_distribution<double>(0,roll_noise_std_dev);
-  pitch_distribution = std::normal_distribution<double>(0,pitch_noise_std_dev);
-  yaw_distribution = std::normal_distribution<double>(0,yaw_noise_std_dev);
-
+  x_distribution = std::normal_distribution<double>(0, x_noise_std_dev);
+  y_distribution = std::normal_distribution<double>(0, y_noise_std_dev);
+  z_distribution = std::normal_distribution<double>(0, z_noise_std_dev);
+  roll_distribution = std::normal_distribution<double>(0, roll_noise_std_dev);
+  pitch_distribution = std::normal_distribution<double>(0, pitch_noise_std_dev);
+  yaw_distribution = std::normal_distribution<double>(0, yaw_noise_std_dev);
 
   std::string ground_truth_topic, estimate_topic, pub_topic, diff_topic;
 
