@@ -76,6 +76,13 @@
     <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen" required="true">
         <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>
         <param name="ground_truth_pub_topic" value="/ground_truth"/>
+        <!--Add Noise to Simulation-->
+        <param name ="x_noise_std_dev" value = "0.0"/>
+        <param name ="y_noise_std_dev" value = "0.0"/>
+        <param name ="z_noise_std_dev" value = "0.0"/>
+        <param name ="roll_noise_std_dev" value = "0.0"/>
+        <param name ="pitch_noise_std_dev" value = "0.0"/>
+        <param name ="yaw_noise_std_dev" value = "0.0"/>
     </node>
 
     <node name="ground_truth_to_rpy" pkg="igvc_utils" type="quaternion_to_rpy" output="screen" required="true">
