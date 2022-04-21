@@ -7,7 +7,7 @@
 -->
 <launch>
 
-    <include file="$(find igvc_navigation)/launch/wheel_odometry.launch" />
+    <include file="$(find igvc_navigation)/launch/swerve_wheel_odometry.launch" />
 
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
 

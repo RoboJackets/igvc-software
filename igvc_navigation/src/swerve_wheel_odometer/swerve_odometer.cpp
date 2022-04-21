@@ -150,7 +150,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
   if (inf_all)
   {
-    ROS_INFO_STREAM("inf_all");
+    // ROS_INFO_STREAM("inf_all");
     angular = 0;
     for (int i = 0; i < num_wheels; ++i)
     {
@@ -166,15 +166,15 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
       if ((fabs(intersections[i][0] - intersections[i - 1][0]) > intersection_tol_ ||
            fabs(intersections[i][1] - intersections[i - 1][1]) > intersection_tol_))
       {
-        ROS_ERROR_STREAM("intersections are not close enough to get an average, dropping!");
-        for (int i = 0; i < num_wheels; ++i)
-        {
-          ROS_WARN_STREAM("theta, omega: " << wheel_info[i][1] << " " << wheel_info[i][0]);
-        }
-        for (size_t i = 0; i < intersections.size(); ++i)
-        {
-          ROS_WARN_STREAM("intersection i:" << i << " , " << intersections[i][0] << "  " << intersections[i][1]);
-        }
+        // ROS_ERROR_STREAM("intersections are not close enough to get an average, dropping!");
+        // for (int i = 0; i < num_wheels; ++i)
+        // {
+        //   ROS_WARN_STREAM("theta, omega: " << wheel_info[i][1] << " " << wheel_info[i][0]);
+        // }
+        // for (size_t i = 0; i < intersections.size(); ++i)
+        // {
+        //   ROS_WARN_STREAM("intersection i:" << i << " , " << intersections[i][0] << "  " << intersections[i][1]);
+        // }
         return;
       }
       else
@@ -207,10 +207,10 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
       auto icr_wh = std::array<double, 2>{ positions_list[i][0] - average_intersection[0],
                                            positions_list[i][1] - average_intersection[1] };
 
-      if (isinf(icr_wh[0]) || isinf(icr_wh[1]))
-        ROS_WARN_STREAM("icr_wh is inf");
-      if (isclose(icr_wh[0], 0) || isclose(icr_wh[1], 0))
-        ROS_WARN_STREAM("icr_wh for wheel " << i << " is zero. icr is just over it!");
+      // if (isinf(icr_wh[0]) || isinf(icr_wh[1]))
+      //   ROS_WARN_STREAM("icr_wh is inf");
+      // if (isclose(icr_wh[0], 0) || isclose(icr_wh[1], 0))
+      //   ROS_WARN_STREAM("icr_wh for wheel " << i << " is zero. icr is just over it!");
 
       double ang_x = (wheel_info[i][0] * wheel_radius * sin(wheel_info[i][1])) / (icr_wh[0]);
       double ang_y = (wheel_info[i][0] * wheel_radius * cos(wheel_info[i][1])) / (icr_wh[1]);
@@ -220,7 +220,7 @@ void SwerveOdometer::enc_callback(const igvc_msgs::velocity_quad msg)
 
       if (isinf(angular))
       {
-        ROS_WARN_STREAM("angular is the problem");
+        // ROS_WARN_STREAM("angular is the problem");
         return;
       }
     }

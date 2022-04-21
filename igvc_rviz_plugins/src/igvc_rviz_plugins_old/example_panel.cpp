@@ -18,7 +18,7 @@ ExamplePanel::ExamplePanel(QWidget *parent) : rviz::Panel(parent)  // Base class
   /* Initialize our subscriber to listen to the /speed topic.
    * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
    */
-  speed_subscriber = handle.subscribe<igvc_msgs::velocity_pair>(
+  speed_subscriber = handle.subscribe<igvc_msgs::velocity_quad>(
       "/encoders", 1, boost::bind(&ExamplePanel::speed_callback, this, _1, label));
 
   /* Use QT layouts to add widgets to the panel.
@@ -29,7 +29,7 @@ ExamplePanel::ExamplePanel(QWidget *parent) : rviz::Panel(parent)  // Base class
   setLayout(layout);
 }
 
-void ExamplePanel::speed_callback(const igvc_msgs::velocity_pairConstPtr &msg, QLabel *label)
+void ExamplePanel::speed_callback(const igvc_msgs::velocity_quadConstPtr &msg, QLabel *label)
 {
   // Create the new contents of the label based on the speed message.
   auto text = "Left: " + std::to_string(msg->left_velocity) + " m/s\n" +
