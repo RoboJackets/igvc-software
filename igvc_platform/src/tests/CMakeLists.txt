@@ -14,6 +14,10 @@ add_rostest_gtest(TestSwerveDrive test/test_swerve_drive.test test_swerve_drive.
 add_dependencies(TestSwerveDrive ${catkin_EXPORTED_TARGETS} swerve_drive)
 target_link_libraries(TestSwerveDrive ${catkin_LIBRARIES})
 
+add_rostest_gtest(TestSimColorDetector test/test_sim_color_detector.test test_sim_color_detector.cpp)
+add_dependencies(TestSimColorDetector ${catkin_EXPORTED_TARGETS} test_sim_color_detector)
+target_link_libraries(TestSimColorDetector ${catkin_LIBRARIES})
+
 add_rostest_gtest(TestSegmentedCamera test/test_segmented_camera.test test_segmented_camera.cpp)
 add_dependencies(TestSegmentedCamera ${catkin_EXPORTED_TARGETS} segmented_camera)
 target_link_libraries(TestSegmentedCamera ${catkin_LIBRARIES})
