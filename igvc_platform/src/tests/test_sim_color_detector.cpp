@@ -203,7 +203,7 @@ TEST_F(TestSimColorDetector, AllLineTest)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "test_sim_color_detector  ");
+  ros::init(argc, argv, "test_sim_color_detector");
   testing::InitGoogleTest(&argc, argv);
 
   int ret = RUN_ALL_TESTS();
