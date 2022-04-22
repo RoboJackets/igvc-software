@@ -3,24 +3,36 @@
 #include <mocking_utils/mock_subscriber.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <parameter_assertions/assertions.h>
 
 class TestSimColorDetector : public testing::Test
 {
-public:
-  TestSimColorDetector()
-    : mock_image_pub(handle.advertise<sensor_msgs::Image>("/cam/center/raw/image", 1))
-    , mock_info_pub(handle.advertise<sensor_msgs::CameraInfo>("/cam/center/raw/camera_info", 1))
-  {
-  }
+  public:
+    TestSimColorDetector()
+    {
+      handle.getParam("sim_color_detector/camera_names", camera_names);
+      
+      for (size_t i; i < camera_names.size(); ++i) {
+        auto camera_name = camera_names[i];
+        std::string img_name = camera_name + "/raw/image";
+        std::string info_name = camera_name + "/raw/camera_info";
 
-protected:
-  ros::NodeHandle handle;
-  ros::Publisher mock_image_pub;
-  ros::Publisher mock_info_pub;
+        ros::Publisher img_pub = handle.advertise<sensor_msgs::Image>(img_name, 1);
+        ros::Publisher info_pub = handle.advertise<sensor_msgs::CameraInfo>(info_name, 1);
+
+        mock_image_pubs.push_back(img_pub);
+        mock_info_pubs.push_back(info_pub);
+      }
+    }
+
+  protected:
+    ros::NodeHandle handle;
+    std::vector<ros::Publisher> mock_image_pubs;
+    std::vector<ros::Publisher> mock_info_pubs;
+    std::vector<std::string> camera_names;
 };
 
 sensor_msgs::Image createCircleImgMsg(double height, double width, double h, double s, double v)
@@ -29,14 +41,11 @@ sensor_msgs::Image createCircleImgMsg(double height, double width, double h, dou
   cv::Mat3f bgr;
   cvtColor(hsv, bgr, CV_HSV2BGR);
 
-  // cv::Mat cv_img = cv::Mat(height, width, CV_8UC3, cv::Scalar(bgr.data[0], bgr.data[1], bgr.data[2]));
   cv::Mat cv_img = cv::Mat(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
 
   cv::Point center = cv::Point(height / 2, width / 2);
   cv::circle(cv_img, center, width / 8, cv::Scalar(bgr.data[0], bgr.data[1], bgr.data[2]), cv::LineTypes::FILLED,
              cv::LineTypes::LINE_8);
-
-  cv::imwrite("/home/pr/catkin_ws/test.jpg", cv_img);
 
   cv_bridge::CvImage img_bridge;
   sensor_msgs::Image img_msg;
@@ -50,73 +59,71 @@ sensor_msgs::Image createCircleImgMsg(double height, double width, double h, dou
 
 TEST_F(TestSimColorDetector, CircleTest)
 {
-  MockSubscriber<sensor_msgs::Image> mock_sub("/cam/center/segmented/image");
-  ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_image_pub));
+  for (size_t i; i < camera_names.size(); ++i) {
+    std::string sub_name = camera_names[i] + "/segmented/image";
+    MockSubscriber<sensor_msgs::Image> mock_sub(sub_name);
+    ASSERT_TRUE(mock_sub.waitForPublisher());
+    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_image_pubs[i]));
 
-  const double height = 480;
-  const double width = 640;
-  const double h = 160;
-  const double s = 240;
-  const double v = 240;
+    const double height = 480;
+    const double width = 640;
+    const double h = 160;
+    const double s = 240;
+    const double v = 240;
 
-  sensor_msgs::Image img_msg = createCircleImgMsg(height, width, h, s, v);
-  sensor_msgs::CameraInfo info_msg;
-  ros::Time curr = ros::Time::now();
-  img_msg.header.stamp = curr;
-  info_msg.header.stamp = curr;
+    sensor_msgs::Image img_msg = createCircleImgMsg(height, width, h, s, v);
+    sensor_msgs::CameraInfo info_msg;
+    ros::Time curr = ros::Time::now();
+    img_msg.header.stamp = curr;
+    info_msg.header.stamp = curr;
 
-  mock_image_pub.publish(img_msg);
-  mock_info_pub.publish(info_msg);
+    mock_image_pubs[i].publish(img_msg);
+    mock_info_pubs[i].publish(info_msg);
 
-  ASSERT_TRUE(mock_sub.spinUntilMessages());
+    ASSERT_TRUE(mock_sub.spinUntilMessages());
 
-  ASSERT_EQ(mock_sub.messages().size(), 1LU);
-  const sensor_msgs::Image& response = mock_sub.front();
+    ASSERT_EQ(mock_sub.messages().size(), 1LU);
+    const sensor_msgs::Image& response = mock_sub.front();
 
-  constexpr double expected_height = 400;
-  constexpr double expected_width = 400;
-  EXPECT_EQ(response.height, expected_height);
-  EXPECT_EQ(response.width, expected_width);
+    constexpr double expected_height = 400;
+    constexpr double expected_width = 400;
+    EXPECT_EQ(response.height, expected_height);
+    EXPECT_EQ(response.width, expected_width);
 
-  cv_bridge::CvImagePtr cv_ptr;
-  try
-  {
-    cv_ptr = cv_bridge::toCvCopy(response, sensor_msgs::image_encodings::MONO8);
-  }
-  catch (cv_bridge::Exception& e)
-  {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
-
-  // sensor_msgs::Image expect_img = createCircleImgMsg(height, width, 0, 0, 255);
-  // cv_bridge::CvImagePtr expect_ptr = cv_bridge::toCvCopy(expect_img, sensor_msgs::image_encodings::MONO8);
-
-  cv::Mat expect_img = cv::Mat(height, width, CV_8UC1, cv::Scalar(0));
-  cv::Mat expect_img_resize = cv::Mat(400, 400, CV_8UC1, cv::Scalar(0));
-
-  cv::Point center = cv::Point(height / 2, width / 2);
-  cv::circle(expect_img, center, width / 8, cv::Scalar(255), cv::LineTypes::FILLED, cv::LineTypes::LINE_8);
-  cv::resize(expect_img, expect_img_resize, cv::Size(400, 400), 0, 0, cv::InterpolationFlags::INTER_AREA);
-
-  cv::imwrite("/home/pr/catkin_ws/test2.jpg", expect_img_resize);
-  cv::imwrite("/home/pr/catkin_ws/test1.jpg", cv_ptr->image);
-
-  int num_errors = 0;
-  for (int i = 0; i < cv_ptr->image.rows; ++i)
-  {
-    for (int j = 0; j < cv_ptr->image.cols; j++)
+    cv_bridge::CvImagePtr cv_ptr;
+    try
     {
-      int val = (int)cv_ptr->image.at<uchar>(i, j);
-      int expect_val = (int)expect_img_resize.at<uchar>(i, j);
-      if (val != expect_val)
+      cv_ptr = cv_bridge::toCvCopy(response, sensor_msgs::image_encodings::MONO8);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
+
+
+    cv::Mat expect_img = cv::Mat(height, width, CV_8UC1, cv::Scalar(0));
+    cv::Mat expect_img_resize = cv::Mat(400, 400, CV_8UC1, cv::Scalar(0));
+
+    cv::Point center = cv::Point(height / 2, width / 2);
+    cv::circle(expect_img, center, width / 8, cv::Scalar(255), cv::LineTypes::FILLED, cv::LineTypes::LINE_8);
+    cv::resize(expect_img, expect_img_resize, cv::Size(400, 400), 0, 0, cv::InterpolationFlags::INTER_AREA);
+
+    int num_errors = 0;
+    for (int i = 0; i < cv_ptr->image.rows; ++i)
+    {
+      for (int j = 0; j < cv_ptr->image.cols; j++)
       {
-        num_errors++;
+        int val = (int)cv_ptr->image.at<uchar>(i, j);
+        int expect_val = (int)expect_img_resize.at<uchar>(i, j);
+        if (val != expect_val)
+        {
+          num_errors++;
+        }
       }
     }
+    EXPECT_LT(num_errors, (400 * 400) * 0.01);
   }
-  EXPECT_LT(num_errors, (400 * 400) * 0.01);
 }
 
 sensor_msgs::Image createSolidImgMsg(double height, double width, double h, double s, double v)
@@ -139,52 +146,55 @@ sensor_msgs::Image createSolidImgMsg(double height, double width, double h, doub
 
 TEST_F(TestSimColorDetector, AllLineTest)
 {
-  MockSubscriber<sensor_msgs::Image> mock_sub("/cam/center/segmented/image");
-  ASSERT_TRUE(mock_sub.waitForPublisher());
-  ASSERT_TRUE(mock_sub.waitForSubscriber(mock_image_pub));
+  for (size_t i; i < camera_names.size(); ++i) {
+    std::string sub_name = camera_names[i] + "/segmented/image";
+    MockSubscriber<sensor_msgs::Image> mock_sub(sub_name);
+    ASSERT_TRUE(mock_sub.waitForPublisher());
+    ASSERT_TRUE(mock_sub.waitForSubscriber(mock_image_pubs[i]));
 
-  const double height = 480;
-  const double width = 640;
-  const double h = 160;
-  const double s = 240;
-  const double v = 240;
+    const double height = 480;
+    const double width = 640;
+    const double h = 160;
+    const double s = 240;
+    const double v = 240;
 
-  sensor_msgs::Image img_msg = createSolidImgMsg(height, width, h, s, v);
-  sensor_msgs::CameraInfo info_msg;  // blank msg. ok bc dont care about this
-  ros::Time curr = ros::Time::now();
-  img_msg.header.stamp = curr;
-  info_msg.header.stamp = curr;  // important that both messages have same time stamp
+    sensor_msgs::Image img_msg = createSolidImgMsg(height, width, h, s, v);
+    sensor_msgs::CameraInfo info_msg;  // blank msg. ok bc dont care about this
+    ros::Time curr = ros::Time::now();
+    img_msg.header.stamp = curr;
+    info_msg.header.stamp = curr;  // important that both messages have same time stamp
 
-  mock_image_pub.publish(img_msg);
-  mock_info_pub.publish(info_msg);  //
+    mock_image_pubs[i].publish(img_msg);
+    mock_info_pubs[i].publish(info_msg);
 
-  ASSERT_TRUE(mock_sub.spinUntilMessages());
+    ASSERT_TRUE(mock_sub.spinUntilMessages());
 
-  ASSERT_EQ(mock_sub.messages().size(), 1LU);
-  const sensor_msgs::Image& response = mock_sub.front();
+    ASSERT_EQ(mock_sub.messages().size(), 1LU);
+    const sensor_msgs::Image& response = mock_sub.front();
 
-  const double expected_height = 400;
-  const double expected_width = 400;
-  EXPECT_EQ(response.height, expected_height);
-  EXPECT_EQ(response.width, expected_width);
+    const double expected_height = 400;
+    const double expected_width = 400;
+    EXPECT_EQ(response.height, expected_height);
+    EXPECT_EQ(response.width, expected_width);
 
-  cv_bridge::CvImagePtr cv_ptr;
-  try
-  {
-    cv_ptr = cv_bridge::toCvCopy(response, sensor_msgs::image_encodings::MONO8);
-  }
-  catch (cv_bridge::Exception& e)
-  {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
-
-  for (int i = 0; i < cv_ptr->image.rows; i++)
-  {
-    for (int j = 0; j < cv_ptr->image.cols; j++)
+    cv_bridge::CvImagePtr cv_ptr;
+    try
     {
-      int val = (int)cv_ptr->image.at<uchar>(i, j);
-      EXPECT_EQ(val, 255);
+      cv_ptr = cv_bridge::toCvCopy(response, sensor_msgs::image_encodings::MONO8);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
+
+    for (int i = 0; i < cv_ptr->image.rows; i++)
+    {
+      for (int j = 0; j < cv_ptr->image.cols; j++)
+      {
+        int val = (int)cv_ptr->image.at<uchar>(i, j);
+        EXPECT_EQ(val, 255);
+      }
     }
   }
 }

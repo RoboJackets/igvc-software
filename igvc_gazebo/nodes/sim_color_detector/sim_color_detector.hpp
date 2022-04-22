@@ -1,24 +1,19 @@
 /*
  * Node responsible for (color) detecting the lines and barrels in the Gazebo
- * simulator. Receives the raw image and publishes two different B&W images
- * (one for line detection, one for barrel detection) that each highlight
- * their respective features in white.
+ * simulator. Receives the raw image and publishes a B&W image
+ * that highlights lines in white. Structures relating to barrels have
+ * been left for future integration/use with multiclass segmentation.
  */
-
 #include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <fstream>
-#include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/opencv.hpp>
-
 #include <image_transport/image_transport.h>
 #include <parameter_assertions/assertions.h>
 #include <map>
 #include <vector>
-
 #include <parameter_assertions/assertions.h>
 
 class SimColorDetector
@@ -48,13 +43,13 @@ private:
   std::string image_base_topic;
 
   // Map of camera name to line and barrel publishers
-  std::map<std::string, LineBarrelPair> g_pubs;
+  std::map<std::string, LineBarrelPair> pubs;
 
   // Output size of the image
-  cv::Size g_output_size;
+  cv::Size output_size;
 
-  cv::Scalar g_lower_lines;
-  cv::Scalar g_upper_lines;
+  cv::Scalar lower_lines;
+  cv::Scalar upper_lines;
 
   sensor_msgs::CameraInfo scaleCameraInfo(const sensor_msgs::CameraInfo& camera_info, int width, int height);
 

@@ -9,15 +9,15 @@ SimColorDetector::SimColorDetector() : pNh("~")
 
   assertions::getParam(pNh, "image_base_topic", image_base_topic);
 
-  assertions::getParam(pNh, "output_image/width", g_output_size.width);
-  assertions::getParam(pNh, "output_image/height", g_output_size.height);
+  assertions::getParam(pNh, "output_image/width", output_size.width);
+  assertions::getParam(pNh, "output_image/height", output_size.height);
 
-  assertions::getParam(pNh, "lines/lower/h", g_lower_lines[0]);
-  assertions::getParam(pNh, "lines/lower/s", g_lower_lines[1]);
-  assertions::getParam(pNh, "lines/lower/v", g_lower_lines[2]);
-  assertions::getParam(pNh, "lines/upper/h", g_upper_lines[0]);
-  assertions::getParam(pNh, "lines/upper/s", g_upper_lines[1]);
-  assertions::getParam(pNh, "lines/upper/v", g_upper_lines[2]);
+  assertions::getParam(pNh, "lines/lower/h", lower_lines[0]);
+  assertions::getParam(pNh, "lines/lower/s", lower_lines[1]);
+  assertions::getParam(pNh, "lines/lower/v", lower_lines[2]);
+  assertions::getParam(pNh, "lines/upper/h", upper_lines[0]);
+  assertions::getParam(pNh, "lines/upper/s", upper_lines[1]);
+  assertions::getParam(pNh, "lines/upper/v", upper_lines[2]);
 
   assertions::getParam(pNh, "line_topic", line_topic);
   assertions::getParam(pNh, "barrel_topic", barrel_topic);
@@ -40,9 +40,9 @@ SimColorDetector::SimColorDetector() : pNh("~")
     // Publish line and barrel segmentation
     image_transport::CameraPublisher cam_pub = image_transport.advertiseCamera(semantic_topic, 1);
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
-    LineBarrelPair pubs = { cam_pub, barrel_pub };
+    LineBarrelPair publishers = { cam_pub, barrel_pub };
 
-    g_pubs.insert(std::make_pair(camera_name, pubs));
+    pubs.insert(std::make_pair(camera_name, publishers));
   }
 }
 
@@ -89,15 +89,15 @@ void SimColorDetector::handleImage(const sensor_msgs::ImageConstPtr& msg,
     return;
   }
 
-  cv::resize(frame, frame, g_output_size, 0, 0, cv::INTER_LINEAR);
+  cv::resize(frame, frame, output_size, 0, 0, cv::INTER_LINEAR);
   cv::Mat frame_hsv;
   cv::cvtColor(frame, frame_hsv, CV_BGR2HSV);
 
-  cv::Mat output_lines(frame_hsv.rows, frame_hsv.cols, CV_8UC1, cv::Scalar::all(0));    // Ouput image lines (B&W)
-  cv::Mat output_barrels(frame_hsv.rows, frame_hsv.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image barrels (B&W)
+  cv::Mat output_lines(frame_hsv.rows, frame_hsv.cols, CV_8UC1, cv::Scalar::all(0));    // Output image lines (B&W)
+  cv::Mat output_barrels(frame_hsv.rows, frame_hsv.cols, CV_8UC1, cv::Scalar::all(0));  // Output image barrels (B&W)
 
-  // Segment lines and barrels by checking bounds
-  cv::inRange(frame_hsv, g_lower_lines, g_upper_lines, output_lines);
+  // Segment lines by checking bounds
+  cv::inRange(frame_hsv, lower_lines, upper_lines, output_lines);
 
   sensor_msgs::Image outmsg;
   outmsg.header = msg->header;
@@ -105,17 +105,17 @@ void SimColorDetector::handleImage(const sensor_msgs::ImageConstPtr& msg,
 
   // Modify camera info to fit scaled image
   sensor_msgs::CameraInfo modified_camera_info =
-      scaleCameraInfo(*camera_info, g_output_size.width, g_output_size.height);
+      scaleCameraInfo(*camera_info, output_size.width, output_size.height);
 
-  // publish line segmentation
+  // Publish line segmentation
   cv_ptr->image = output_lines;
   cv_ptr->toImageMsg(outmsg);
-  g_pubs.at(camera_name).camera.publish(outmsg, modified_camera_info);
+  pubs.at(camera_name).camera.publish(outmsg, modified_camera_info);
 
-  // publish barrel segmentation
+  // Publish barrel segmentation (blank for now until multiclass segmentation integrated)
   cv_ptr->image = output_barrels;
   cv_ptr->toImageMsg(outmsg);
-  g_pubs.at(camera_name).barrel.publish(outmsg);
+  pubs.at(camera_name).barrel.publish(outmsg);
 }
 
 int main(int argc, char** argv)
