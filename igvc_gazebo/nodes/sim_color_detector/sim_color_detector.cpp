@@ -104,8 +104,7 @@ void SimColorDetector::handleImage(const sensor_msgs::ImageConstPtr& msg,
   cv_ptr->encoding = "mono8";
 
   // Modify camera info to fit scaled image
-  sensor_msgs::CameraInfo modified_camera_info =
-      scaleCameraInfo(*camera_info, output_size.width, output_size.height);
+  sensor_msgs::CameraInfo modified_camera_info = scaleCameraInfo(*camera_info, output_size.width, output_size.height);
 
   // Publish line segmentation
   cv_ptr->image = output_lines;

@@ -10,29 +10,30 @@
 
 class TestSimColorDetector : public testing::Test
 {
-  public:
-    TestSimColorDetector()
+public:
+  TestSimColorDetector()
+  {
+    handle.getParam("sim_color_detector/camera_names", camera_names);
+
+    for (size_t i; i < camera_names.size(); ++i)
     {
-      handle.getParam("sim_color_detector/camera_names", camera_names);
-      
-      for (size_t i; i < camera_names.size(); ++i) {
-        auto camera_name = camera_names[i];
-        std::string img_name = camera_name + "/raw/image";
-        std::string info_name = camera_name + "/raw/camera_info";
+      auto camera_name = camera_names[i];
+      std::string img_name = camera_name + "/raw/image";
+      std::string info_name = camera_name + "/raw/camera_info";
 
-        ros::Publisher img_pub = handle.advertise<sensor_msgs::Image>(img_name, 1);
-        ros::Publisher info_pub = handle.advertise<sensor_msgs::CameraInfo>(info_name, 1);
+      ros::Publisher img_pub = handle.advertise<sensor_msgs::Image>(img_name, 1);
+      ros::Publisher info_pub = handle.advertise<sensor_msgs::CameraInfo>(info_name, 1);
 
-        mock_image_pubs.push_back(img_pub);
-        mock_info_pubs.push_back(info_pub);
-      }
+      mock_image_pubs.push_back(img_pub);
+      mock_info_pubs.push_back(info_pub);
     }
+  }
 
-  protected:
-    ros::NodeHandle handle;
-    std::vector<ros::Publisher> mock_image_pubs;
-    std::vector<ros::Publisher> mock_info_pubs;
-    std::vector<std::string> camera_names;
+protected:
+  ros::NodeHandle handle;
+  std::vector<ros::Publisher> mock_image_pubs;
+  std::vector<ros::Publisher> mock_info_pubs;
+  std::vector<std::string> camera_names;
 };
 
 sensor_msgs::Image createCircleImgMsg(double height, double width, double h, double s, double v)
@@ -59,7 +60,8 @@ sensor_msgs::Image createCircleImgMsg(double height, double width, double h, dou
 
 TEST_F(TestSimColorDetector, CircleTest)
 {
-  for (size_t i; i < camera_names.size(); ++i) {
+  for (size_t i; i < camera_names.size(); ++i)
+  {
     std::string sub_name = camera_names[i] + "/segmented/image";
     MockSubscriber<sensor_msgs::Image> mock_sub(sub_name);
     ASSERT_TRUE(mock_sub.waitForPublisher());
@@ -100,7 +102,6 @@ TEST_F(TestSimColorDetector, CircleTest)
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-
 
     cv::Mat expect_img = cv::Mat(height, width, CV_8UC1, cv::Scalar(0));
     cv::Mat expect_img_resize = cv::Mat(400, 400, CV_8UC1, cv::Scalar(0));
@@ -146,7 +147,8 @@ sensor_msgs::Image createSolidImgMsg(double height, double width, double h, doub
 
 TEST_F(TestSimColorDetector, AllLineTest)
 {
-  for (size_t i; i < camera_names.size(); ++i) {
+  for (size_t i; i < camera_names.size(); ++i)
+  {
     std::string sub_name = camera_names[i] + "/segmented/image";
     MockSubscriber<sensor_msgs::Image> mock_sub(sub_name);
     ASSERT_TRUE(mock_sub.waitForPublisher());
