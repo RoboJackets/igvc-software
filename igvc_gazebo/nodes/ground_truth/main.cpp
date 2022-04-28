@@ -64,9 +64,8 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     tf::Matrix3x3 m(quat);
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
-    roll = roll + roll_distribution(engine);
-    pitch = pitch + pitch_distribution(engine);
-    yaw = yaw + yaw_distribution(engine);
+    result.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+        roll + roll_distribution(engine), pitch + pitch_distribution(engine), yaw + yaw_distribution(engine));
     quat = tf::createQuaternionFromRPY(roll, pitch, yaw);
 
     tf::Vector3 pos;
