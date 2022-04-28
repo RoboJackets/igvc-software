@@ -27,3 +27,4 @@ This folder contains research and design documents for the repo.
 
 ### 2021/2022 Projects
 * [Simulating Swerve Modules](design/swerve_module.md)
+* [Simulating Noise](add_noise_to_simulation_2.md)
