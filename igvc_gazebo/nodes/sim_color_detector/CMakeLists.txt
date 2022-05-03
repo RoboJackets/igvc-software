@@ -1,4 +1,4 @@
-add_executable(sim_color_detector main.cpp)
+add_executable(sim_color_detector sim_color_detector.cpp)
 add_dependencies(sim_color_detector ${catkin_EXPORTED_TARGETS})
 target_link_libraries(sim_color_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 

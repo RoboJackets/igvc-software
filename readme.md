@@ -72,14 +72,14 @@ The repo is comprised of multiple ROS packages and one sandbox folder for miscel
 ## Running Gazebo
 You can get started with the IGVC code base right away by launching our simulator!
 
-**Load up Jessii:**
+**Load up Swervi:**
 The following command will load our platform into a simulated IGVC qualifications course:
 ```
 roslaunch igvc_gazebo qualification.launch
 ```
 
-**Navigation the course:**
-To launch the navigation stack for simulation:
+**Navigate the course:**
+After launching the gazebo simulation, launch the navigation stack for simulation:
 ```bash
 roslaunch igvc_navigation navigation_simulation.launch
 ```
@@ -88,6 +88,9 @@ Alternatively, you can control the robot manually with a USB gamepad with this c
 ```
 roslaunch igvc_platform joystick_driver.launch
 ```
+
+## Past Iterations
+To view the software repository for our past differential drive robot, Jessiii, checkout the `jessiii-dev` branch.
 
 ## Contributing
 Join the chat [here!](https://robojackets.slack.com/)

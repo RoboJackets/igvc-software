@@ -15,6 +15,7 @@ add_message_files(
     DIRECTORY msg
     FILES
     velocity_quad.msg
+    velocity_pair.msg
     lights.msg
     system_stats.msg
     map.msg
