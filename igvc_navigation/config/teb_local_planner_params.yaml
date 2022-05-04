@@ -23,10 +23,10 @@ TebLocalPlannerROS:
   max_vel_x: 2.0
   max_vel_x_backwards: 2.0
   max_vel_y: 2.0
-  max_vel_theta: 4.0
-  acc_lim_x: 1.0
-  acc_lim_y: 1.0
-  acc_lim_theta: 2.0
+  max_vel_theta: 2.0
+  acc_lim_x: 0.75
+  acc_lim_y: 0.75
+  acc_lim_theta: 1
   min_turning_radius: 0.0 # swerve-drive robot (can turn on place!)
 
   footprint_model:
@@ -71,16 +71,18 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1
   obstacle_cost_exponent: 2
   weight_max_vel_x: 1
+  weight_max_vel_y: 1
   weight_max_vel_theta: 1
   weight_acc_lim_x: 1
+  weight_acc_lim_y: 1
   weight_acc_lim_theta: 1
-  weight_kinematics_nh: 0.01
+  weight_kinematics_nh: 1
   weight_kinematics_forward_drive: 1
   weight_kinematics_turning_radius: 1
   weight_optimaltime: 1 # must be > 0
   weight_shortest_path: 0
   weight_obstacle: 100
-  weight_inflation: 90
+  weight_inflation: 3
   weight_dynamic_obstacle: 10
   weight_dynamic_obstacle_inflation: 0.2
   weight_viapoint: 0.01
