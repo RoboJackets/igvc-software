@@ -73,7 +73,7 @@
     </node>
 
     <!-- Publish segmented camera images -->
-    <include file="$(find igvc_gazebo)/launch/sim_detector.launch" />
+    <!-- <include file="$(find igvc_gazebo)/launch/sim_detector.launch" /> -->
 
     <include file="$(find igvc_utils)/launch/imu_to_rpy.launch" />
 

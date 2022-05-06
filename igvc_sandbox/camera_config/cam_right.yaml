@@ -1,0 +1,20 @@
+image_width: 640
+image_height: 480
+camera_name: cam/right
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [423.902449, 0.000000, 297.916553, 0.000000, 425.785847, 235.045360, 0.000000, 0.000000, 1.000000]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.050813, -0.061465, -0.002275, -0.004615, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [426.252197, 0.000000, 293.505196, 0.000000, 0.000000, 430.785797, 233.414442, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000]

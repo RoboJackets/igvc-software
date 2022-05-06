@@ -13,10 +13,10 @@
       <param name="output_image/width" value="400" />
       <param name="output_image/height" value="400" />
 
-      <param name="lines/lower/h" value="120" />
-      <param name="lines/lower/s" value="130" />
-      <param name="lines/lower/v" value="100" />
-      <param name="lines/upper/h" value="180" />
+      <param name="lines/lower/h" value="0" />
+      <param name="lines/lower/s" value="70" />
+      <param name="lines/lower/v" value="50" />
+      <param name="lines/upper/h" value="10" />
       <param name="lines/upper/s" value="255" />
       <param name="lines/upper/v" value="255" />
 

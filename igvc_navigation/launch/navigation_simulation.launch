@@ -20,7 +20,7 @@
     </include>
 
     <!-- Launch swerve drive controller -->
-    <include file="$(find igvc_navigation)/launch/swerve_drive.launch" />
+    <!-- <include file="$(find igvc_navigation)/launch/swerve_drive.launch" /> -->
 
     <!-- pointcloud filter -->
     <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
