@@ -81,17 +81,17 @@
 
     <!-- Left Camera -->
     <xacro:property name="left_camera_x" value="0.0"/>
-    <xacro:property name="left_camera_y" value="-0.25"/>
-    <xacro:property name="left_camera_z" value="0.0"/>
-    <xacro:property name="left_camera_pitch" value="0.5"/>
-    <xacro:property name="left_camera_yaw" value="-2"/>
+    <xacro:property name="left_camera_y" value="0.25"/>
+    <xacro:property name="left_camera_z" value="0.04"/>
+    <xacro:property name="left_camera_pitch" value="0.56"/>
+    <xacro:property name="left_camera_yaw" value="2.05"/>
 
     <!-- Right Camera -->
     <xacro:property name="right_camera_x" value="0.0"/>
-    <xacro:property name="right_camera_y" value="0.25"/>
-    <xacro:property name="right_camera_z" value="0.0"/>
-    <xacro:property name="right_camera_pitch" value="0.5"/>
-    <xacro:property name="right_camera_yaw" value="2"/>
+    <xacro:property name="right_camera_y" value="-0.25"/>
+    <xacro:property name="right_camera_z" value="0.04"/>
+    <xacro:property name="right_camera_pitch" value="0.56"/>
+    <xacro:property name="right_camera_yaw" value="-2.05"/>
 
     <!-- GPS -->
     <xacro:property name="gps_x" value="0.0"/>
