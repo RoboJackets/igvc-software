@@ -74,10 +74,10 @@
     <xacro:property name="sensor_mast_z_dim" value="0.05"/>
 
     <!-- Center Camera -->
-    <xacro:property name="center_camera_x" value="0.1"/>
+    <xacro:property name="center_camera_x" value="0.03"/>
     <xacro:property name="center_camera_y" value="0.0"/>
-    <xacro:property name="center_camera_z" value="0.0"/>
-    <xacro:property name="center_camera_pitch" value="0.5"/>
+    <xacro:property name="center_camera_z" value="0.04"/>
+    <xacro:property name="center_camera_pitch" value="0.56"/>
 
     <!-- Left Camera -->
     <xacro:property name="left_camera_x" value="0.0"/>
