@@ -24,8 +24,8 @@ TebLocalPlannerROS:
   max_vel_x_backwards: 2.0
   max_vel_y: 2.0
   max_vel_theta: 2.0
-  acc_lim_x: 0.75
-  acc_lim_y: 0.75
+  acc_lim_x: 0.6
+  acc_lim_y: 0.6
   acc_lim_theta: 1
   min_turning_radius: 0.0 # swerve-drive robot (can turn on place!)
 
@@ -43,8 +43,8 @@ TebLocalPlannerROS:
 
     # Obstacles
 
-  min_obstacle_dist: 0.45
-  inflation_dist: 0.0
+  min_obstacle_dist: .5 # > sqrt((.4318-.2)^2 + .3048^2)
+  inflation_dist: 1.0
   include_costmap_obstacles: True
   costmap_obstacles_behind_robot_dist: 1.5
   obstacle_poses_affected: 15
@@ -82,7 +82,7 @@ TebLocalPlannerROS:
   weight_optimaltime: 1 # must be > 0
   weight_shortest_path: 0
   weight_obstacle: 100
-  weight_inflation: 6
+  weight_inflation: 1
   weight_dynamic_obstacle: 10
   weight_dynamic_obstacle_inflation: 0.2
   weight_viapoint: 0.01
