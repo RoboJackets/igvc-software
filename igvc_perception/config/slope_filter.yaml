@@ -21,6 +21,31 @@ slope_map_filters:
           edge_handling: crop # options: inside, crop, empty, mean
           window_size: 5 # optional
 
+    - name: median
+      type: gridMapFilters/MedianFillFilter
+      params:
+        input_layer: elevation_smooth
+        output_layer: elevation_no_nans
+        fill_hole_radius: 0.2 # in m. 
+        filter_existing_values: false # Default is false. If enabled it also does a median computation for existing values. 
+        existing_value_radius: 0.2 # in m. Note that this option only has an effect if filter_existing_values is set true. 
+        fill_mask_layer: fill_mask # A layer that is used to compute which areas to fill. If not present in the input it is automatically computed. 
+        debug: false # If enabled, the additional debug_infill_mask_layer is published. 
+        debug_infill_mask_layer: infill_mask # Layer used to visualize the intermediate, sparse-outlier removed fill mask. Only published if debug is enabled.
+
+    # Gaussian Blur
+    - name: Gaussian Blur
+      type: gridMapFilters/SlidingWindowMathExpressionFilter
+      params:
+        input_layer: elevation_no_nans
+        output_layer: elevation_no_nans_smooth
+        expression: 'sumOfFinites([1/16,2/16,1/16;2/16,4/16,2/16;1/16,2/16,1/16].*elevation_no_nans)' # Edge detection.
+        # expression: 'sumOfFinites([-1,0,1;-2,0,2;-1,0,1].*elevation_inpainted)' # Edge detection.
+        # expression: 'sumOfFinites([0,-1,0;-1,5,-1;0,-1,0].*elevation_inpainted)' # Sharpen.
+        compute_empty_cells: false
+        edge_handling: mean # options: inside, crop, empty, mean
+        window_size: 3 # Make sure to make this compatible with the kernel matrix.
+
     # Compute surface normals.
     - name: surface_normals
       type: gridMapFilters/NormalVectorsFilter
@@ -36,3 +61,41 @@ slope_map_filters:
       params:
           output_layer: slope
           expression: acos(normal_vectors_z)
+
+    # Compute surface normals.
+    - name: surface_normals_no_nans
+      type: gridMapFilters/NormalVectorsFilter
+      params:
+          input_layer: elevation_no_nans_smooth
+          output_layers_prefix: normal_vectors_no_nans_
+          radius: 0.05
+          normal_vector_positive_axis: z
+
+    # Compute slope from surface normal.
+    - name: slope_no_nans
+      type: gridMapFilters/MathExpressionFilter
+      params:
+          output_layer: slope_no_nans
+          expression: acos(normal_vectors_no_nans_z)
+    
+    # Edge detection on elevation layer with convolution filter as alternative to filter above.
+    - name: edge_detection_vert
+      type: gridMapFilters/SlidingWindowMathExpressionFilter
+      params:
+        input_layer: elevation_no_nans_smooth
+        output_layer: edges_vert
+        expression: 'sumOfFinites([-1,0,1;-2,0,2;-1,0,1].*elevation_no_nans_smooth)' # Edge detection.
+        compute_empty_cells: false
+        edge_handling: mean # options: inside, crop, empty, mean
+        window_size: 3 # Make sure to make this compatible with the kernel matrix.
+    
+    # Edge detection on elevation layer with convolution filter as alternative to filter above.
+    - name: edge_detection_horiz
+      type: gridMapFilters/SlidingWindowMathExpressionFilter
+      params:
+        input_layer: elevation_no_nans_smooth
+        output_layer: edges_horiz
+        expression: 'sumOfFinites([-1,-2,-1;0,0,0;1,2,1].*elevation_no_nans_smooth)' # Edge detection.
+        compute_empty_cells: false
+        edge_handling: mean # options: inside, crop, empty, mean
+        window_size: 3 # Make sure to make this compatible with the kernel matrix.

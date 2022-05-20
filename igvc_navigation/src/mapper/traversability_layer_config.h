@@ -17,6 +17,7 @@ public:
 
   double logodd_increment;
   double slope_threshold;
+  double edge_threshold;
 };
 }  // namespace traversability_layer
 

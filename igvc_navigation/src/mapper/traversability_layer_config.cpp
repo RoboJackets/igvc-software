@@ -10,6 +10,7 @@ TraversabilityLayerConfig::TraversabilityLayerConfig(const ros::NodeHandle &pare
   double untraversable_probability;
   assertions::getParam(nh, "untraversable_probability", untraversable_probability);
   assertions::getParam(nh, "slope_threshold", slope_threshold);
+  assertions::getParam(nh, "edge_threshold", edge_threshold);
 
   logodd_increment = probability_utils::toLogOdds(untraversable_probability);
 }

@@ -85,11 +85,13 @@ void TraversabilityLayer::slopeMapCallback(const grid_map_msgs::GridMap &slope_m
     if (map_.isInside(pos))
     {
       float slope = slope_map.get("slope")((*it)[0], (*it)[1]);
+      float edges_vert = slope_map.get("edges_vert")((*it)[0], (*it)[1]);
       grid_map::Index map_index;
       map_.getIndex(pos, map_index);
       touch(map_index);
       float *logodd = &map_.at("logodds", map_index);
-      if (slope > config_.slope_threshold)
+      // when edges vert is positive that means only detects positive changes in elevation (low to high)
+      if (slope > config_.slope_threshold || edges_vert > config_.edge_threshold)
       {
         *logodd = std::min(*logodd + config_.logodd_increment, config_.map.max_occupancy);
       }
