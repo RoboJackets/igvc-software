@@ -150,7 +150,48 @@
         <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
     </joint>
 
-   
+    <gazebo reference="cam/center">
+        <sensor name="center_cam_sensor" type="camera">
+            <camera>
+                <!-- hov in radians -->
+                <horizontal_fov>1.2290609</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                </image>
+                <clip>
+                    <near>0.1</near>
+                    <far>100</far>
+                </clip>
+                <!--
+                    <distortion>
+                    <k1>-0.25</k1>
+                    <k2>0.12</k2>
+                    <k3>0.0</k3>
+                    <p1>-0.00028</p1>
+                    <p2>-0.00005</p2>
+                    <center>0.5 0.5</center>
+                    </distortion>
+                -->
+            </camera>
+            <always_on>1</always_on>
+            <update_rate>30</update_rate>
+            <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30</updateRate>
+                <cameraName>cam/center/raw</cameraName>
+                <imageTopicName>image</imageTopicName>
+                <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+                <frameName>cam/center_optical</frameName>
+                <hackBaseline>0.0</hackBaseline>
+                <distortionK1>0.0</distortionK1>
+                <distortionK2>0.0</distortionK2>
+                <distortionK3>0.0</distortionK3>
+                <distortionT1>0.0</distortionT1>
+                <distortionT2>0.0</distortionT2>
+            </plugin>
+        </sensor>
+    </gazebo>
 
     <!-- Left Camera -->
     <link name="cam/left">
@@ -175,7 +216,48 @@
         <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
     </joint>
 
-    
+    <gazebo reference="cam/left">
+        <sensor name="left_cam_sensor" type="camera">
+            <camera>
+                <!-- hov in radians -->
+                <horizontal_fov>1.2290609</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                </image>
+                <clip>
+                    <near>0.1</near>
+                    <far>100</far>
+                </clip>
+                <!--
+                    <distortion>
+                    <k1>-0.25</k1>
+                    <k2>0.12</k2>
+                    <k3>0.0</k3>
+                    <p1>-0.00028</p1>
+                    <p2>-0.00005</p2>
+                    <center>0.5 0.5</center>
+                    </distortion>
+                -->
+            </camera>
+            <always_on>1</always_on>
+            <update_rate>30</update_rate>
+            <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30</updateRate>
+                <cameraName>cam/left/raw</cameraName>
+                <imageTopicName>image</imageTopicName>
+                <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+                <frameName>cam/left_optical</frameName>
+                <hackBaseline>0.0</hackBaseline>
+                <distortionK1>0.0</distortionK1>
+                <distortionK2>0.0</distortionK2>
+                <distortionK3>0.0</distortionK3>
+                <distortionT1>0.0</distortionT1>
+                <distortionT2>0.0</distortionT2>
+            </plugin>
+        </sensor>
+    </gazebo>
 
     <!-- Right Camera -->
     <link name="cam/right">
@@ -200,7 +282,48 @@
         <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
     </joint>
 
-    
+    <gazebo reference="cam/right">
+        <sensor name="right_cam_sensor" type="camera">
+            <camera>
+                <!-- hov in radians -->
+                <horizontal_fov>1.2290609</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                </image>
+                <clip>
+                    <near>0.1</near>
+                    <far>100</far>
+                </clip>
+                <!--
+                    <distortion>
+                    <k1>-0.25</k1>
+                    <k2>0.12</k2>
+                    <k3>0.0</k3>
+                    <p1>-0.00028</p1>
+                    <p2>-0.00005</p2>
+                    <center>0.5 0.5</center>
+                    </distortion>
+                -->
+            </camera>
+            <always_on>1</always_on>
+            <update_rate>30</update_rate>
+            <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30</updateRate>
+                <cameraName>cam/right/raw</cameraName>
+                <imageTopicName>image</imageTopicName>
+                <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+                <frameName>cam/right_optical</frameName>
+                <hackBaseline>0.0</hackBaseline>
+                <distortionK1>0.0</distortionK1>
+                <distortionK2>0.0</distortionK2>
+                <distortionK3>0.0</distortionK3>
+                <distortionT1>0.0</distortionT1>
+                <distortionT2>0.0</distortionT2>
+            </plugin>
+        </sensor>
+    </gazebo>
 
     <!-- GPS -->
     <link name="gps">
@@ -263,7 +386,7 @@
             <headingDrift>0.0 0.0 0.0</headingDrift>
             <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
             <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-            <yawOffset>0</yawOffset>
+            <yawOffset>-1.57079632679</yawOffset>
         </plugin>
 
         <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
@@ -283,7 +406,7 @@
             <headingDrift>0.0 0.0 0.0</headingDrift>
             <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
             <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-            <yawOffset>0</yawOffset>
+            <yawOffset>-1.57079632679</yawOffset>
         </plugin>
 
         <plugin name="magnetometer" filename="libhector_gazebo_ros_magnetic.so">

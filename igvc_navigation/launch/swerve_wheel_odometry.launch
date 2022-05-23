@@ -8,7 +8,6 @@
         <param name="intersection_tol_" value="1"/>
         <param name="alpha" value="0.5"/>
         <param name="wheel_radius" value="0.1375"/>
-        <param name="angular_limit_" value="20.0"/>
     </node>
 
 </launch>

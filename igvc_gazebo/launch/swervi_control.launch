@@ -13,20 +13,20 @@
 
   <node name="swervi_control" pkg="igvc_gazebo" type="swerve_control" output="screen" required="true">
       <!-- < PID values for wheel speed > -->
-      <param name="speed_P_fl" value="10.0"/>
-      <param name="speed_P_fr" value="10.0"/>
-      <param name="speed_P_bl" value="10.0"/>
-      <param name="speed_P_br" value="10.0"/>
-      <param name="speed_I_fl" value="1.0"/>
-      <param name="speed_I_fr" value="1.0"/>
-      <param name="speed_I_bl" value="1.0"/>
-      <param name="speed_I_br" value="1.0"/>
-      <param name="speed_D_fl" value="0.0"/>
-      <param name="speed_D_fr" value="0.0"/>
-      <param name="speed_D_bl" value="0.0"/>
-      <param name="speed_D_br" value="0.0"/>
+      <param name="speed_P_fl" value="5.0"/>
+      <param name="speed_P_fr" value="5.0"/>
+      <param name="speed_P_bl" value="5.0"/>
+      <param name="speed_P_br" value="5.0"/>
+      <param name="speed_I_fl" value="0.0"/>
+      <param name="speed_I_fr" value="0.0"/>
+      <param name="speed_I_bl" value="0.0"/>
+      <param name="speed_I_br" value="0.0"/>
+      <param name="speed_D_fl" value="1.0"/>
+      <param name="speed_D_fr" value="1.0"/>
+      <param name="speed_D_bl" value="1.0"/>
+      <param name="speed_D_br" value="1.0"/>
       <param name="wheel_radius" value="0.1375"/>
-      <param name="max_effort" value="12.0"/>
+      <param name="max_effort" value="8.0"/>
       <param name="rate" value="60.0"/>
       <param name="alpha" value="0.5"/>
   </node>
