@@ -51,7 +51,7 @@
     <xacro:property name="chassis_offset_z" value="0.385"/>
 
     <!-- Lidar -->
-    <xacro:property name="lidar_pitch" value="0.0"/>
+    <xacro:property name="lidar_pitch" value="0.575959"/>
     <xacro:property name="lidar_x" value="0.127"/>
     <xacro:property name="lidar_z" value="0.8486"/>
     <xacro:property name="lidar_hz" value="10"/>
