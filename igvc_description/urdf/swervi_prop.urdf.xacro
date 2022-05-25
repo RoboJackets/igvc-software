@@ -14,7 +14,7 @@
     <xacro:property name="wheel_damping" value="0.001"/>
     <xacro:property name="wheel_friction" value="0.5"/>
 
-    <xacro:property name="swivel_height" value="0.17272"/>
+    <xacro:property name="swivel_height" value="0.27272"/>
     <xacro:property name="swivel_radius" value="0.1" />
     <xacro:property name="swivel_mass" value="1" />
     <xacro:property name="swivel_Ixx" value="0.4" />
@@ -43,12 +43,12 @@
     <!-- chassis params-->
     <xacro:property name="chassis_com_z" value="0.29"/>
     <xacro:property name="wheel_offset_x" value="0.362"/>
-    <xacro:property name="chassis_mass" value="20" />
+    <xacro:property name="chassis_mass" value="50" />
     <xacro:property name="chassis_Ixx" value="5" />
     <xacro:property name="chassis_Iyy" value="5" />
     <xacro:property name="chassis_Izz" value="5" />
     <xacro:property name="wheel_offset_y" value="0.188"/>
-    <xacro:property name="chassis_offset_z" value="0.318"/>
+    <xacro:property name="chassis_offset_z" value="0.385"/>
 
     <!-- Lidar -->
     <xacro:property name="lidar_pitch" value="0.0"/>
