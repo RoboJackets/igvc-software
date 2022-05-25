@@ -8,7 +8,7 @@
     <include file="$(find igvc_description)/launch/robot_state_publisher.launch" />
 
     <!-- MOTOR CONTROLLER -->
-    <include file="$(find igvc_platform)/launch/motor_controller.launch" />
+    <!-- <include file="$(find igvc_platform)/launch/motor_controller.launch" /> -->
 
     <!-- GPS -->
     <include file="$(find igvc_platform)/launch/gps.launch" />
@@ -34,13 +34,13 @@
     <!-- System Stats -->
     <include file="$(find igvc_utils)/launch/system_stats.launch" />
 
-    <node pkg="diagnostic_aggregator" type="aggregator_node"
+    <!-- <node pkg="diagnostic_aggregator" type="aggregator_node"
           name="diagnostic_aggregator" required="true" >
-        <!-- Load the file you made above -->
+        Load the file you made above
         <rosparam command="load"
                   file="$(find igvc_platform)/config/analyzers.yaml" />
-    </node>
+    </node> -->
 
-    <node pkg="rqt_robot_monitor" name="robot_monitor" type="rqt_robot_monitor" required="true" />
+    <!-- <node pkg="rqt_robot_monitor" name="robot_monitor" type="rqt_robot_monitor" required="true" /> -->
 
 </launch>

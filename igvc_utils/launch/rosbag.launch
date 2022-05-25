@@ -6,6 +6,9 @@
     excluding some of the duplicate image_transport topics.
     -->
 <launch>
+    <!-- bag information -->
+    <arg name="CHASSIS_NAME" default="swervi"/>
+    <arg name="LOCATION" default="parking_lot"/>
     <node pkg="rosbag" type="record" name="record" output="screen"
-          args="-a -x '(.*)image(.*)*' usb_cam_center/image_raw/compressed usb_cam_left/image_raw/compressed usb_cam_right/image_raw/compressed -o $(env HOME)/data/$(env CHASSIS_NAME)_$(env LOCATION)" />
+          args="-a -x '(.*)cam/(.*)*' cam/center/raw/image/compressed cam/left/raw/image/compressed cam/right/raw/image/compressed -o $(find igvc_sandbox)/$(arg CHASSIS_NAME)_$(arg LOCATION)" />
 </launch>
