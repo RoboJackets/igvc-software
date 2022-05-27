@@ -1,11 +1,12 @@
 <launch>
+<!-- Vehicle Type (0 for jessi, 1 for swervi)-->
     <arg name="read_from_file" default="true"/>
 
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
 
     <!-- Launch navigation (simulation version) -->
-    <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
+    <include file="$(find igvc_navigation)/launch/mbf_navigation.launch"/>
 
     <!-- Launch back circle service server -->
     <include file="$(find igvc_navigation)/launch/back_circle_server.launch"/>
