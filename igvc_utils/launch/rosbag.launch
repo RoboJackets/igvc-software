@@ -10,5 +10,8 @@
     <arg name="CHASSIS_NAME" default="swervi"/>
     <arg name="LOCATION" default="parking_lot"/>
     <node pkg="rosbag" type="record" name="record" output="screen"
-          args="-a -x '(.*)cam/(.*)*' cam/center/raw/image/compressed cam/left/raw/image/compressed cam/right/raw/image/compressed -o $(find igvc_sandbox)/$(arg CHASSIS_NAME)_$(arg LOCATION)" />
+          args="-a -x '(.*)cam/(.*)*' cam/center/raw/image/compressed cam/center/raw/camera_info
+ cam/left/raw/image/compressed /cam/left/raw/camera_info
+ cam/right/raw/image/compressed /cam/right/raw/camera_info
+ -o $(find igvc_sandbox)/$(arg CHASSIS_NAME)_$(arg LOCATION)" />
 </launch>
