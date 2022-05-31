@@ -48,7 +48,7 @@
         <joint name="${prefix}_swivel_rev" type="continuous">
             <parent link="${prefix}_swivel_axle"/>
             <child link="${prefix}_swerve_swivel"/>
-            <axis xyz="0 0 -1"/>
+            <axis xyz="0 0 1"/>
             <limit effort="${max_torque_swivel}" velocity="${max_vel_swivel}"/>
             <dynamics damping="${swivel_damping}" friction="${swivel_friction}"/>
         </joint> 
@@ -92,7 +92,7 @@
             <parent link="${prefix}_wheel_axle"/>
             <child link="${prefix}_wheel"/>
             <origin xyz="0 0 0" rpy="${M_PI / 2} 0 0"/>
-            <axis xyz="0 0 1"/>
+            <axis xyz="0 0 -1"/>
             <limit effort="${max_torque_hub}" velocity="${max_vel_hub}"/>
             <dynamics damping="${wheel_damping}" friction="${wheel_friction}"/>
         </joint>

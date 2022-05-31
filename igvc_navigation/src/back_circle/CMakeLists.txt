@@ -1,4 +1,4 @@
-add_executable(back_circle main.cpp)
+add_executable(back_circle back_circle_server.cpp)
 add_dependencies(back_circle ${catkin_EXPORTED_TARGETS})
 target_link_libraries(back_circle ${catkin_LIBRARIES} ${OPENCV_LIBRARIES})
 

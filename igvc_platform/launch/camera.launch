@@ -4,38 +4,41 @@
 	<arg name="camera" default="center" />
 
 	<group if="$(eval 'center' in arg('camera'))">
-		<node name="usb_cam_center" pkg="usb_cam" type="usb_cam_node" required="true">
+		<node name="cam_center" pkg="usb_cam" type="usb_cam_node" required="true">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
-		    <param name="video_device" type="string" value="/dev/igvc_usb_cam_center" />
+		    <param name="video_device" type="string" value="/dev/video6" />
 		    <param name="pixel_format" type="string" value="yuyv" />
-		    <param name="camera_frame_id" type="string" value="cam/center" />
-	 	    <param name="camera_info_url" type="string" value="file://$(find igvc_sandbox)/camera_config/usb_cam_center.yaml" />
-		    <param name="camera_name" type="string" value="cam/center/raw" />
+		    <param name="camera_frame_id" type="string" value="cam/center_optical" />
+	 	    <param name="camera_info_url" type="string" value="file://$(find igvc_sandbox)/camera_config/cam_center.yaml" />
+		    <param name="camera_name" type="string" value="cam/center" />
 			<param name="framerate" value="30" />
+			<remap from="/cam_center/image_raw" to="/cam/center/raw/image"/>
 		</node>
 	</group>
 
 	<group if="$(eval 'right' in arg('camera'))">
-		<node name="usb_cam_right" pkg="usb_cam" type="usb_cam_node" required="true">
+		<node name="cam_right" pkg="usb_cam" type="usb_cam_node" required="true">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
-		    <param name="video_device" type="string" value="/dev/igvc_usb_cam_right" />
+		    <param name="video_device" type="string" value="/dev/video2" />
 		    <param name="pixel_format" type="string" value="yuyv" />
-		    <param name="camera_frame_id" type="string" value="cam/right" />
-	 	    <param name="camera_info_url" type="string" value="file://$(find igvc_sandbox)/camera_config/usb_cam_right.yaml" />
-		    <param name="camera_name" type="string" value="cam/center/raw" />
+		    <param name="camera_frame_id" type="string" value="cam/right_optical" />
+	 	    <param name="camera_info_url" type="string" value="file://$(find igvc_sandbox)/camera_config/cam_right.yaml" />
+		    <param name="camera_name" type="string" value="cam/right" />
 			<param name="framerate" value="30" />
+			<remap from="/cam_right/image_raw" to="/cam/right/raw/image"/>
 		</node>
 	</group>
 
 	<group if="$(eval 'left' in arg('camera'))">
-		<node name="usb_cam_left" pkg="usb_cam" type="usb_cam_node" required="true">
+		<node name="cam_left" pkg="usb_cam" type="usb_cam_node" required="true">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
-		    <param name="video_device" type="string" value="/dev/igvc_usb_cam_left" />
+		    <param name="video_device" type="string" value="/dev/video4" />
 		    <param name="pixel_format" type="string" value="yuyv" />
-		    <param name="camera_frame_id" type="string" value="cam/left" />
-	 	    <param name="camera_info_url" type="string" value="file://$(find igvc_sandbox)/camera_config/usb_cam_left.yaml" />
-		    <param name="camera_name" type="string" value="cam/center/raw" />
+		    <param name="camera_frame_id" type="string" value="cam/left_optical" />
+	 	    <param name="camera_info_url" type="string" value="file://$(find igvc_sandbox)/camera_config/cam_left.yaml" />
+		    <param name="camera_name" type="string" value="cam/left" />
 			<param name="framerate" value="30" />
+			<remap from="/cam_left/image_raw" to="/cam/left/raw/image"/>
 		</node>
 	</group>
 

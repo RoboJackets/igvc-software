@@ -1,0 +1,20 @@
+image_width: 640
+image_height: 480
+camera_name: cam/center
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [415.595987, 0.000000, 305.457652, 0.000000, 417.251830, 270.509128, 0.000000, 0.000000, 1.000000]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.067308, -0.080053, 0.001156, -0.000402, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [419.812958, 0.000000, 304.229632, 0.000000, 0.000000, 422.129974, 270.428650, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000]

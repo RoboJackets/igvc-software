@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
+    <arg name="model" default="0"/>
     <arg name="track" default="0"/>
     <arg name="cmd_timeout" default="0.5"/>
     <arg name="gpu" default="false"/>

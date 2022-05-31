@@ -1,0 +1,6 @@
+back_circle:
+    width: 1.5
+    length: 2.0
+    grid_size: 0.1
+    thickness: 0.2
+    offset: -0.5
