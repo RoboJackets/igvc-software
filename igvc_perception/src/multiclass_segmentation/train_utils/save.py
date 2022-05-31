@@ -23,7 +23,7 @@ def save_result(predictions, test_data, save_path):
     # rand_nums = np.insert(rand_nums, 0, 141)
 
     # Save the image, mask, and predicted mask for sample test data
-    predictions_path = os.path.join(save_path, predictions)
+    predictions_path = os.path.join(save_path, "predictions")
     Path(predictions_path).mkdir(parents=True, exist_ok=True)
     for num in tqdm(rand_nums):
         fig = plt.figure(figsize=(10, 4))
