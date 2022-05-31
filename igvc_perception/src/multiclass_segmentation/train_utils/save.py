@@ -5,6 +5,7 @@ from tqdm import tqdm
 import cv2
 import os
 
+
 def save_result(predictions, test_data, save_path):
     # Pick sample images to analyze results
     low = 1
