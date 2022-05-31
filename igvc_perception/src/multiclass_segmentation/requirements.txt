@@ -2,7 +2,7 @@ segmentation-models-pytorch
 tensorboard
 torchvision
 torch
-catalyst
+catalyst==20.12
 numpy
 opencv-python
 scikit-learn
