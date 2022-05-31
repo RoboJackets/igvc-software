@@ -104,7 +104,7 @@ class SegmentationModel(object):
         np_arr = np.frombuffer(data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        # Resize image (No resizing. Encoder Decoder Architecture outputs 640x480)
+        # Resize image (No resizing. Encoder Decoder Architecture outputs 640x480) If want to resize need to resize to multiple of 32
         # image_np = cv2.resize(image_np, dsize=(self.resize_width,self.resize_height), interpolation = cv2.INTER_LINEAR)
 
         # Swap dimensions around to the dimensions the model expects
