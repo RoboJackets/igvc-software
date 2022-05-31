@@ -157,8 +157,8 @@
 //   {
 //     ROS_ERROR_STREAM("Encoding failed: " << PB_GET_ERROR(&ostream));
 //     mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed");
-//     battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed. Lost battery tracking.");
-//     ros::shutdown();
+//     battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed. Lost battery
+//     tracking."); ros::shutdown();
 //   }
 
 //   size_t n;             // n is the response from socket: 0 means connection closed, otherwise n = num bytes read

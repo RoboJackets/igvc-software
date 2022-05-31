@@ -26,7 +26,7 @@
       <param name="yaw_offset" value="0"/>
 
       <!-- sets altitude to 0 -->
-      <param name="zero_altitude" value="true"/>
+      <param name="zero_altitude" value="false"/>
 
       <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
       <param name="broadcast_cartesian_transform" value="true"/>
