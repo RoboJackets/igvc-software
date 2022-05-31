@@ -3,9 +3,9 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 import cv2
+import os
 
-
-def save_result(predictions, test_data):
+def save_result(predictions, test_data, save_path):
     # Pick sample images to analyze results
     low = 1
     high = len(predictions) - 1
@@ -17,12 +17,13 @@ def save_result(predictions, test_data):
     The results specifically include images 30 and 141 as
     they are images containing multiple lines and barrels.
     Hence, they would be strong indicators of performance.
+    Can add certain samples specific to datasets
     """
-    rand_nums = np.insert(rand_nums, 0, 30)
-    rand_nums = np.insert(rand_nums, 0, 141)
+    # rand_nums = np.insert(rand_nums, 0, 30)
+    # rand_nums = np.insert(rand_nums, 0, 141)
 
     # Save the image, mask, and predicted mask for sample test data
-    predictions_path = "./predictions"
+    predictions_path = os.path.join(save_path, predictions)
     Path(predictions_path).mkdir(parents=True, exist_ok=True)
     for num in tqdm(rand_nums):
         fig = plt.figure(figsize=(10, 4))
@@ -52,5 +53,6 @@ def save_result(predictions, test_data):
         plt.gca().set_title("Predicted")
 
         plt.tight_layout()
-        plt.savefig(f"./{predictions_path}/{num}.png")
+        save_path = os.path.join(predictions_path, f"{num}.png")
+        plt.savefig(save_path)
         plt.close()

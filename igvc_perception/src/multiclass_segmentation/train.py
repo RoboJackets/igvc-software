@@ -144,19 +144,20 @@ def main():
     )
 
     # Get model predictions on test dataset
+    model_path = os.path.join(ARCH["train"]["logdir"], "checkpoints/best.pth")
     predictions = np.vstack(
         list(
             map(
                 lambda x: x["logits"].cpu().numpy(),
                 runner.predict_loader(
                     loader=infer_loader,
-                    resume=f"content/full_model2/checkpoints/best.pth",
+                    resume=model_path,
                 ),
             )
         )
     )
 
-    save_result(predictions, test_data)
+    save_result(predictions, test_data, ARCH["train"]["logdir"])
 
 
 if __name__ == "__main__":
