@@ -71,19 +71,12 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1
   obstacle_cost_exponent: 2
   weight_max_vel_x: 1
-<<<<<<< HEAD
-  weight_max_vel_theta: 1
-  weight_acc_lim_x: 1
-  weight_acc_lim_theta: 1
-  weight_kinematics_nh: 0.01
-=======
   weight_max_vel_y: 1
   weight_max_vel_theta: 1
   weight_acc_lim_x: 1
   weight_acc_lim_y: 1
   weight_acc_lim_theta: 1
   weight_kinematics_nh: 1
->>>>>>> master
   weight_kinematics_forward_drive: 1
   weight_kinematics_turning_radius: 1
   weight_optimaltime: 1 # must be > 0
