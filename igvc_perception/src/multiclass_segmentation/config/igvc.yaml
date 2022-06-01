@@ -1,6 +1,6 @@
 # training parameters
 train:
-  epochs: 1
+  epochs: 10
   lr: 0.001              
   seed: 42               
   cudnn: True
@@ -16,7 +16,7 @@ train:
   amsgrad: False
   betas_min: 0.9
   betas_max: 0.999
-  logdir: "content/full_model2"
+  logdir: "/content/drive/Shareddrives/RoboNav/Software/model_training/full_model2"
   minimize_metric: True
   fp16: null
   verbose: True
