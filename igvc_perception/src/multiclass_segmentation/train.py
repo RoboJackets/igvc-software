@@ -139,8 +139,7 @@ def main():
     test_data = SegmentationDataset(
         test_images_path,
         test_masks_path,
-        im_size=(ARCH["image"]["height"],
-        ARCH["image"]["width"])
+        im_size=(ARCH["image"]["height"], ARCH["image"]["width"])
     )
     infer_loader = DataLoader(
         test_data,
