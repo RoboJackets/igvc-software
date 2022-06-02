@@ -13,7 +13,8 @@ if __name__ == "__main__":
     # Establish arguments as file paths
     ap = argparse.ArgumentParser()
 
-    ap.add_argument("-dir", "--dir", required=True, help="igvc_dataset location")
+    ap.add_argument("-dir", "--dir", required=True,
+        help="igvc_dataset location")
     args = vars(ap.parse_args())
 
     # Load images and masks as numpy arrays

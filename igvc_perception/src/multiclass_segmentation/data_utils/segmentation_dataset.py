@@ -25,7 +25,7 @@ class SegmentationDataset(Dataset):
     def __getitem__(self, idx: int) -> dict:
         image = self.images[idx]
         if self.resize:
-          image = cv2.resize(image, (self.im_size[0], self.im_size[1]))
+            image = cv2.resize(image, (self.im_size[0], self.im_size[1]))
         image = np.swapaxes(image, 2, 0)
         image = np.swapaxes(image, 2, 1)
         image = torch.from_numpy(image).float()
@@ -34,9 +34,9 @@ class SegmentationDataset(Dataset):
         if self.masks is not None:
             mask = self.masks[idx]
             if self.resize:
-              mask = cv2.resize(mask, (self.im_size[0], self.im_size[1]))
-              # Need to add dimension since mask is 1D
-              mask = mask[..., np.newaxis]
+                mask = cv2.resize(mask, (self.im_size[0], self.im_size[1]))
+                # Need to add dimension since mask is 1D
+                mask = mask[..., np.newaxis]
             mask = np.swapaxes(mask, 2, 0)
             mask = np.swapaxes(mask, 2, 1)
             mask = torch.from_numpy(mask).float()

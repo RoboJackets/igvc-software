@@ -59,12 +59,15 @@ def create_dataset(path_to_folder, file_type):
     all_data = np.asarray(all_data)
     return all_data
 
+
 if __name__ == "__main__":
     # Establish arguments as file paths
     ap = argparse.ArgumentParser()
 
-    ap.add_argument("-images", "--images", required=True, help="path to folder with images")
-    ap.add_argument("-masks", "--masks", required=True, help="path to folder with masks")
+    ap.add_argument("-images", "--images", required=True,
+        help="path to folder with images")
+    ap.add_argument("-masks", "--masks", required=True,
+        help="path to folder with masks")
     args = vars(ap.parse_args())
 
     images_path = args["images"]

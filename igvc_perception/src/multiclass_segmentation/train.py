@@ -136,8 +136,12 @@ def main():
     )
 
     # Test model on test dataset
-    test_data = SegmentationDataset(test_images_path, test_masks_path,
-        im_size=(ARCH["image"]["height"], ARCH["image"]["width"]))
+    test_data = SegmentationDataset(
+        test_images_path,
+        test_masks_path,
+        im_size=(ARCH["image"]["height"],
+        ARCH["image"]["width"])
+    )
     infer_loader = DataLoader(
         test_data,
         batch_size=ARCH["test"]["batch_size"],
