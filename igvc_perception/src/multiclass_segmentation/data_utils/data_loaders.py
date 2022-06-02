@@ -19,7 +19,7 @@ def get_loaders(
     valid_size: float = 0.1,
     batch_size: int = 12,
     num_workers: int = 4,
-    im_size: tuple,
+    im_size: tuple = (480, 640),
 ) -> dict:
 
     """Creates Torch dataloaders"""

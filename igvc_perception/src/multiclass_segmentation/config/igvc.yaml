@@ -33,7 +33,7 @@ encoder:
   weight: "imagenet"
   activation: null
 
-# image size
+# image size, multiple of 32. e.g: (480, 640)
 image:
-  height: 400
-  width: 400
+  height: 416
+  width: 416
