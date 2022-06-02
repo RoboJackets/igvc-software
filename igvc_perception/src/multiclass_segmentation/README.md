@@ -77,6 +77,8 @@ If using your own dataset perform the following steps:
 3.  Open the [igvc_multiunet.ipynb](https://colab.research.google.com/drive/1bb9TRCNWBgV8-EiqzhjlSQM_yny9DXzt?usp=sharing) Google Colab Notebook and follow the steps to train the network. Make sure to adjust the config file in igvc_perception/src/multiclass_segmentation/config/igvc.yaml for desired training parameters and to specify model save location.
     - Note: Tensorboard may not show anything when launched for the first time so try pressing the refresh button on tensorboard in the top right of the screen.
 
+[Here](https://drive.google.com/file/d/12fkDeWA-QX9LAIS0Aw1wIQsI2FjU26Mr/view?usp=sharing) is a sample model trained on our parking lot dataset. [Linked](https://drive.google.com/file/d/15XqLQEYo7DCPBZ1mF104pXZANsoAQcgQ/view?usp=sharing) [are](https://drive.google.com/file/d/14xmVaKbz2UD9BjD6nQ9DMfI6T7q5s_KJ/view?usp=sharing) [some](https://drive.google.com/file/d/15aQULrV2B4nwYMDFlt4o2d-9xfMlA4IY/view?usp=sharing) [predictions](https://drive.google.com/file/d/15Ii0uRV3lUBy3VlVV2cZUiEeAXNnPMx6/view?usp=sharing) the model made on our dataset.
+
 ## Archived notebook
 If you like to run an old version of jupyter notebook, please follor the instruction below.
 Alternatively, download **UNetWithEfficientNet.ipynb**, and run it in [Google Colaboratory](https://colab.research.google.com/notebooks/intro.ipynb#recent=true) or a local Jupyter environment. 
