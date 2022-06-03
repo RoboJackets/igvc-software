@@ -103,11 +103,14 @@ class SegmentationModel(object):
             cam_img_topic = os.path.join(camera_name, "/raw/image/compressed")
             self.subscribers.append(
                 rospy.Subscriber(cam_img_topic,
-                    CompressedImage,
-                    functools.partial(self.image_cb, camera_name),
-                    queue_size=1,
-                    buff_size=10**8
-                    )
+                                    CompressedImage,
+                                    functools.partial(
+                                        self.image_cb,
+                                        camera_name
+                                    ),
+                                    queue_size=1,
+                                    buff_size=10**8
+                                )
                 )
 
         rospy.loginfo('Line detector is running.')
