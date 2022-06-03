@@ -79,10 +79,10 @@ class SegmentationModel(object):
             try:
                 cam_info_topic = os.path.join(camera_name, "/raw/camera_info")
                 camera_info = rospy.wait_for_message(
-                                    cam_info_topic,
-                                    CameraInfo,
-                                    timeout=5
-                                )
+                    cam_info_topic,
+                    CameraInfo,
+                    timeout=5
+                )
             except rospy.ROSException:
                 rospy.logerr(f"Camera info for {camera_name} not available.")
                 sys.exit()
@@ -91,10 +91,10 @@ class SegmentationModel(object):
             # Create image publishers.
             cam_img_topic = os.path.join(camera_name, publisher_topic)
             self.im_publishers[camera_name] = rospy.Publisher(
-                                                                cam_img_topic,
-                                                                ImMsg,
-                                                                queue_size=1
-                                                            )
+                cam_img_topic,
+                ImMsg,
+                queue_size=1
+            )
 
             print(f"Finished setting up {camera_name}.")
 
@@ -110,8 +110,8 @@ class SegmentationModel(object):
                                  ),
                                  queue_size=1,
                                  buff_size=10**8
-                                )
-                )
+                                 )
+            )
 
         rospy.loginfo('Line detector is running.')
 
@@ -125,14 +125,14 @@ class SegmentationModel(object):
 
         # Resize image
         image_np = cv2.resize(
-                        image_np,
-                        dsize=(self.resize_width, self.resize_height)
-                    )
+            image_np,
+            dsize=(self.resize_width, self.resize_height)
+        )
 
         # Swap dimensions around to the dimensions the model expects
         image_np = np.swapaxes(image_np, 2, 0)
         image_np = np.swapaxes(image_np, 2, 1)
-        
+
         # Convert to tensor
         img_to_tensor = torch.from_numpy(image_np).float()
 
@@ -152,9 +152,9 @@ class SegmentationModel(object):
 
         # Network output values above threshold are lines.
         colorImg = cv2.cvtColor(
-                        pred_mask.astype(np.uint8),
-                        cv2.COLOR_GRAY2BGR
-                    )
+            pred_mask.astype(np.uint8),
+            cv2.COLOR_GRAY2BGR
+        )
         lineMask = np.all(colorImg == [2, 2, 2], axis=2)
         colorImg[lineMask] = [255, 255, 255]
         barrelMask = np.all(colorImg == [1, 1, 1], axis=2)
@@ -182,16 +182,15 @@ if __name__ == '__main__':
     image_resize_width = rospy.get_param('image_resize_width')
     image_resize_height = rospy.get_param('image_resize_height')
 
-
     SegmentationModel(camera_names,
-                        segmentation_topic,
-                        model_filename=model_path,
-                        force_cpu=force_cpu,
-                        encoder=encoder,
-                        encoder_weights=encoder_weights,
-                        resize_width=image_resize_width,
-                        resize_height=image_resize_height
-                    )
+                      segmentation_topic,
+                      model_filename=model_path,
+                      force_cpu=force_cpu,
+                      encoder=encoder,
+                      encoder_weights=encoder_weights,
+                      resize_width=image_resize_width,
+                      resize_height=image_resize_height
+                      )
 
     try:
         rospy.spin()
