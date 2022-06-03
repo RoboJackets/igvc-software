@@ -5,7 +5,7 @@
         <rosparam param="semantic_info_topic_suffix">["/raw/camera_info", "/raw/camera_info", "/raw/camera_info"]</rosparam>
 
         <param name="segmented_subscriber_path" value="/raw/camera_info" />
-        <param name="segmented_publisher_path" value="/segmented/info" />
+        <param name="segmented_publisher_path" value="/segmented/camera_info" />
 
         <param name="output_width" value="400" />
         <param name="output_height" value="400" />
