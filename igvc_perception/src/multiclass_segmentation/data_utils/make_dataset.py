@@ -60,23 +60,34 @@ def create_dataset(path_to_folder, file_type):
     return all_data
 
 
-# Establish arguments as file paths
-ap = argparse.ArgumentParser()
+if __name__ == "__main__":
+    # Establish arguments as file paths
+    ap = argparse.ArgumentParser()
 
-ap.add_argument("-images", "--images", required=True, help="path to folder with images")
-ap.add_argument("-masks", "--masks", required=True, help="path to folder with masks")
-args = vars(ap.parse_args())
+    ap.add_argument(
+        "-images",
+        "--images",
+        required=True,
+        help="path to folder with images"
+    )
+    ap.add_argument(
+        "-masks",
+        "--masks",
+        required=True,
+        help="path to folder with masks"
+    )
+    args = vars(ap.parse_args())
 
-images_path = args["images"]
-masks_path = args["masks"]
+    images_path = args["images"]
+    masks_path = args["masks"]
 
-# Create separate images and masks datasets
-images = create_dataset(images_path, "images")
-masks = create_dataset(masks_path, "json")
+    # Create separate images and masks datasets
+    images = create_dataset(images_path, "images")
+    masks = create_dataset(masks_path, "json")
 
-num_images = len(images)
-masks = np.reshape(masks, (num_images, 480, 640, 1))
+    num_images = len(images)
+    masks = np.reshape(masks, (num_images, 480, 640, 1))
 
-# Save NumPy arrays as .npy files
-np.save("images.npy", images)
-np.save("masks.npy", masks)
+    # Save NumPy arrays as .npy files
+    np.save("images.npy", images)
+    np.save("masks.npy", masks)

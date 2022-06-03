@@ -19,6 +19,7 @@ def get_loaders(
     valid_size: float = 0.1,
     batch_size: int = 12,
     num_workers: int = 4,
+    im_size: tuple = (480, 640),
 ) -> dict:
 
     """Creates Torch dataloaders"""
@@ -34,11 +35,11 @@ def get_loaders(
     np_masks = np.array(masks)
 
     # Establish datasets within dataset class
-    train_dataset = SegmentationDataset(image_arr_path, mask_arr_path)
+    train_dataset = SegmentationDataset(image_arr_path, mask_arr_path, im_size)
     train_dataset.images = np_images[train_indices]
     train_dataset.masks = np_masks[train_indices]
 
-    valid_dataset = SegmentationDataset(image_arr_path, mask_arr_path)
+    valid_dataset = SegmentationDataset(image_arr_path, mask_arr_path, im_size)
     valid_dataset.images = np_images[valid_indices]
     valid_dataset.masks = np_masks[valid_indices]
 

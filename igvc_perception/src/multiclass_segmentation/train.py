@@ -82,6 +82,7 @@ def main():
         valid_size=ARCH["train"]["valid_size"],
         batch_size=ARCH["train"]["batch_size"],
         num_workers=ARCH["train"]["num_workers"],
+        im_size=(ARCH["image"]["height"], ARCH["image"]["width"]),
     )
 
     # Optimize for cross entropy using Adam
@@ -135,7 +136,11 @@ def main():
     )
 
     # Test model on test dataset
-    test_data = SegmentationDataset(test_images_path, test_masks_path)
+    test_data = SegmentationDataset(
+        test_images_path,
+        test_masks_path,
+        im_size=(ARCH["image"]["height"], ARCH["image"]["width"])
+    )
     infer_loader = DataLoader(
         test_data,
         batch_size=ARCH["test"]["batch_size"],

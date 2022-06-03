@@ -32,3 +32,8 @@ encoder:
   name: "efficientnet-b3"
   weight: "imagenet"
   activation: null
+
+# image size, multiple of 32. e.g: (480, 640)
+image:
+  height: 416
+  width: 416
