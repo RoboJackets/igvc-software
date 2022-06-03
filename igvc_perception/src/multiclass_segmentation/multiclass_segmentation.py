@@ -63,7 +63,8 @@ class SegmentationModel(object):
             self.model.cuda()
         elif ((torch.cuda.is_available() is False) and self.force_cpu):
             rospy.logerr(f"Conflict with device and cuda!
-                        Device: {DEVICE}, CUDA: {torch.cuda.is_available()}")
+                        Device: {DEVICE}, CUDA: {torch.cuda.is_available()}"
+                        )
             sys.exit()
 
         self.model.eval()
@@ -102,11 +103,11 @@ class SegmentationModel(object):
             self.subscribers.append(
                 rospy.Subscriber(cam_img_topic,
                     CompressedImage,
-                    functools.partial(
-                        self.image_cb,
-                        camera_name),
+                    functools.partial(self.image_cb, camera_name),
                     queue_size=1,
-                    buff_size=10**8))
+                    buff_size=10**8
+                    )
+                )
 
         rospy.loginfo('Line detector is running.')
 
@@ -183,7 +184,7 @@ if __name__ == '__main__':
                         model_filename=model_path,
                         force_cpu=force_cpu,
                         encoder=encoder,
-                        encoder_weights=encoder_weights
+                        encoder_weights=encoder_weights,
                         resize_width=image_resize_width,
                         resize_height=image_resize_height
                     )
