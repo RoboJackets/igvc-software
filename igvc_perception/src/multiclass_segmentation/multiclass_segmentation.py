@@ -64,7 +64,7 @@ class SegmentationModel(object):
         elif ((torch.cuda.is_available() is False) and self.force_cpu):
             rospy.logerr(f"Conflict with device and cuda! Device: {DEVICE}, \
                 CUDA: {torch.cuda.is_available()}"
-            )
+                         )
             sys.exit()
 
         self.model.eval()
