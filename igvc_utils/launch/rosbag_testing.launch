@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<!-- rosbag.launch -->
+<!--
+    This file will launch the rosbag recorder and will log all topics
+    excluding some of the duplicate image_transport topics.
+    jessii_JOHNSCREEK_2020-02-22-15-22-32.bag - 3GB
+    jessii_JOHNSCREEK_2020-02-22-15-20-24.bag
+    jessii_field_2019-03-18-14-45-45.bag 
+    swervi_parking_lot_2022-05-27-02-01-33.bag 
+    swervi_parking_lot_2022-05-27-18-51-38.bag
+    swervi_parking_lot_2022-05-27-18-53-19.bag
+    swervi_parking_lot_2022-05-27-19-03-14.bag
+    swervi_parking_lot_2022-05-27-19-41-33.bag
+    -->
+<launch>
+    <arg name = "pathToRosbag"  default = "/home/vivek/Desktop/swervi_parking_lot_2022-05-27-19-41-33.bag" />        
+    
+    <!--Remap to correct topics-->
+    <!-- <remap from = "/usb_cam_center/camera_info" to = "/cam/center/raw/camera_info"/>            
+    <remap from = "/usb_cam_left/camera_info" to = "/cam/left/raw/camera_info"/>              
+    <remap from = "/usb_cam_right/camera_info" to = "/cam/right/raw/camera_info" />    
+    <remap from = "usb_cam_center/image_raw/compressed" to = "/cam/center/raw/image/compressed"/>    
+    <remap from = "usb_cam_left/image_raw/compressed" to = "/cam/left/raw/image/compressed"/>      
+    <remap from = "usb_cam_right/image_raw/compressed" to = "/cam/right/raw/image/compressed"/>  -->
+
+    <remap from = "/cam/right/raw/image" to = "/cam/center/raw/image"/>              
+    <remap from = "/cam/center/raw/image" to = "/cam/left/raw/image" />          
+    <remap from = "/cam/left/raw/image" to = "/cam/right/raw/image" /> 
+    <!--Play rosbag-->
+    <!-- <param name="use_sim_time" value="true" /> -->
+    <node pkg  = "rosbag" type = "play" name = "player" args = "--clock $(arg pathToRosbag) -l">
+        <remap from="tf" to="tf_old"/>
+        <remap from="tf_static" to="tf_static_old"/>
+    </node>
+
+    <!--Convert compressed images to raw uncompressed-->
+    <node name="republish1" type="republish" pkg="image_transport" output="screen" args="compressed in:=/cam/center/raw/image raw out:=/cam/center/raw/image"/>
+    <node name="republish2" type="republish" pkg="image_transport" output="screen" args="compressed in:=/cam/left/raw/image raw out:=/cam/left/raw/image"/>
+    <node name="republish3" type="republish" pkg="image_transport" output="screen" args="compressed in:=/cam/right/raw/image raw out:=/cam/right/raw/image"/>
+
+    <!-- TF -->
+    <include file="$(find igvc_description)/launch/robot_state_publisher.launch" />
+</launch>
