@@ -4,12 +4,13 @@
 
         <rosparam param="camera_names">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
 
-        <param name="model_path" value="$(find igvc_sandbox)/models/MC_model.pth" />
+        <param name="model_path" value="$(find igvc_sandbox)/models/best.pth" />
 
         <!-- Use cpu instead of GPU (will run very slowly). -->
-        <param name="force_cpu" value="false" />
+        <param name="force_cpu" value="true" />
 
-        <param name="segmentation_topic" value="/segmented/image" />
+        <!-- Do not have backslash before the start of string-->
+        <param name="segmentation_topic" value="segmented/image" />
 
         <!--Encoder Backbone-->
         <param name="encoder" value="efficientnet-b3"/>

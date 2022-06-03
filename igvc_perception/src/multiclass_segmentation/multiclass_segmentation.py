@@ -2,7 +2,7 @@
 from sensor_msgs.msg import Image as ImMsg
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import CameraInfo
-from cv_bridge import CvBridge, CvBridgeError
+from cv_bridge import CvBridge
 import rospy
 import cv2
 import functools
@@ -62,9 +62,8 @@ class SegmentationModel(object):
         if torch.cuda.is_available() and not self.force_cpu:
             self.model.cuda()
         elif ((torch.cuda.is_available() is False) and self.force_cpu):
-            rospy.logerr(
-                f"Conflict with device and cuda!
-                Device: {DEVICE}, CUDA: {torch.cuda.is_available()}"
+            rospy.logerr(f"Conflict with device and cuda! Device: {DEVICE}, \
+                CUDA: {torch.cuda.is_available()}"
             )
             sys.exit()
 
@@ -100,14 +99,11 @@ class SegmentationModel(object):
 
         for camera_name in camera_names:
             # Use the same callback for every camera.
-            cam_img_topic = os.path.join(camera_name, "/raw/image/compressed")
+            cam_img_topic = os.path.join(camera_name, "raw/image/compressed")
             self.subscribers.append(
                 rospy.Subscriber(cam_img_topic,
                                  CompressedImage,
-                                 functools.partial(
-                                     self.image_cb,
-                                     camera_name
-                                 ),
+                                 functools.partial(self.image_cb, camera_name),
                                  queue_size=1,
                                  buff_size=10**8
                                  )
@@ -179,8 +175,8 @@ if __name__ == '__main__':
     encoder = rospy.get_param('~encoder', 'efficientnet-b3')
     encoder_weights = rospy.get_param('~encoder_weights', 'imagenet')
 
-    image_resize_width = rospy.get_param('image_resize_width')
-    image_resize_height = rospy.get_param('image_resize_height')
+    image_resize_width = rospy.get_param('~image_resize_width')
+    image_resize_height = rospy.get_param('~image_resize_height')
 
     SegmentationModel(camera_names,
                       segmentation_topic,
