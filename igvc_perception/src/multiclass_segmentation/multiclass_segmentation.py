@@ -38,7 +38,7 @@ class SegmentationModel(object):
         self.resize_width = kwargs["resize_width"]
         self.resize_height = kwargs["resize_height"]
 
-        #Set up U-Net with EfficientNet backbone pretrained on ImageNet
+        # Set up U-Net with EfficientNet backbone pretrained on ImageNet
         if self.force_cpu:
             DEVICE = 'cpu'
         else:
@@ -46,20 +46,24 @@ class SegmentationModel(object):
         ACTIVATION = None
 
         self.model = smp.Unet(
-            encoder_name=self.encoder, 
-            encoder_weights=self.encoder_weights, 
-            classes=3, 
+            encoder_name=self.encoder,
+            encoder_weights=self.encoder_weights,
+            classes=3,
             activation=ACTIVATION,
         )
 
         # Load weights from file
-        bestModel = torch.load(kwargs["model_filename"], map_location=torch.device(DEVICE))
+        bestModel = torch.load(
+            kwargs["model_filename"],
+            map_location=torch.device(DEVICE)
+        )
         self.model.load_state_dict(bestModel['model_state_dict'])
 
         if torch.cuda.is_available() and not self.force_cpu:
             self.model.cuda()
-        elif ((torch.cuda.is_available() == False) && (self.force_cpu == True)):
-            rospy.logerr(f"Conflict with device and cuda! Device: {DEVICE}, CUDA: {torch.cuda.is_available()}")
+        elif ((torch.cuda.is_available() is False) and self.force_cpu):
+            rospy.logerr(f"Conflict with device and cuda!
+                        Device: {DEVICE}, CUDA: {torch.cuda.is_available()}")
             sys.exit()
 
         self.model.eval()
@@ -72,7 +76,11 @@ class SegmentationModel(object):
             rospy.loginfo(f"Setting up {camera_name}.")
             try:
                 cam_info_topic = os.path.join(camera_name, "/raw/camera_info")
-                camera_info = rospy.wait_for_message(cam_info_topic, CameraInfo, timeout=5)
+                camera_info = rospy.wait_for_message(
+                                    cam_info_topic,
+                                    CameraInfo,
+                                    timeout=5
+                                )
             except rospy.ROSException:
                 rospy.logerr(f"Camera info for {camera_name} not available.")
                 sys.exit()
@@ -80,7 +88,11 @@ class SegmentationModel(object):
 
             # Create image publishers.
             cam_img_topic = os.path.join(camera_name, publisher_topic)
-            self.im_publishers[camera_name] = rospy.Publisher(cam_img_topic, ImMsg, queue_size=1)
+            self.im_publishers[camera_name] = rospy.Publisher(
+                                                                cam_img_topic,
+                                                                ImMsg,
+                                                                queue_size=1
+                                                            )
 
             print(f"Finished setting up {camera_name}.")
 
@@ -107,7 +119,10 @@ class SegmentationModel(object):
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
         # Resize image
-        image_np = cv2.resize(image_np, dsize=(self.resize_width, self.resize_height))
+        image_np = cv2.resize(
+                        image_np,
+                        dsize=(self.resize_width, self.resize_height)
+                    )
 
         # Swap dimensions around to the dimensions the model expects
         image_np = np.swapaxes(image_np, 2, 0)
@@ -131,7 +146,10 @@ class SegmentationModel(object):
         pred_mask = np.argmax(pred_mask, axis=2)
 
         # Network output values above threshold are lines.
-        colorImg = cv2.cvtColor(pred_mask.astype(np.uint8), cv2.COLOR_GRAY2BGR)
+        colorImg = cv2.cvtColor(
+                        pred_mask.astype(np.uint8),
+                        cv2.COLOR_GRAY2BGR
+                    )
         lineMask = np.all(colorImg == [2, 2, 2], axis=2)
         colorImg[lineMask] = [255, 255, 255]
         barrelMask = np.all(colorImg == [1, 1, 1], axis=2)
