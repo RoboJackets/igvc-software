@@ -21,7 +21,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 class SegmentationModel(object):
     """
-    Segmentation and Pinhole projection for line detection
+    Segmentation for line detection
     """
 
     def __init__(
@@ -35,6 +35,8 @@ class SegmentationModel(object):
         self.force_cpu = kwargs["force_cpu"]
         self.encoder = kwargs["encoder"]
         self.encoder_weights = kwargs["encoder_weights"]
+        self.resize_width = kwargs["resize_width"]
+        self.resize_height = kwargs["resize_height"]
 
         #Set up U-Net with EfficientNet backbone pretrained on ImageNet
         if self.force_cpu:
@@ -104,14 +106,14 @@ class SegmentationModel(object):
         np_arr = np.frombuffer(data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        # Resize image (No resizing. Encoder Decoder Architecture outputs 640x480) If want to resize need to resize to multiple of 32
-        # image_np = cv2.resize(image_np, dsize=(self.resize_width,self.resize_height), interpolation = cv2.INTER_LINEAR)
+        # Resize image
+        image_np = cv2.resize(image_np, dsize=(self.resize_width, self.resize_height))
 
         # Swap dimensions around to the dimensions the model expects
         image_np = np.swapaxes(image_np, 2, 0)
         image_np = np.swapaxes(image_np, 2, 1)
+        
         # Convert to tensor
-
         img_to_tensor = torch.from_numpy(image_np).float()
 
         if not self.force_cpu:
@@ -154,12 +156,19 @@ if __name__ == '__main__':
     encoder = rospy.get_param('~encoder', 'efficientnet-b3')
     encoder_weights = rospy.get_param('~encoder_weights', 'imagenet')
 
+    image_resize_width = rospy.get_param('image_resize_width')
+    image_resize_height = rospy.get_param('image_resize_height')
+
+
     SegmentationModel(camera_names,
                         segmentation_topic,
                         model_filename=model_path,
                         force_cpu=force_cpu,
                         encoder=encoder,
-                        encoder_weights=encoder_weights)
+                        encoder_weights=encoder_weights
+                        resize_width=image_resize_width,
+                        resize_height=image_resize_height
+                    )
 
     try:
         rospy.spin()

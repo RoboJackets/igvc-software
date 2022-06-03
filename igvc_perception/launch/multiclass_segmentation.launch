@@ -14,6 +14,10 @@
         <!--Encoder Backbone-->
         <param name="encoder" value="efficientnet-b3"/>
         <param name="encoder_weights" value="imagenet"/>
+
+        <!-- These sizes must match the model input dimensions. -->
+        <param name="image_resize_width" value="416" />
+        <param name="image_resize_height" value="416" />
     </node>
 
 </launch>
