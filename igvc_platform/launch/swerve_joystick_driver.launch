@@ -17,10 +17,15 @@
         <param name="maxAngle" type="double" value="1.57"/>
         <param name="maxVelIncr" type="double" value="0.1"/>
 
-        <param name="stickLeft_UDAxis" type="int" value="1"/>
+        <!-- <param name="stickLeft_UDAxis" type="int" value="1"/>
         <param name="stickRight_UDAxis" type="int" value="4"/>
         <param name="stickLeft_LRAxis" type="int" value="0"/>
-        <param name="stickRight_LRAxis" type="int" value="3"/>
+        <param name="stickRight_LRAxis" type="int" value="3"/> -->
+
+        <param name="stickLeft_UDAxis" type="int" value="1"/>
+        <param name="stickRight_UDAxis" type="int" value="3"/>
+        <param name="stickLeft_LRAxis" type="int" value="0"/>
+        <param name="stickRight_LRAxis" type="int" value="2"/>
         
         <param name="leftUDInverted" type="bool" value="false"/>
         <param name="rightUDInverted" type="bool" value="false"/>
