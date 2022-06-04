@@ -57,16 +57,16 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 
   // Diagnostic_updator
 
-//  mc_updater_.setHardwareID("Motor Controller");
-//  mc_updater_.add("MC Diagnostic", this, &MotorController::mc_diagnostic);
-//  battery_updater_.setHardwareID("Battery Controller");
-//  battery_updater_.add("Battery Diagnostic", this, &MotorController::battery_diagnostic);
+  //  mc_updater_.setHardwareID("Motor Controller");
+  //  mc_updater_.add("MC Diagnostic", this, &MotorController::mc_diagnostic);
+  //  battery_updater_.setHardwareID("Battery Controller");
+  //  battery_updater_.add("Battery Diagnostic", this, &MotorController::battery_diagnostic);
 
   // communication frequency
   assertions::getParam(pNh, std::string("frequency"), frequency_);
   ros::Rate rate(frequency_);
 
-//  setPID();  // Set PID Values on mbed
+  //  setPID();  // Set PID Values on mbed
 
   // send motor commands
   while (ros::ok())
@@ -74,8 +74,8 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
     sendRequest();
     receiveResponse();
     ros::spinOnce();
-//    mc_updater_.update();
-//    battery_updater_.update();
+    //    mc_updater_.update();
+    //    battery_updater_.update();
     rate.sleep();
   }
 }
@@ -86,13 +86,13 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_quad::ConstPtr& msg)
   last_motors_message_ = ros::Time::now();
 }
 
-//void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
+// void MotorController::mc_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 //{
 //  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Controller Online");
 //  stat.add("mc publishing freq", std::to_string(mc_hertz_) + " Hz");
 //}
 
-//void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
+// void MotorController::battery_diagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat)
 //{
 //  if (battery_avg_ < min_battery_voltage_)
 //  {
@@ -109,7 +109,7 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_quad::ConstPtr& msg)
 //  stat.add("battery voltage", battery_avg_);
 //}
 
-//void MotorController::setPID()
+// void MotorController::setPID()
 //{
 //  ros::Rate rate(frequency_);
 //  ROS_INFO_STREAM("Setting PID Values:"
@@ -158,8 +158,8 @@ void MotorController::cmdCallback(const igvc_msgs::velocity_quad::ConstPtr& msg)
 //  {
 //    ROS_ERROR_STREAM("Encoding failed: " << PB_GET_ERROR(&ostream));
 //    mc_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed");
-//    battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed. Lost battery tracking.");
-//    ros::shutdown();
+//    battery_updater_.broadcast(diagnostic_msgs::DiagnosticStatus::ERROR, "PID Encoding Failed. Lost battery
+//    tracking."); ros::shutdown();
 //  }
 //
 //  size_t n;             // n is the response from socket: 0 means connection closed, otherwise n = num bytes read
@@ -226,19 +226,19 @@ void MotorController::sendRequest()
   pb_ostream_t ostream = pb_ostream_from_buffer(requestbuffer, sizeof(requestbuffer));
 
   /* indicate that speed fields will contain values */
-//  request.has_speed_l = true;
-//  request.has_speed_r = true;
+  //  request.has_speed_l = true;
+  //  request.has_speed_r = true;
 
-    request.has_buffer = true;
-    request.has_fl_velocity = true;
-    request.has_fr_velocity = true;
-    request.has_bl_velocity = true;
-    request.has_br_velocity = true;
-    request.has_fl_angle = true;
-    request.has_fr_angle = true;
-    request.has_bl_angle = true;
-    request.has_br_angle = true;
-    request.has_duration = true;
+  request.has_buffer = true;
+  request.has_fl_velocity = true;
+  request.has_fr_velocity = true;
+  request.has_bl_velocity = true;
+  request.has_br_velocity = true;
+  request.has_fl_angle = true;
+  request.has_fr_angle = true;
+  request.has_bl_angle = true;
+  request.has_br_angle = true;
+  request.has_duration = true;
 
   /*double dt = (ros::Time::now() - last_motors_message_).toSec();
   if(dt > watchdog_delay_) {
@@ -249,19 +249,19 @@ void MotorController::sendRequest()
   }*/
 
   /* fill in the message fields */
-//  request.speed_l = static_cast<float>(current_motor_command_.left_velocity);
-//  request.speed_r = static_cast<float>(current_motor_command_.right_velocity);
+  //  request.speed_l = static_cast<float>(current_motor_command_.left_velocity);
+  //  request.speed_r = static_cast<float>(current_motor_command_.right_velocity);
 
-    request.buffer = static_cast<float>(0);
-    request.fl_velocity = static_cast<float>(current_motor_command_.fl_velocity);
-    request.fr_velocity = static_cast<float>(current_motor_command_.fr_velocity);
-    request.bl_velocity = static_cast<float>(current_motor_command_.bl_velocity);
-    request.br_velocity = static_cast<float>(current_motor_command_.br_velocity);
-    request.fl_angle = static_cast<float>(current_motor_command_.fl_angle);
-    request.fr_angle = static_cast<float>(current_motor_command_.fr_angle);
-    request.bl_angle = static_cast<float>(current_motor_command_.bl_angle);
-    request.br_angle = static_cast<float>(current_motor_command_.br_angle);
-    request.duration = static_cast<float>(current_motor_command_.duration);
+  request.buffer = static_cast<float>(0);
+  request.fl_velocity = static_cast<float>(current_motor_command_.fl_velocity);
+  request.fr_velocity = static_cast<float>(current_motor_command_.fr_velocity);
+  request.bl_velocity = static_cast<float>(current_motor_command_.bl_velocity);
+  request.br_velocity = static_cast<float>(current_motor_command_.br_velocity);
+  request.fl_angle = static_cast<float>(current_motor_command_.fl_angle);
+  request.fr_angle = static_cast<float>(current_motor_command_.fr_angle);
+  request.bl_angle = static_cast<float>(current_motor_command_.bl_angle);
+  request.br_angle = static_cast<float>(current_motor_command_.br_angle);
+  request.duration = static_cast<float>(current_motor_command_.duration);
 
   /* encode the protobuffer */
   bool status = pb_encode(&ostream, RequestMessage_fields, &request);
@@ -288,7 +288,8 @@ void MotorController::receiveResponse()
   /* read from the buffer */
   n = (*sock_).readMessage(buffer);  // blocks until data is read
 
-  if (n == 0) {
+  if (n == 0)
+  {
     ROS_ERROR_STREAM("Connection closed by server");
     ros::shutdown();
   }
@@ -303,64 +304,64 @@ void MotorController::receiveResponse()
   bool status = pb_decode(&istream, ResponseMessage_fields, &response);
 
   /* check for any errors.. */
-  if (!status) {
+  if (!status)
+  {
     ROS_ERROR_STREAM("Decoding Failed: " << PB_GET_ERROR(&istream));
     ros::shutdown();
   }
 
-    publishResponse(response);
-//  mc_hertz_ = 1 / response.dt_sec;
+  publishResponse(response);
+  //  mc_hertz_ = 1 / response.dt_sec;
 }
 
 void MotorController::publishResponse(const ResponseMessage& response)
 {
-    // /* update the exponentially weighted moving voltage average and publish */
-    // std_msgs::Float64 battery_msg;
-    // battery_avg_ = (battery_alpha_ * battery_avg_) + ((1 - battery_alpha_) * response.voltage);
-    // battery_msg.data = battery_avg_;
-    // battery_pub_.publish(battery_msg);
+  // /* update the exponentially weighted moving voltage average and publish */
+  // std_msgs::Float64 battery_msg;
+  // battery_avg_ = (battery_alpha_ * battery_avg_) + ((1 - battery_alpha_) * response.voltage);
+  // battery_msg.data = battery_avg_;
+  // battery_pub_.publish(battery_msg);
 
-    // if (battery_avg_ < min_battery_voltage_)
-    // {
-    // ROS_ERROR_STREAM_THROTTLE(log_period_, "Battery voltage dangerously low:"
-    //                                             << "\n\tCurr. Voltage: " << battery_avg_
-    //                                             << "\n\tMin. Voltage: " << min_battery_voltage_);
-    // }
+  // if (battery_avg_ < min_battery_voltage_)
+  // {
+  // ROS_ERROR_STREAM_THROTTLE(log_period_, "Battery voltage dangerously low:"
+  //                                             << "\n\tCurr. Voltage: " << battery_avg_
+  //                                             << "\n\tMin. Voltage: " << min_battery_voltage_);
+  // }
 
-    // std_msgs::Bool enabled_msg;
-    // enabled_msg.data = response.estop;
-    // enabled_pub_.publish(enabled_msg);
+  // std_msgs::Bool enabled_msg;
+  // enabled_msg.data = response.estop;
+  // enabled_pub_.publish(enabled_msg);
 
-    /* publish encoder feedback */
-    // igvc_msgs::velocity_pair enc_msg;
-    // enc_msg.left_velocity = response.speed_l;
-    // enc_msg.right_velocity = response.speed_r;
-    // enc_msg.duration = response.duration;
-    // enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
-    // enc_pub_.publish(enc_msg);
+  /* publish encoder feedback */
+  // igvc_msgs::velocity_pair enc_msg;
+  // enc_msg.left_velocity = response.speed_l;
+  // enc_msg.right_velocity = response.speed_r;
+  // enc_msg.duration = response.duration;
+  // enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
+  // enc_pub_.publish(enc_msg);
 
+  /* publish encoder feedback */
+  igvc_msgs::velocity_quad enc_msg;
 
-    /* publish encoder feedback */
-    igvc_msgs::velocity_quad enc_msg;
+  enc_msg.fl_velocity = response.fl_velocity_est;
+  enc_msg.fr_velocity = response.fr_velocity_est;
+  enc_msg.bl_velocity = response.bl_velocity_est;
+  enc_msg.br_velocity = response.br_velocity_est;
+  // This is in microseconds
+  // Do you want this in seconds?
+  enc_msg.duration = response.duration / 1000000;
+  // enc_msg.header.stamp = response.duration;
+  // enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.duration);
 
-    enc_msg.fl_velocity = response.fl_velocity_est;
-    enc_msg.fr_velocity = response.fr_velocity_est;
-    enc_msg.bl_velocity = response.bl_velocity_est;
-    enc_msg.br_velocity = response.br_velocity_est;
-    // This is in microseconds
-    // Do you want this in seconds?
-    enc_msg.duration = response.duration / 1000000;
-    // enc_msg.header.stamp = response.duration;
-    // enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.duration);
+  // enc_msg.fl_velocity = response.fl_velocity;
+  // enc_msg.fr_velocity = response.fr_velocity;
+  // enc_msg.bl_velocity = response.bl_velocity;
+  // enc_msg.br_velocity = response.br_velocity;
+  // enc_msg.duration = response.duration;
+  // enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.duration);
 
-    // enc_msg.fl_velocity = response.fl_velocity;
-    // enc_msg.fr_velocity = response.fr_velocity;
-    // enc_msg.bl_velocity = response.bl_velocity;
-    // enc_msg.br_velocity = response.br_velocity;
-    // enc_msg.duration = response.duration;
-    // enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.duration);
-
-    enc_pub_.publish(enc_msg);
+  enc_pub_.publish(enc_msg);
 }
 
 int main(int argc, char** argv)
