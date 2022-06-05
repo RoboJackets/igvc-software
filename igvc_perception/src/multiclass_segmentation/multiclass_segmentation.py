@@ -151,10 +151,20 @@ class SegmentationModel(object):
             pred_mask.astype(np.uint8),
             cv2.COLOR_GRAY2BGR
         )
+
+        # Multiclass Segmentation Visualization
+        # lineMask = np.all(colorImg == [2, 2, 2], axis=2)
+        # colorImg[lineMask] = [255, 255, 255]
+        # barrelMask = np.all(colorImg == [1, 1, 1], axis=2)
+        # colorImg[barrelMask] = [0, 255, 0]
+        # msg_out = self.bridge.cv2_to_imgmsg(colorImg, 'bgr8')
+        # msg_out.header.stamp = data.header.stamp
+        # self.im_publishers[camera_name].publish(msg_out)
+
+        # Producing Binary Mask for lines
         lineMask = np.all(colorImg == [2, 2, 2], axis=2)
         colorImg[lineMask] = [255, 255, 255]
-        barrelMask = np.all(colorImg == [1, 1, 1], axis=2)
-        colorImg[barrelMask] = [0, 255, 0]
+        colorImg[~lineMask] = [0, 0, 0]
         msg_out = self.bridge.cv2_to_imgmsg(colorImg, 'bgr8')
         msg_out.header.stamp = data.header.stamp
         self.im_publishers[camera_name].publish(msg_out)
