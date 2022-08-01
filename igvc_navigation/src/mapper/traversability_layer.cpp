@@ -82,7 +82,7 @@ void TraversabilityLayer::slopeMapCallback(const grid_map_msgs::GridMap &slope_m
   {
     grid_map::Position pos;
     slope_map.getPosition((*it), pos);
-    if (map_.isInside(pos))
+    if (map_.isInside(pos) && slope_map.get("mask_dilated")((*it)[0], (*it)[1]) > 0)
     {
       float slope = slope_map.get("slope")((*it)[0], (*it)[1]);
       grid_map::Index map_index;

@@ -17,7 +17,6 @@ add_message_files(
     velocity_quad.msg
     velocity_pair.msg
     lights.msg
-    action_path.msg
     system_stats.msg
     map.msg
     igvc_path.msg
