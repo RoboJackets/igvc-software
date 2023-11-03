@@ -5,6 +5,7 @@
 
 **Author:**
 - Vivek Mhatre
+- Henry Liao
 
 ## The Problem
 
@@ -22,12 +23,13 @@ Depending on the color of the lines I would use one or two masks. The algorithm 
 5. Process edge detection using Canny
 6. Use Hough Transform (HoughLinesP) to get lines
 7. Draw lines on source image
+8. Return edited copy of source image
 
 To solve this problem, I will first implement my algorithm using python and
 Steps to solve issue:
-1. I will first implement my algorithm using Python.
-2. Use the training images on the robojackets cloud to tune my parameters.
-3. Then I will implement my algorithm using C++
+1. I will set up a new ros node in igvc_perception based on existing cnn detection node setup.
+2. I will implement my algorithm using Python.
+3. Use the training images on the robojackets cloud to tune my parameters.
 4. Test the performance in past simulations using ros bag files.
 
 Challenges:
@@ -48,14 +50,14 @@ What topic will I need to subscribe to in order to get images from the ros bag f
 
 ### Affected Packages
 
-I will need the OpenCV package and line_layer.cpp. I will be making changes to the igvc_navigation package.
+I will need the OpenCV package and ros nodes. I will be making changes to the igvc_perception package.
 
 ### Schedule
 
-Subtask 1 (April 19th): Finish implementing algorithm in python.
+Subtask 1 (December 8th): Finish implementing algorithm in Python.
 
-Subtask 2 (April 26th): Implement algorithm in C++.
+Subtask 2 (December 11th): Finish tuning parameters.
 
-Subtask 3 (April 29th): Test algorithm using ros bag files.
+Subtask 3 (December 20th): Test algorithm using ros bag files.
 
-Code Review (May 1st): Everything should be done now.
+Code Review (By January 1st): Everything should be done now.
